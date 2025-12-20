@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .language-selector {
+            margin: 20px 0;
+        }
+        .language-selector button {
+            margin: 0 5px;
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+        }
+        .language-selector button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Translation Test Suite</h1>
+    <p>This page tests the translation functionality for the Lila Catering website.</p>
+
+    <div class="language-selector">
+        <button id="en-btn" class="active">English</button>
+        <button id="fr-btn">Français</button>
+        <button id="nl-btn">Nederlands</button>
+    </div>
+
+    <div id="results"></div>
+
+    <div id="component-tests">
+        <h2>Component Translation Tests</h2>
+        <div class="section">
+            <h3>Testimonials Section</h3>
+            <div id="testimonials-test"></div>
+        </div>
+
+        <div class="section">
+            <h3>Cultural Authenticity Section</h3>
+            <div id="cultural-authenticity-test"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getTranslation } from '../utils/translations.js';
+
+        // Test cases
+        const testCases = [
+            {
+                key: 'testimonials.kicker',
+                expected: {
+                    en: 'Client Excellence',
+                    fr: 'Excellence Client',
+                    nl: 'Klantuitmuntendheid'
+                }
+            },
+            {
+                key: 'testimonials.title',
+                expected: {
+                    en: 'Testimonials.',
+                    fr: 'Témoignages.',
+                    nl: 'Getuigenissen.'
+                }
+            },
+            {
+                key: 'culturalAuthenticity.kicker',
+                expected: {
+                    en: 'Cultural Authenticity',
+                    fr: 'Authenticité Culturelle',
+                    nl: 'Culturele Authenticiteit'
+                }
+            },
+            {
+                key: 'testimonials.testimonials.0.name',
+                expected: {
+                    en: 'Sophie Laurent',
+                    fr: 'Sophie Laurent',
+                    nl: 'Sophie Laurent'
+                }
+            },
+            {
+                key: 'culturalAuthenticity.cards.0.title',
+                expected: {
+                    en: 'Artisan Spices',
+                    fr: 'Épices Artisanales',
+                    nl: 'Ambachtelijke Specerijen'
+                }
+            }
+        ];
+
+        let currentLang = 'en';
+
+        function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h2>Translation Tests</h2>';
+
+            let passed = 0;
+            let failed = 0;
+
+            testCases.forEach((testCase, index) => {
+                const testDiv = document.createElement('div');
+                testDiv.innerHTML = `<h3>Test ${index + 1}: ${testCase.key}</h3>`;
+
+                ['en', 'fr', 'nl'].forEach(lang => {
+                    try {
+                        const result = getTranslation(lang, testCase.key);
+                        const expected = testCase.expected[lang];
+
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'test-result';
+
+                        if (result === expected) {
+                            resultDiv.className += ' pass';
+                            resultDiv.innerHTML = `✅ ${lang}: "${result}"`;
+                            passed++;
+                        } else {
+                            resultDiv.className += ' fail';
+                            resultDiv.innerHTML = `❌ ${lang}: Expected "${expected}", got "${result}"`;
+                            failed++;
+                        }
+
+                        testDiv.appendChild(resultDiv);
+                    } catch (error) {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'test-result fail';
+                        resultDiv.innerHTML = `❌ ${lang}: Error - ${error.message}`;
+                        testDiv.appendChild(resultDiv);
+                        failed++;
+                    }
+                });
+
+                resultsDiv.appendChild(testDiv);
+            });
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = `test-result ${failed === 0 ? 'pass' : 'fail'}`;
+            summaryDiv.innerHTML = `<strong>Summary: ${passed} passed, ${failed} failed</strong>`;
+            resultsDiv.appendChild(summaryDiv);
+
+            updateComponentTests();
+        }
+
+        function updateComponentTests() {
+            // Test component-like usage
+            const testimonialsDiv = document.getElementById('testimonials-test');
+            const culturalDiv = document.getElementById('cultural-authenticity-test');
+
+            // Simulate how components use translations
+            const testimonials = [
+                getTranslation(currentLang, 'testimonials.testimonials.0'),
+                getTranslation(currentLang, 'testimonials.testimonials.1'),
+                getTranslation(currentLang, 'testimonials.testimonials.2'),
+            ];
+
+            const cards = [
+                getTranslation(currentLang, 'culturalAuthenticity.cards.0'),
+                getTranslation(currentLang, 'culturalAuthenticity.cards.1'),
+                getTranslation(currentLang, 'culturalAuthenticity.cards.2'),
+                getTranslation(currentLang, 'culturalAuthenticity.cards.3'),
+            ];
+
+            testimonialsDiv.innerHTML = `
+                <p><strong>Kicker:</strong> ${getTranslation(currentLang, 'testimonials.kicker')}</p>
+                <p><strong>Title:</strong> ${getTranslation(currentLang, 'testimonials.title')}</p>
+                <p><strong>Subtitle:</strong> ${getTranslation(currentLang, 'testimonials.subtitle')}</p>
+                <p><strong>Testimonial 1:</strong> ${testimonials[0]?.name} - ${testimonials[0]?.text?.substring(0, 50)}...</p>
+                <p><strong>Book Event:</strong> ${getTranslation(currentLang, 'testimonials.stats.bookEvent')}</p>
+            `;
+
+            culturalDiv.innerHTML = `
+                <p><strong>Kicker:</strong> ${getTranslation(currentLang, 'culturalAuthenticity.kicker')}</p>
+                <p><strong>Title:</strong> ${getTranslation(currentLang, 'culturalAuthenticity.title')}</p>
+                <p><strong>Description:</strong> ${getTranslation(currentLang, 'culturalAuthenticity.description')}</p>
+                <p><strong>Card 1:</strong> ${cards[0]?.title} - ${cards[0]?.description?.substring(0, 50)}...</p>
+                <p><strong>Bottom Text:</strong> ${getTranslation(currentLang, 'culturalAuthenticity.bottomText')}</p>
+            `;
+        }
+
+        // Language selector event listeners
+        document.getElementById('en-btn').addEventListener('click', () => {
+            currentLang = 'en';
+            updateButtons();
+            updateComponentTests();
+        });
+
+        document.getElementById('fr-btn').addEventListener('click', () => {
+            currentLang = 'fr';
+            updateButtons();
+            updateComponentTests();
+        });
+
+        document.getElementById('nl-btn').addEventListener('click', () => {
+            currentLang = 'nl';
+            updateButtons();
+            updateComponentTests();
+        });
+
+        function updateButtons() {
+            document.querySelectorAll('.language-selector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${currentLang}-btn`).classList.add('active');
+        }
+
+        // Run tests on page load
+        runTests();
+    </script>
+</body>
+</html>

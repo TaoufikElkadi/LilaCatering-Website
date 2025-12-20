@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Translations</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { margin: 5px; padding: 8px 16px; }
+        .active { background: blue; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Translation Debug Page</h1>
+    <p>Use this page to debug translation issues. Open browser console to see logs.</p>
+
+    <div>
+        <h2>Language Selector</h2>
+        <button id="en-btn" class="active">English</button>
+        <button id="fr-btn">Français</button>
+        <button id="nl-btn">Nederlands</button>
+    </div>
+
+    <div id="debug-output">
+        <div class="debug-section">
+            <h3>LanguageProvider Debug</h3>
+            <p>Check console for LanguageProvider logs</p>
+        </div>
+
+        <div class="debug-section">
+            <h3>Navigation Debug</h3>
+            <p>Check console for Navigation component logs</p>
+        </div>
+
+        <div class="debug-section">
+            <h3>Component Debug</h3>
+            <p>Check console for Testimonials and CulturalAuthenticity component logs</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Mock React components for debugging
+        console.log('Debug page loaded. Check if language switching works.');
+
+        // Simulate language state
+        let currentLang = 'en';
+
+        document.getElementById('en-btn').addEventListener('click', () => {
+            currentLang = 'en';
+            updateButtons();
+            console.log('Language changed to:', currentLang);
+        });
+
+        document.getElementById('fr-btn').addEventListener('click', () => {
+            currentLang = 'fr';
+            updateButtons();
+            console.log('Language changed to:', currentLang);
+        });
+
+        document.getElementById('nl-btn').addEventListener('click', () => {
+            currentLang = 'nl';
+            updateButtons();
+            console.log('Language changed to:', currentLang);
+        });
+
+        function updateButtons() {
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${currentLang}-btn`).classList.add('active');
+        }
+
+        console.log('Initial language:', currentLang);
+    </script>
+</body>
+</html>

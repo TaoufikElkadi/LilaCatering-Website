@@ -64,6 +64,21 @@ export interface ServiceOptions {
   cookiesLuxe?: boolean;
   /** One-time decoration-collection fee. */
   decorationFee?: number;
+  /** One-time transport fee (added as-is, NOT marked up by the guest multiplier). */
+  transportFee?: number;
+}
+
+/** Transport: flat fee within Amsterdam, otherwise a per-km rate. */
+export const AMSTERDAM_TRANSPORT = 150;
+export const TRANSPORT_PER_KM = 3.5;
+
+/** Transport cost for a venue (Amsterdam → flat; else km × rate). */
+export function getTransportCost(
+  venue: { isAmsterdam?: boolean; distanceKm: number } | null | undefined
+): number {
+  if (!venue) return 0;
+  if (venue.isAmsterdam) return AMSTERDAM_TRANSPORT;
+  return venue.distanceKm * TRANSPORT_PER_KM;
 }
 
 /**
@@ -89,6 +104,7 @@ export function getServicePerGuest(service: ServiceOptions = {}): number {
  *     + per-person service upgrades × guests
  *     + one-time flat fees
  *     + one-time decoration fee ) × multiplier
+ *   + transport fee   (pass-through cost, not marked up)
  */
 export function getEstimatedTotal(
   selectedItems: MenuItem[],
@@ -103,8 +119,9 @@ export function getEstimatedTotal(
 
   const flatFees = getFlatFeesTotal(selectedItems);
   const decorationFee = service.decorationFee ?? 0;
+  const transportFee = service.transportFee ?? 0;
 
-  return (menuTotal + serviceTotal + flatFees + decorationFee) * multiplier;
+  return (menuTotal + serviceTotal + flatFees + decorationFee) * multiplier + transportFee;
 }
 
 /** Format a number as a euro string, e.g. 38.95 → "€38,95". */

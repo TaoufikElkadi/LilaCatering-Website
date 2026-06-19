@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
@@ -15,23 +15,28 @@ interface GuestCountSelectorProps {
 function GuestCountSelector({ guestCount, onGuestCountChange }: GuestCountSelectorProps) {
   const { t } = useLanguage();
 
-  if (!onGuestCountChange) {
-    console.error('GuestCountSelector: onGuestCountChange is required');
-    return null;
-  }
-
   const presetCounts = [40, 60, 80, 100, 150, 200, 300, 500];
 
+  // Local text state so the field can be cleared and typed freely; we snap to a
+  // valid multiple of GUEST_STEP (min MIN_GUESTS) only on blur.
+  const [inputValue, setInputValue] = useState(String(guestCount));
+  useEffect(() => {
+    setInputValue(String(guestCount));
+  }, [guestCount]);
+
   const handleCustomInput = (value: string) => {
-    const count = parseInt(value);
-    if (!isNaN(count) && count > 0) {
-      onGuestCountChange(count);
-    }
+    if (!/^\d*$/.test(value)) return; // digits only (empty allowed while typing)
+    setInputValue(value);
+    const count = parseInt(value, 10);
+    if (!isNaN(count) && count > 0) onGuestCountChange(count); // live, not yet snapped
   };
 
-  // Always snap to a valid multiple of GUEST_STEP (min MIN_GUESTS) on commit.
+  // Snap to a valid multiple of GUEST_STEP (min MIN_GUESTS) on commit.
   const handleCustomBlur = () => {
-    onGuestCountChange(normalizeGuestCount(guestCount));
+    const parsed = parseInt(inputValue, 10);
+    const norm = normalizeGuestCount(isNaN(parsed) ? MIN_GUESTS : parsed);
+    onGuestCountChange(norm);
+    setInputValue(String(norm));
   };
 
   const step = (delta: number) => {
@@ -100,14 +105,12 @@ function GuestCountSelector({ guestCount, onGuestCountChange }: GuestCountSelect
 
           <div className="relative">
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
-              min={MIN_GUESTS}
-              step={GUEST_STEP}
-              value={guestCount}
+              value={inputValue}
               onChange={(e) => handleCustomInput(e.target.value)}
               onBlur={handleCustomBlur}
-              className="w-40 bg-white/70 border border-[#dcc8a4] focus:border-[#C19A5B] focus:ring-2 focus:ring-[#C19A5B]/20 text-center text-3xl font-serif text-[#1f1f1f] py-4 px-4 outline-none rounded-[3px] transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="w-40 bg-white/70 border border-[#dcc8a4] focus:border-[#C19A5B] focus:ring-2 focus:ring-[#C19A5B]/20 text-center text-3xl font-serif text-[#1f1f1f] py-4 px-4 outline-none rounded-[3px] transition-all duration-300"
               placeholder={String(MIN_GUESTS)}
             />
             <div className="absolute -bottom-6 left-0 right-0 text-center">

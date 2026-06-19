@@ -18,6 +18,10 @@ interface OfferteData {
   coffeeLuxe: boolean;
   cookiesLuxe: boolean;
   selectedDecoration: DecorationType;
+  venueName?: string;
+  venueCity?: string;
+  transportFee?: number;
+  transportOnRequest?: boolean;
   totalPrice: number;
   lang?: Lang;
 }
@@ -459,6 +463,17 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
       ? t('menuBuilder.pdf.included')
       : formatEuro(decorationPrices[data.selectedDecoration])
   ]);
+
+  // Transport — venue-based; one-time, not multiplied.
+  if (data.venueName) {
+    const venueLabel = data.venueCity ? `${data.venueName}, ${data.venueCity}` : data.venueName;
+    extrasRows.push([
+      t('menuBuilder.pdf.extras.transport'),
+      venueLabel,
+      '-',
+      data.transportOnRequest ? t('menuBuilder.pdf.onRequest') : formatEuro(data.transportFee ?? 0)
+    ]);
+  }
 
   if (extrasRows.length > 0) {
     autoTable(doc, {

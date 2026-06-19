@@ -11,12 +11,15 @@ import {
   MIN_GUESTS,
   getPerPersonPrice,
   getServicePerGuest,
+  getTransportCost,
   getEstimatedTotal,
   formatEuro,
 } from '@/lib/pricing';
+import type { PlaceResult } from '@/lib/geocode';
 import MenuCard from './MenuCard';
 import EventTypeSelector, { EventType } from './EventTypeSelector';
 import GuestCountSelector from './GuestCountSelector';
+import LocationSelector from './LocationSelector';
 import ServiceSelector from './ExtrasSelector';
 import DecorationSelector, { DecorationType, DECORATION_PRICES } from './DecorationSelector';
 import DatePickerSelector from './DatePickerSelector';
@@ -25,8 +28,8 @@ import { getTranslatedMenuItem } from '@/utils/translations';
 import { StarSeal as DecorStar } from './MenuDecor';
 import { smoothScrollTo, getLenis } from '@/lib/lenis';
 
-type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-type StepKind = 'event' | 'menu' | 'guests' | 'service' | 'decor' | 'date';
+type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
+type StepKind = 'event' | 'date' | 'location' | 'guests' | 'menu' | 'service' | 'decor' | 'review';
 
 // Faint eight-pointed-star (khatam) zellige texture for the section atmosphere.
 const ZELLIGE_TEXTURE =
@@ -98,6 +101,10 @@ export default function MenuBuilder() {
   const [cookiesLuxe, setCookiesLuxe] = useState<boolean>(false);
   const [selectedDecoration, setSelectedDecoration] = useState<DecorationType>('basic');
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState<PlaceResult | null>(null);
+  const [locationUnknown, setLocationUnknown] = useState<boolean>(false);
+
+  const transportFee = locationUnknown || !selectedLocation ? 0 : getTransportCost(selectedLocation);
 
   // Mobile full-screen focused flow
   const [isDesktop, setIsDesktop] = useState(true);
@@ -162,14 +169,16 @@ export default function MenuBuilder() {
   // Desserts) plus event, guests, service, decoration and date.
   const STEP_DEFS: { step: FlowStep; kind: StepKind; category?: MenuCategory }[] = [
     { step: 1, kind: 'event' },
-    { step: 2, kind: 'menu', category: 'appetizer' },
-    { step: 3, kind: 'menu', category: 'starter' },
-    { step: 4, kind: 'menu', category: 'main' },
-    { step: 5, kind: 'menu', category: 'dessert' },
-    { step: 6, kind: 'guests' },
-    { step: 7, kind: 'service' },
-    { step: 8, kind: 'decor' },
-    { step: 9, kind: 'date' },
+    { step: 2, kind: 'date' },
+    { step: 3, kind: 'location' },
+    { step: 4, kind: 'guests' },
+    { step: 5, kind: 'menu', category: 'appetizer' },
+    { step: 6, kind: 'menu', category: 'starter' },
+    { step: 7, kind: 'menu', category: 'main' },
+    { step: 8, kind: 'menu', category: 'dessert' },
+    { step: 9, kind: 'service' },
+    { step: 10, kind: 'decor' },
+    { step: 11, kind: 'review' },
   ];
   const TOTAL_STEPS = STEP_DEFS.length;
   const currentDef = STEP_DEFS[currentStep - 1];
@@ -214,8 +223,9 @@ export default function MenuBuilder() {
       coffeeLuxe,
       cookiesLuxe,
       decorationFee: DECORATION_PRICES[selectedDecoration],
+      transportFee,
     });
-  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration]);
+  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration, transportFee]);
 
   // Compact, customer-facing total (rounded euros, locale-grouped).
   const localeTag = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -238,39 +248,28 @@ export default function MenuBuilder() {
       coffeeLuxe,
       cookiesLuxe,
       selectedDecoration,
+      venueName: locationUnknown ? t('menuBuilder.location.unknownShort') : selectedLocation?.label,
+      transportFee,
+      transportOnRequest: locationUnknown,
       totalPrice: getTotalPrice(),
       lang,
     });
-  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration, getTotalPrice, lang]);
+  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
 
-  const hasStarter = selectedItems.some((item) => item.category === 'starter');
-  const hasMain = selectedItems.some((item) => item.category === 'main');
-  const hasDessert = selectedItems.some((item) => item.category === 'dessert');
+  // Step index of the last course (Desserts) — leaving it requires ≥1 dish.
+  const LAST_COURSE_STEP = 8;
 
   const canProceedToNextStep = () => {
     if (currentDef.kind === 'event') return selectedEventType !== null;
     if (currentDef.kind === 'date') return selectedDate !== '';
-    // Leaving the last course step (Desserts) enforces menu completeness.
-    if (currentStep === 5) {
-      if (selectedEventType === 'wedding') {
-        return hasStarter && hasMain && hasDessert;
-      }
-      return selectedItems.length > 0;
-    }
+    if (currentDef.kind === 'location') return locationUnknown || selectedLocation !== null;
+    // Same rule for every event type: at least one dish before continuing.
+    if (currentStep === LAST_COURSE_STEP) return selectedItems.length > 0;
     return true;
   };
 
   const getValidationMessage = () => {
-    if (currentStep !== 5) return null;
-    if (selectedEventType === 'wedding') {
-      const missing = [] as string[];
-      if (!hasStarter) missing.push(t('menuBuilder.validation.starter'));
-      if (!hasMain) missing.push(t('menuBuilder.validation.main'));
-      if (!hasDessert) missing.push(t('menuBuilder.validation.dessert'));
-      if (missing.length > 0) {
-        return t('menuBuilder.validation.weddingRequires').replace('{missing}', missing.join(', '));
-      }
-    } else if (selectedItems.length === 0) {
+    if (currentStep === LAST_COURSE_STEP && selectedItems.length === 0) {
       return t('menuBuilder.validation.atLeastOne');
     }
     return null;
@@ -298,7 +297,7 @@ export default function MenuBuilder() {
     }
     // canProceedToNextStep is recreated each render; intentionally read latest
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep, scrollToBuilder, selectedEventType, selectedItems, guestCount, selectedDate, hasStarter, hasMain, hasDessert]);
+  }, [currentStep, scrollToBuilder, selectedEventType, selectedItems, guestCount, selectedDate, selectedLocation, locationUnknown]);
 
   const handlePrevStep = useCallback(() => {
     if (currentStep > 1) {
@@ -310,10 +309,12 @@ export default function MenuBuilder() {
   // Step labels for progress indicator — courses use their category name.
   const stepKeyForKind: Record<Exclude<StepKind, 'menu'>, string> = {
     event: 'event',
+    date: 'date',
+    location: 'location',
     guests: 'guests',
     service: 'extras',
     decor: 'decor',
-    date: 'date',
+    review: 'review',
   };
   const stepLabels = STEP_DEFS.map((d) => ({
     step: d.step,
@@ -443,14 +444,34 @@ export default function MenuBuilder() {
         </motion.div>
       )}
 
-      {/* Step: Date Picker and Review */}
+      {/* Step: Date */}
       {currentDef.kind === 'date' && (
-        <motion.div key="step-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="space-y-12 py-2 sm:py-6">
+        <motion.div key="step-date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="py-2 sm:py-6">
             <DatePickerSelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          </div>
+        </motion.div>
+      )}
 
-            {selectedDate && (
-              <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="py-6 sm:py-10 border-t border-[#dcd3c5]">
+      {/* Step: Location (venue → transport cost) */}
+      {currentDef.kind === 'location' && (
+        <motion.div key="step-location" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="py-2 sm:py-6">
+            <LocationSelector
+              selectedLocation={selectedLocation}
+              onLocationChange={setSelectedLocation}
+              unknown={locationUnknown}
+              onUnknownChange={setLocationUnknown}
+            />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Step: Review (summary + PDF + scheduling) */}
+      {currentDef.kind === 'review' && (
+        <motion.div key="step-review" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="py-2 sm:py-6">
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
                   <div className="text-center space-y-4">
                     <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif uppercase tracking-[0.05em] text-[#1f1f1f]">
@@ -467,7 +488,7 @@ export default function MenuBuilder() {
                     <div className="grid grid-cols-2 gap-4 border-b border-[#e6ddd0] pb-3 sm:pb-4">
                       <div>
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.eventLabel')}</p>
-                        <p className="text-sm text-[#1f1f1f] capitalize font-medium">{selectedEventType}</p>
+                        <p className="text-sm text-[#1f1f1f] font-medium">{selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : ''}</p>
                       </div>
                       <div>
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.guestsLabel')}</p>
@@ -522,6 +543,26 @@ export default function MenuBuilder() {
                       </div>
                     </div>
 
+                    {/* Location & transport */}
+                    <div className="grid sm:grid-cols-2 gap-4 border-b border-[#e6ddd0] pb-3 sm:pb-4">
+                      <div>
+                        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.locationLabel')}</p>
+                        <p className="text-xs sm:text-sm text-[#1f1f1f]">
+                          {locationUnknown
+                            ? t('menuBuilder.location.unknownShort')
+                            : selectedLocation
+                            ? selectedLocation.label
+                            : '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.transportLabel')}</p>
+                        <p className="text-xs sm:text-sm text-[#1f1f1f]">
+                          {locationUnknown ? t('menuBuilder.location.onRequest') : formatEuro(transportFee)}
+                        </p>
+                      </div>
+                    </div>
+
                     {/* Pricing breakdown */}
                     <div className="space-y-1.5 sm:space-y-2">
                       <div className="flex items-center justify-between">
@@ -532,6 +573,12 @@ export default function MenuBuilder() {
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275]">{t('menuBuilder.review.perPersonPrice')}</p>
                         <p className="text-sm text-[#1f1f1f]">{formatEuro(getPerPersonPrice(selectedItems) + getServicePerGuest({ coffeeLuxe, cookiesLuxe }))}</p>
                       </div>
+                      {!locationUnknown && transportFee > 0 && (
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275]">{t('menuBuilder.review.transportLabel')}</p>
+                          <p className="text-sm text-[#1f1f1f]">{formatEuro(transportFee)}</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Total */}
@@ -579,7 +626,6 @@ export default function MenuBuilder() {
                   </div>
                 </div>
               </motion.div>
-            )}
           </div>
         </motion.div>
       )}
@@ -620,7 +666,9 @@ export default function MenuBuilder() {
     </div>
   );
 
-  const showLiveTotal = currentStep >= 2 && currentStep < TOTAL_STEPS;
+  // Live total is meaningful once we're into menu/service/decor (after guests),
+  // not on the event, date, or final review screens.
+  const showLiveTotal = ['location', 'guests', 'menu', 'service', 'decor'].includes(currentDef.kind);
 
   return (
     <section id="menu-builder" className="relative isolate overflow-hidden py-16 sm:py-28 bg-gradient-to-b from-[#f8f4ed] via-[#f5efe5] to-[#f2ebdd] text-[#1f1f1f]">
@@ -709,7 +757,7 @@ export default function MenuBuilder() {
             <div className="mt-10">
               <div className="relative overflow-hidden rounded-[4px] border border-[#dfd2ba] bg-gradient-to-br from-[#fdfbf7] to-[#f3ecdf] p-6 shadow-[0_18px_44px_-26px_rgba(80,60,30,0.4)]">
                 <DecorStar className="pointer-events-none absolute -top-6 -right-6 w-28 h-28 text-[#C19A5B]/[0.06]" />
-                <p className="text-[11px] uppercase tracking-[0.28em] text-[#a8824a] mb-2">{t('menuBuilder.steps.event')} → {t('menuBuilder.steps.date')}</p>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[#a8824a] mb-2">{stepLabels[0].label} → {stepLabels[stepLabels.length - 1].label}</p>
                 <p className="text-sm text-[#4a4742] font-light leading-relaxed mb-5">{t('menuBuilder.description')}</p>
                 <button
                   onClick={() => setMobileOpen(true)}

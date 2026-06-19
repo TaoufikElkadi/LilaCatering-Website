@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 
-export type EventType = 'wedding' | 'dinner' | 'corporate' | 'celebration' | 'other';
+export type EventType = 'wedding' | 'engagement' | 'henna' | 'birth' | 'other';
 
 interface EventTypeSelectorProps {
   selectedEventType: EventType | null;
@@ -26,7 +26,7 @@ function EventTypeSelector({ selectedEventType, onEventTypeChange }: EventTypeSe
     return null;
   }
 
-  const eventTypeIds: EventType[] = ['wedding', 'dinner', 'corporate', 'celebration', 'other'];
+  const eventTypeIds: EventType[] = ['wedding', 'engagement', 'henna', 'birth', 'other'];
 
   return (
     <div className="space-y-12">

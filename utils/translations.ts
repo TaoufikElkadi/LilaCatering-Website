@@ -206,6 +206,8 @@ const translations: Record<Lang, TranslationTree> = {
         extras: 'Service',
         decor: 'Decor',
         date: 'Date',
+        location: 'Location',
+        review: 'Overview',
       },
       categories: {
         appetizer: 'Appetizers',
@@ -260,6 +262,8 @@ const translations: Record<Lang, TranslationTree> = {
         guestsCount: '{count} guests',
         extrasLabel: 'Service',
         serviceLabel: 'Service',
+        locationLabel: 'Location',
+        transportLabel: 'Service fee',
         decorLabel: 'Decor',
         decorationLabel: 'Decoration',
         estimatedTotal: 'Estimated total',
@@ -317,6 +321,7 @@ const translations: Record<Lang, TranslationTree> = {
           cookiesLuxe: 'Luxe Moroccan cookies',
           cookiesLuxeDesc: 'Extended luxe pastry assortment',
           decoration: 'Decoration collection',
+          transport: 'Service fee',
         },
         onRequest: 'On request',
         decoration: {
@@ -340,21 +345,21 @@ const translations: Record<Lang, TranslationTree> = {
           wedding: {
             name: 'Wedding',
             description: 'Celebrate your special day with authentic Moroccan cuisine',
-            requirements: 'Full menu required: Starter, Main, and Dessert',
-          },
-          dinner: {
-            name: 'Private Dinner',
-            description: 'Intimate dining experience for family and friends',
             requirements: 'Flexible menu selection',
           },
-          corporate: {
-            name: 'Corporate Event',
-            description: 'Professional catering for business occasions',
+          engagement: {
+            name: 'Engagement Party',
+            description: 'Mark your engagement with a warm Moroccan celebration',
             requirements: 'Flexible menu selection',
           },
-          celebration: {
-            name: 'Celebration',
-            description: 'Birthdays, anniversaries, and special occasions',
+          henna: {
+            name: 'Henna Party',
+            description: 'A festive henna night with traditional flavors',
+            requirements: 'Flexible menu selection',
+          },
+          birth: {
+            name: 'Birth Celebration',
+            description: 'Welcome your new arrival with family and friends',
             requirements: 'Flexible menu selection',
           },
           other: {
@@ -370,6 +375,18 @@ const translations: Record<Lang, TranslationTree> = {
         guests: 'Guests',
         customLabel: 'Or enter custom amount',
         stepHint: 'In steps of 10 guests',
+      },
+      location: {
+        title: 'Location',
+        subtitle: 'Type your venue name or address — we calculate the service fee from the distance.',
+        placeholder: 'Type address or venue name',
+        noResults: 'No results — try street + city',
+        transport: 'Service fee',
+        onRequest: 'On request',
+        selectedLabel: 'Chosen location',
+        unknownCheckbox: "I don't have a location yet",
+        unknownShort: 'Location to be confirmed',
+        info: 'Within Amsterdam €150 · outside €3.50 per km',
       },
       extras: {
         title: 'Service & sweets',
@@ -884,6 +901,8 @@ const translations: Record<Lang, TranslationTree> = {
         extras: 'Service',
         decor: 'Décor',
         date: 'Date',
+        location: 'Lieu',
+        review: 'Récapitulatif',
       },
       categories: {
         appetizer: 'Amuse-bouches',
@@ -938,6 +957,8 @@ const translations: Record<Lang, TranslationTree> = {
         guestsCount: '{count} invités',
         extrasLabel: 'Service',
         serviceLabel: 'Service',
+        locationLabel: 'Lieu',
+        transportLabel: 'Frais de service',
         decorLabel: 'Décor',
         decorationLabel: 'Décoration',
         estimatedTotal: 'Total estimé',
@@ -995,6 +1016,7 @@ const translations: Record<Lang, TranslationTree> = {
           cookiesLuxe: 'Pâtisseries marocaines luxe',
           cookiesLuxeDesc: 'Assortiment luxe étendu de pâtisseries',
           decoration: 'Collection de décoration',
+          transport: 'Frais de service',
         },
         onRequest: 'Sur devis',
         decoration: {
@@ -1018,21 +1040,21 @@ const translations: Record<Lang, TranslationTree> = {
           wedding: {
             name: 'Mariage',
             description: 'Célébrez votre jour spécial avec une cuisine marocaine authentique',
-            requirements: 'Menu complet requis : Entrée, Plat et Dessert',
-          },
-          dinner: {
-            name: 'Dîner Privé',
-            description: 'Expérience gastronomique intime pour famille et amis',
             requirements: 'Sélection de menu flexible',
           },
-          corporate: {
-            name: 'Événement Corporate',
-            description: 'Traiteur professionnel pour occasions professionnelles',
+          engagement: {
+            name: 'Fiançailles',
+            description: 'Célébrez vos fiançailles avec une fête marocaine chaleureuse',
             requirements: 'Sélection de menu flexible',
           },
-          celebration: {
-            name: 'Célébration',
-            description: 'Anniversaires et occasions spéciales',
+          henna: {
+            name: 'Fête du henné',
+            description: 'Une soirée henné festive aux saveurs traditionnelles',
+            requirements: 'Sélection de menu flexible',
+          },
+          birth: {
+            name: 'Fête de naissance',
+            description: 'Accueillez votre nouveau-né en famille et entre amis',
             requirements: 'Sélection de menu flexible',
           },
           other: {
@@ -1048,6 +1070,18 @@ const translations: Record<Lang, TranslationTree> = {
         guests: 'Invités',
         customLabel: 'Ou entrez un nombre personnalisé',
         stepHint: 'Par tranches de 10 invités',
+      },
+      location: {
+        title: 'Lieu',
+        subtitle: "Saisissez le nom de la salle ou l'adresse — nous calculons les frais de service selon la distance.",
+        placeholder: 'Saisissez une adresse ou le nom de la salle',
+        noResults: 'Aucun résultat — essayez rue + ville',
+        transport: 'Frais de service',
+        onRequest: 'Sur devis',
+        selectedLabel: 'Lieu choisi',
+        unknownCheckbox: "Je n'ai pas encore de lieu",
+        unknownShort: 'Lieu à confirmer',
+        info: 'Dans Amsterdam 150 € · au-delà 3,50 € par km',
       },
       extras: {
         title: 'Service & douceurs',
@@ -1562,6 +1596,8 @@ const translations: Record<Lang, TranslationTree> = {
         extras: 'Service',
         decor: 'Decoratie',
         date: 'Datum',
+        location: 'Locatie',
+        review: 'Overzicht',
       },
       categories: {
         appetizer: 'Hapjes',
@@ -1616,6 +1652,8 @@ const translations: Record<Lang, TranslationTree> = {
         guestsCount: '{count} gasten',
         extrasLabel: 'Service',
         serviceLabel: 'Service',
+        locationLabel: 'Locatie',
+        transportLabel: 'Servicekosten',
         decorLabel: 'Decoratie',
         decorationLabel: 'Decoratie',
         estimatedTotal: 'Geschatte totaalprijs',
@@ -1673,6 +1711,7 @@ const translations: Record<Lang, TranslationTree> = {
           cookiesLuxe: 'Luxe Marokkaanse koekjes',
           cookiesLuxeDesc: 'Uitgebreid luxe koekjesassortiment',
           decoration: 'Decoratiecollectie',
+          transport: 'Servicekosten',
         },
         onRequest: 'Op aanvraag',
         decoration: {
@@ -1696,25 +1735,25 @@ const translations: Record<Lang, TranslationTree> = {
           wedding: {
             name: 'Bruiloft',
             description: 'Vier uw bijzondere dag met authentieke Marokkaanse gerechten',
-            requirements: 'Volledig menu vereist: Voorgerecht, Hoofdgerecht en Dessert',
-          },
-          dinner: {
-            name: 'Privédiner',
-            description: 'Intieme culinaire ervaring voor familie en vrienden',
             requirements: 'Flexibele menukeuze',
           },
-          corporate: {
-            name: 'Zakelijk evenement',
-            description: 'Professionele catering voor zakelijke gelegenheden',
+          engagement: {
+            name: 'Verlovingsfeest',
+            description: 'Vier uw verloving met een warm Marokkaans feest',
             requirements: 'Flexibele menukeuze',
           },
-          celebration: {
-            name: 'Feest',
-            description: 'Verjaardagen, jubilea en bijzondere gelegenheden',
+          henna: {
+            name: 'Hennafeest',
+            description: 'Een feestelijke hennaavond met traditionele smaken',
+            requirements: 'Flexibele menukeuze',
+          },
+          birth: {
+            name: 'Geboortefeest',
+            description: 'Verwelkom uw kleintje met familie en vrienden',
             requirements: 'Flexibele menukeuze',
           },
           other: {
-            name: 'Overig evenement',
+            name: 'Overige evenementen',
             description: 'Catering op maat voor uw wensen',
             requirements: 'Flexibele menukeuze',
           },
@@ -1726,6 +1765,18 @@ const translations: Record<Lang, TranslationTree> = {
         guests: 'Gasten',
         customLabel: 'Of voer een eigen aantal in',
         stepHint: 'Per 10 gasten',
+      },
+      location: {
+        title: 'Locatie',
+        subtitle: 'Typ de naam van de zaal of het adres — wij berekenen de servicekosten op basis van de afstand.',
+        placeholder: 'Typ adres of naam van de zaal',
+        noResults: 'Geen resultaten — probeer straat + plaats',
+        transport: 'Servicekosten',
+        onRequest: 'Op aanvraag',
+        selectedLabel: 'Gekozen locatie',
+        unknownCheckbox: 'Ik heb nog geen locatie',
+        unknownShort: 'Locatie nog te bevestigen',
+        info: 'Binnen Amsterdam €150 · daarbuiten €3,50 per km',
       },
       extras: {
         title: 'Service & zoetigheden',

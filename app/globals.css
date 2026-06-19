@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+/* Fonts are now loaded via next/font in layout.tsx for better performance */
 
 @layer base {
   :root {
@@ -38,14 +38,14 @@
 body {
   background-color: #f7f3ec;
   color: #1f1f1f;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-inter), 'Inter', sans-serif;
   font-weight: 300;
   overflow-x: hidden;
   letter-spacing: 0.02em;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-cormorant), 'Cormorant Garamond', serif;
   font-weight: 300;
   letter-spacing: 0.05em;
   color: #1f1f1f;
@@ -57,9 +57,28 @@ h1, h2, h3, h4, h5, h6 {
     repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(193, 154, 91, 0.02) 10px, rgba(193, 154, 91, 0.02) 20px);
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling — native fallback when Lenis is inactive (reduced-motion). */
 html {
   scroll-behavior: smooth;
+}
+
+/* Lenis smooth-scroll (momentum). When active it sets html.lenis and drives scroll
+   itself, so native smooth must be disabled to avoid double-easing jank. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 /* Custom scrollbar */
@@ -86,14 +105,160 @@ html {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(calc(-304px * 6)); /* -(card width 256px + margin 48px) * number of companies */
+    transform: translateX(calc(-184px * 6)); /* Mobile: -(card width 160px + margin 24px) * number of companies */
+  }
+}
+
+@keyframes scroll-logos-desktop {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-304px * 6)); /* Desktop: -(card width 256px + margin 48px) * number of companies */
   }
 }
 
 .animate-scroll-logos {
-  animation: scroll-logos 40s linear infinite;
+  animation: scroll-logos 30s linear infinite;
+}
+
+@media (min-width: 640px) {
+  .animate-scroll-logos {
+    animation: scroll-logos-desktop 40s linear infinite;
+  }
 }
 
 .animate-scroll-logos:hover {
   animation-play-state: running;
+}
+
+/* Hide scrollbar for horizontal scroll areas */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile tap highlight removal */
+@media (max-width: 640px) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Improve touch feedback */
+@media (hover: none) and (pointer: coarse) {
+  .touch-feedback:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+}
+
+/* Line clamp utility */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Hide video controls and play buttons */
+video::-webkit-media-controls {
+  display: none !important;
+}
+
+video::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+video::-webkit-media-controls-panel {
+  display: none !important;
+}
+
+video::-webkit-media-controls-play-button {
+  display: none !important;
+}
+
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+}
+
+video::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+}
+
+video {
+  -webkit-playsinline: true;
+  -moz-playsinline: true;
+  -ms-playsinline: true;
+}
+
+/* Premium CTA Link Animation */
+.cta-premium {
+  position: relative;
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  border-bottom: 1px solid #C19A5B;
+  padding-bottom: 0.5rem;
+  transition: color 130ms ease-out, transform 250ms cubic-bezier(0.4, 0, 0.2, 1), border-color 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+}
+
+.cta-premium::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #C19A5B;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1), height 280ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta-premium:hover {
+    color: #B8905A;
+    transform: translateX(3px);
+    border-bottom-color: transparent;
+  }
+
+  .cta-premium:hover::after {
+    transform: scaleX(1);
+    height: 1.5px;
+  }
+}
+
+/* Active state for touch devices */
+.cta-premium:active {
+  opacity: 0.7;
+  transition: opacity 100ms ease-out;
+}
+
+/* Mobile: instant feedback, no hover animations */
+@media (hover: none) and (pointer: coarse) {
+  .cta-premium {
+    transition: opacity 100ms ease-out;
+  }
+  
+  .cta-premium:active {
+    opacity: 0.7;
+  }
+}
+
+/* Hide the floating scroll-to-top while the menu-builder full-screen flow is open */
+body.menu-flow-open .scroll-to-top-btn {
+  display: none !important;
+}
+
+/* Date field: hide the default (right-side) calendar indicator — we render our own
+   gold calendar icon and open the picker on click. */
+.date-field::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
 }

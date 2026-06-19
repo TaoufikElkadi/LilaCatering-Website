@@ -1,8 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { memo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 
-export default function MoroccanPattern() {
+function MoroccanPattern() {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <svg
@@ -23,8 +26,8 @@ export default function MoroccanPattern() {
               fill="currentColor"
               className="text-accent-gold"
               initial={{ opacity: 0.1 }}
-              animate={{ opacity: [0.1, 0.2, 0.1] }}
-              transition={{ duration: 3, repeat: Infinity }}
+              animate={prefersReducedMotion ? { opacity: 0.15 } : { opacity: [0.1, 0.2, 0.1] }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 3, repeat: Infinity }}
             />
             <circle
               cx="50"
@@ -40,4 +43,6 @@ export default function MoroccanPattern() {
     </div>
   );
 }
+
+export default memo(MoroccanPattern);
 

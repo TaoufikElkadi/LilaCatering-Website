@@ -36,3 +36,24 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+.image-backup/
+.next-verify/
+.gstack/
+
+# scratch / unused local assets (not part of the app)
+/BUILD_FIX_SUMMARY.md
+/CSS_FIX_SUMMARY.md
+/QUICK_FIX_GUIDE.md
+/data/Books/
+/data/saveweb2zip-com-savor-it/
+/data/lp1-original-4k.mp4
+/data/*.docx
+# data/ holds source originals; only data/menuData.ts is imported by the app
+/data/*.jpg
+/data/*.jpeg
+/data/*.png
+/data/*.webp
+/data/*.gif
+/data/*.mp4
+/data/*.mov
+/data/*.pdf

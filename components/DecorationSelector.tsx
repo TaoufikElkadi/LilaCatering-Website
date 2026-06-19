@@ -1,240 +1,98 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { memo } from 'react';
+import { useLanguage } from './LanguageProvider';
+import { StepHeader, StarSeal, InsetFrame, cardShell, CheckSeal } from './MenuDecor';
 
-export type DecorationType = 'none' | 'minimal' | 'traditional' | 'luxury' | 'custom';
+export type DecorationType = 'basic' | 'classic' | 'grace' | 'custom';
 
 interface DecorationSelectorProps {
   selectedDecoration: DecorationType;
   onDecorationChange: (decoration: DecorationType) => void;
 }
 
-export default function DecorationSelector({ selectedDecoration, onDecorationChange }: DecorationSelectorProps) {
-  if (!onDecorationChange) {
-    console.error('DecorationSelector: onDecorationChange is required');
-    return null;
-  }
+// One-time fees (totals). Basic is included; Custom is quoted per event.
+export const DECORATION_PRICES: Record<DecorationType, number> = {
+  basic: 0,
+  classic: 500,
+  grace: 1000,
+  custom: 0,
+};
 
-  const [selectedElements, setSelectedElements] = useState<string[]>([]);
+function DecorationSelector({ selectedDecoration, onDecorationChange }: DecorationSelectorProps) {
+  const { t } = useLanguage();
 
-  const decorationPackages = [
-    {
-      id: 'none' as DecorationType,
-      name: 'No Decoration',
-      description: 'Simple and elegant event setup without additional decorative elements',
-      icon: '○',
-      price: '€0',
-    },
-    {
-      id: 'minimal' as DecorationType,
-      name: 'Minimal Package',
-      description: 'Subtle Moroccan touches with candles and simple settings',
-      icon: '✦',
-      price: '€150',
-    },
-    {
-      id: 'traditional' as DecorationType,
-      name: 'Traditional Package',
-      description: 'Authentic Moroccan lanterns, textiles, and cushions',
-      icon: '❋',
-      price: '€350',
-    },
-    {
-      id: 'luxury' as DecorationType,
-      name: 'Luxury Package',
-      description: 'Premium setup with ornate lanterns and silk fabrics',
-      icon: '✵',
-      price: '€650',
-    },
-    {
-      id: 'custom' as DecorationType,
-      name: 'Custom Design',
-      description: 'Bespoke decoration - select individual elements below',
-      icon: '◈',
-      price: 'Quote',
-    },
-  ];
+  const collectionIds: DecorationType[] = ['basic', 'classic', 'grace', 'custom'];
 
-  const decorationElements = [
-    { id: 'lanterns', name: 'Moroccan Lanterns', icon: '🏮', price: 50 },
-    { id: 'candles', name: 'Candle Arrangements', icon: '🕯️', price: 30 },
-    { id: 'textiles', name: 'Decorative Textiles', icon: '🧵', price: 80 },
-    { id: 'cushions', name: 'Floor Cushions', icon: '💺', price: 40 },
-    { id: 'flowers', name: 'Floral Arrangements', icon: '🌸', price: 120 },
-    { id: 'tables', name: 'Low Moroccan Tables', icon: '🪑', price: 100 },
-    { id: 'rugs', name: 'Traditional Rugs', icon: '🧶', price: 70 },
-    { id: 'lighting', name: 'Ambient Lighting', icon: '💡', price: 90 },
-  ];
-
-  const handleElementToggle = (elementId: string) => {
-    if (selectedElements.includes(elementId)) {
-      setSelectedElements(selectedElements.filter((id) => id !== elementId));
-    } else {
-      setSelectedElements([...selectedElements, elementId]);
-    }
-    // Auto-select custom if elements are being selected
-    if (selectedDecoration !== 'custom') {
-      onDecorationChange('custom');
-    }
-  };
-
-  const getElementsTotal = () => {
-    return decorationElements
-      .filter((el) => selectedElements.includes(el.id))
-      .reduce((total, el) => total + el.price, 0);
+  const priceLabel = (id: DecorationType): string => {
+    if (id === 'custom') return t('menuBuilder.decoration.onRequest');
+    if (DECORATION_PRICES[id] === 0) return t('menuBuilder.decoration.includedTag');
+    return `+€${DECORATION_PRICES[id]}`;
   };
 
   return (
     <div className="space-y-12">
-      <div className="text-center">
-        <h3 className="text-2xl md:text-3xl font-serif font-light mb-3 tracking-[0.08em] text-[#1f1f1f] uppercase">
-          Decoration & Ambiance
-        </h3>
-        <p className="text-xs text-[#6c655b] tracking-[0.25em] font-light uppercase">
-          Choose a package or build your custom decoration
-        </p>
-      </div>
+      <StepHeader title={t('menuBuilder.decoration.title')} subtitle={t('menuBuilder.decoration.subtitle')} />
 
-      {/* Decoration Packages */}
       <div>
-        <p className="text-xs tracking-[0.25em] text-[#6c655b] mb-6 text-center uppercase">Decoration packages</p>
-        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {decorationPackages.map((pkg, index) => (
-            <motion.div
-              key={pkg.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              whileHover={{ scale: 1.02 }}
-              onClick={() => {
-                onDecorationChange(pkg.id);
-                if (pkg.id !== 'custom') setSelectedElements([]);
-              }}
-              className={`relative cursor-pointer border transition-all duration-200 p-6 ${
-                selectedDecoration === pkg.id
-                  ? 'border-[#1f1f1f] bg-white'
-                  : 'border-[#dcd3c5] hover:border-[#1f1f1f]'
-              }`}
-            >
-              {/* Content */}
-              <div className="mb-4 space-y-2 text-center">
-                <h4
-                  className={`text-sm font-serif font-light tracking-[0.06em] transition-colors duration-200 ${
-                    selectedDecoration === pkg.id ? 'text-[#1f1f1f]' : 'text-[#4a4742]'
-                  }`}
-                >
-                  {pkg.name}
-                </h4>
-                <p className="text-[10px] text-[#6c655b] leading-relaxed font-light min-h-[2.5rem]">
-                  {pkg.description}
-                </p>
-              </div>
+        <p className="text-[11px] tracking-[0.28em] text-[#a8824a] mb-6 text-center uppercase">
+          {t('menuBuilder.decoration.packagesLabel')}
+        </p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {collectionIds.map((id, index) => {
+            const isActive = selectedDecoration === id;
+            return (
+              <motion.div
+                key={id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                whileHover={{ y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onDecorationChange(id)}
+                className="group relative cursor-pointer"
+              >
+                <div className={`${cardShell(isActive)} p-6 h-full flex flex-col`}>
+                  <InsetFrame isActive={isActive} />
+                  <CheckSeal show={isActive} className="absolute top-3 right-3 z-10" />
 
-              {/* Price */}
-              <div className="text-center pt-3 border-t border-[#dcd3c5]">
-                <span
-                  className={`text-xs font-serif tracking-[0.25em] uppercase transition-colors duration-200 ${
-                    selectedDecoration === pkg.id ? 'text-[#1f1f1f]' : 'text-[#6c655b]'
-                  }`}
-                >
-                  {pkg.price}
-                </span>
-              </div>
+                  <div className="relative space-y-2 text-center flex-1">
+                    <h4 className={`text-sm font-serif font-light tracking-[0.05em] ${isActive ? 'text-[#1f1f1f]' : 'text-[#3a352c]'}`}>
+                      {t(`menuBuilder.decoration.packages.${id}.name`)}
+                    </h4>
+                    <p className="text-[11px] text-[#6c655b] leading-relaxed font-light min-h-[3.75rem]">
+                      {t(`menuBuilder.decoration.packages.${id}.description`)}
+                    </p>
+                  </div>
 
-              {/* Selection indicator */}
-              {selectedDecoration === pkg.id && (
-                <motion.div
-                  layoutId="selectedPackage"
-                  className="absolute inset-0 border-2 border-[#1f1f1f]"
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                />
-              )}
-            </motion.div>
-          ))}
+                  <div className="relative text-center pt-3 mt-3 border-t border-[#e7ddcb]">
+                    <span className={`text-xs font-serif tracking-[0.22em] uppercase ${isActive ? 'text-[#a8824a]' : 'text-[#6c655b]'}`}>
+                      {priceLabel(id)}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Individual Decoration Elements */}
-      <div className="pt-8 border-t border-[#dcd3c5]">
-        <div className="text-center mb-8">
-          <p className="text-xs tracking-[0.25em] text-[#6c655b] mb-2 uppercase">Individual elements</p>
-          <p className="text-[10px] text-[#8a8275] tracking-[0.25em] uppercase">
-            Select individual items to create your custom decoration
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {decorationElements.map((element, index) => (
-            <motion.div
-              key={element.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              whileHover={{ scale: 1.02 }}
-              onClick={() => handleElementToggle(element.id)}
-              className={`relative cursor-pointer border transition-all duration-200 p-4 ${
-                selectedElements.includes(element.id)
-                  ? 'border-[#1f1f1f] bg-white'
-                  : 'border-[#dcd3c5] hover:border-[#1f1f1f]'
-              }`}
-            >
-              {/* Content */}
-              <div className="text-center">
-                <h5
-                  className={`text-xs font-serif font-light tracking-[0.06em] mb-1 transition-colors duration-200 ${
-                    selectedElements.includes(element.id) ? 'text-[#1f1f1f]' : 'text-[#4a4742]'
-                  }`}
-                >
-                  {element.name}
-                </h5>
-                <p
-                  className={`text-xs tracking-[0.15em] uppercase transition-colors duration-200 ${
-                    selectedElements.includes(element.id) ? 'text-[#1f1f1f]' : 'text-[#6c655b]'
-                  }`}
-                >
-                  €{element.price}
-                </p>
-              </div>
-
-              {/* Selection indicator */}
-              {selectedElements.includes(element.id) && (
-                <motion.div
-                  layoutId={`selectedElement-${element.id}`}
-                  className="absolute inset-0 border-2 border-[#1f1f1f]"
-                  transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                />
-              )}
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Elements Total */}
-        {selectedElements.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center pt-6 mt-6 border-t border-[#dcd3c5]"
-          >
-            <p className="text-xs tracking-[0.25em] text-[#6c655b] uppercase mb-2">Custom elements total</p>
-            <p className="text-xl font-serif font-light text-[#1f1f1f]">
-              €{getElementsTotal()} <span className="text-sm text-[#6c655b]">+ setup fee</span>
-            </p>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Additional Info */}
+      {/* Setup info */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-center pt-6 border-t border-[#dcd3c5]"
+        transition={{ delay: 0.4 }}
+        className="flex items-center justify-center gap-3 pt-6 border-t border-[#e7ddcb]"
       >
-        <p className="text-xs text-[#8a8275] tracking-[0.25em] font-light uppercase">
-          All decoration packages include setup and takedown services
+        <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]/60" />
+        <p className="text-[11px] text-[#8a8275] tracking-[0.22em] font-light uppercase">
+          {t('menuBuilder.decoration.setupInfo')}
         </p>
+        <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]/60" />
       </motion.div>
     </div>
   );
 }
+
+export default memo(DecorationSelector);

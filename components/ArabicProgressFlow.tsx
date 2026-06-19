@@ -1,22 +1,23 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { memo } from 'react';
+import { motion } from 'framer-motion';
 
 interface ArabicProgressFlowProps {
   currentStep: number;
   totalSteps: number;
 }
 
-export default function ArabicProgressFlow({ currentStep, totalSteps }: ArabicProgressFlowProps) {
-  const steps = [
-    { number: 1, label: 'Event' },
-    { number: 2, label: 'Menu' },
-    { number: 3, label: 'Details' },
-    { number: 4, label: 'Extras' },
-    { number: 5, label: 'Decoration' },
-    { number: 6, label: 'Date' },
-  ];
+const steps = [
+  { number: 1, label: 'Event' },
+  { number: 2, label: 'Menu' },
+  { number: 3, label: 'Details' },
+  { number: 4, label: 'Extras' },
+  { number: 5, label: 'Decoration' },
+  { number: 6, label: 'Date' },
+];
 
+function ArabicProgressFlow({ currentStep }: ArabicProgressFlowProps) {
   return (
     <div className="mb-20">
       {/* Arabic-inspired ornamental top border */}
@@ -116,4 +117,6 @@ export default function ArabicProgressFlow({ currentStep, totalSteps }: ArabicPr
     </div>
   );
 }
+
+export default memo(ArabicProgressFlow);
 

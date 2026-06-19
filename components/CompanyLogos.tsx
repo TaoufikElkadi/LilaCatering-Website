@@ -18,61 +18,63 @@ export default function CompanyLogos() {
   const { t } = useLanguage();
   
   return (
-    <section className="relative py-20 md:py-28 bg-[#f7f3ec]">
-      <div className="max-w-[90rem] mx-auto px-8">
+    <section className="relative py-12 sm:py-20 md:py-28 bg-[#f7f3ec]">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-8">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="h-px w-12 bg-[#C19A5B]" />
-            <span className="text-xs uppercase tracking-[0.3em] text-[#C19A5B] font-light">
+        <div className="text-center mb-6 sm:mb-12">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="h-px w-8 sm:w-12 bg-[#C19A5B]" />
+            <span className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#C19A5B] font-light">
               {t('companyLogos.kicker')}
             </span>
-            <div className="h-px w-12 bg-[#C19A5B]" />
+            <div className="h-px w-8 sm:w-12 bg-[#C19A5B]" />
           </div>
 
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-light text-[#1f1f1f] mb-4">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-light text-[#1f1f1f] mb-2 sm:mb-4">
             {t('companyLogos.title')}
           </h2>
 
-          <p className="text-base md:text-lg text-[#6c655b] max-w-2xl mx-auto font-light">
+          <p className="text-sm sm:text-base md:text-lg text-[#6c655b] max-w-2xl mx-auto font-light">
             {t('companyLogos.description')}
           </p>
         </div>
 
         {/* Logos Container */}
-        <div className="relative overflow-hidden py-8">
+        <div className="relative overflow-hidden py-4 sm:py-8">
           {/* Gradient fades */}
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#f7f3ec] to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#f7f3ec] to-transparent z-10 pointer-events-none" />
-          
+          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#f7f3ec] to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#f7f3ec] to-transparent z-10 pointer-events-none" />
+
           {/* Scrolling content */}
           <div className="flex animate-scroll-logos">
             {duplicatedCompanies.map((company, index) => (
-              <div key={`${company.id}-${index}`} className="flex-shrink-0 mx-6 group">
-                <div className="relative w-64 h-40 flex items-center justify-center bg-white/40 backdrop-blur-md border border-[#e5ddd0]/50 transition-all duration-500 hover:bg-white/70 hover:border-[#c7b9a5] hover:shadow-[0_8px_30px_rgba(193,154,91,0.15)] hover:scale-105 hover:-translate-y-1 overflow-hidden">
+              <div key={`${company.id}-${index}`} className="flex-shrink-0 mx-3 sm:mx-6 group">
+                <div className="relative w-40 h-24 sm:w-64 sm:h-40 flex items-center justify-center bg-white/40 backdrop-blur-md border border-[#e5ddd0]/50 transition-all duration-500 hover:bg-white/70 hover:border-[#c7b9a5] hover:shadow-[0_8px_30px_rgba(193,154,91,0.15)] hover:scale-105 hover:-translate-y-1 overflow-hidden">
                   {/* Glow on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#C19A5B]/5 via-transparent to-[#C19A5B]/5" />
                   </div>
-                  
+
                   {/* Logo */}
-                  <div className="relative z-10 w-full h-full p-6">
-                    <div className="relative w-full h-full grayscale group-hover:grayscale-0 transition-all duration-500">
+                  <div className="relative z-10 w-full h-full p-3 sm:p-6">
+                    <div className="relative w-full h-full">
                       <Image
                         src={company.logo}
                         alt={company.name}
                         fill
-                        className="object-contain group-hover:saturate-[0.85] transition-all duration-500"
-                        sizes="256px"
+                        className="object-contain group-hover:saturate-[1.1] transition-all duration-500"
+                        sizes="(max-width: 640px) 160px, 256px"
+                        quality={75}
+                        loading="lazy"
                       />
                     </div>
                   </div>
-                  
-                  {/* Decorative corners */}
-                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
-                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
+
+                  {/* Decorative corners - hidden on mobile for simplicity */}
+                  <div className="hidden sm:block absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
+                  <div className="hidden sm:block absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
+                  <div className="hidden sm:block absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
+                  <div className="hidden sm:block absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-[#C19A5B]/0 group-hover:border-[#C19A5B]/30 transition-all duration-300" />
                 </div>
               </div>
             ))}

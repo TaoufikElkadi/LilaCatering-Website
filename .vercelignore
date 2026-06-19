@@ -1,0 +1,18 @@
+# Large source assets NOT used by the build (the app references /public only;
+# the only imported file under data/ is data/menuData.ts).
+data/*.mp4
+data/*.mov
+data/*.webp
+data/*.jpg
+data/*.jpeg
+data/*.png
+data/*.gif
+data/*.pdf
+data/*.docx
+data/Books
+data/saveweb2zip-com-savor-it
+
+# Local-only working dirs
+.image-backup
+.gstack
+.next-verify

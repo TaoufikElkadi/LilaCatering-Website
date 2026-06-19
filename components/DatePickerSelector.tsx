@@ -1,20 +1,37 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { memo, useState, useRef } from 'react';
+import { CalendarDays } from 'lucide-react';
+import { useLanguage } from './LanguageProvider';
+import { StepHeader, StarSeal } from './MenuDecor';
 
 interface DatePickerSelectorProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
 }
 
-export default function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorProps) {
-  if (!onDateChange) {
-    console.error('DatePickerSelector: onDateChange is required');
-    return null;
-  }
+function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorProps) {
+  const { t, lang } = useLanguage();
 
   const [tempDate, setTempDate] = useState(selectedDate);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openPicker = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    // showPicker() is the modern way; fall back to focus()/click().
+    if (typeof el.showPicker === 'function') {
+      try {
+        el.showPicker();
+        return;
+      } catch {
+        /* not allowed in this context — fall through */
+      }
+    }
+    el.focus();
+    el.click();
+  };
 
   // Get minimum date (today)
   const today = new Date().toISOString().split('T')[0];
@@ -32,7 +49,8 @@ export default function DatePickerSelector({ selectedDate, onDateChange }: DateP
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return '';
     const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('en-US', {
+    const locale = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
+    return date.toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -41,40 +59,44 @@ export default function DatePickerSelector({ selectedDate, onDateChange }: DateP
   };
 
   return (
-    <div className="space-y-12">
-      <div className="text-center">
-        <h3 className="text-2xl md:text-3xl font-serif font-light mb-3 tracking-[0.08em] text-[#1f1f1f] uppercase">
-          Event Date
-        </h3>
-        <p className="text-xs text-[#6c655b] tracking-[0.25em] font-light uppercase">
-          Select the date for your event
-        </p>
-      </div>
+    <div className="space-y-12 px-4 sm:px-6 overflow-x-hidden">
+      <StepHeader title={t('menuBuilder.datePicker.title')} subtitle={t('menuBuilder.datePicker.subtitle')} />
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto w-full">
         {/* Date Picker */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="border border-[#dcd3c5] bg-white p-8 md:p-12"
+          className="group relative overflow-hidden rounded-[3px] border border-[#e7ddcb] bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] shadow-[0_16px_44px_-22px_rgba(80,60,30,0.34)] p-5 sm:p-10 md:p-12"
         >
-          <div className="flex flex-col items-center gap-8">
-            {/* Date Input */}
-            <div className="w-full">
-              <label className="block text-sm tracking-[0.25em] text-[#6c655b] mb-4 text-center font-serif uppercase">
-                Select your event date
+          {/* inset gold hairline + corner ornament */}
+          <span className="pointer-events-none absolute inset-[6px] rounded-[2px] border border-[#C19A5B]/25" />
+          <StarSeal className="pointer-events-none absolute -top-5 -right-5 w-28 h-28 text-[#C19A5B]/[0.05]" />
+
+          <div className="relative flex flex-col items-center gap-8">
+            {/* Date Input — proper field: calendar icon + value, click anywhere opens the picker */}
+            <div className="w-full min-w-0">
+              <label className="flex items-center justify-center gap-3 text-[11px] tracking-[0.28em] text-[#a8824a] mb-4 text-center uppercase">
+                <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
+                {t('menuBuilder.datePicker.selectLabel')}
+                <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
               </label>
-              <input
-                type="date"
-                min={today}
-                max={maxDateStr}
-                value={tempDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full bg-white border border-[#dcd3c5] focus:border-[#1f1f1f] text-center text-xl font-serif text-[#1f1f1f] py-5 px-6 outline-none transition-all duration-200 cursor-pointer"
-              />
-              <p className="text-xs text-[#8a8275] mt-4 text-center">
-                Click the calendar icon or type a date
-              </p>
+              <div
+                onClick={openPicker}
+                className="group/date relative flex items-center gap-3 w-full max-w-md mx-auto bg-white border border-[#dcc8a4] focus-within:border-[#C19A5B] focus-within:ring-2 focus-within:ring-[#C19A5B]/20 rounded-[3px] px-4 py-3.5 cursor-pointer transition-all duration-300 hover:border-[#C19A5B]"
+              >
+                <CalendarDays className="w-5 h-5 shrink-0 text-[#C19A5B]" strokeWidth={1.75} />
+                <input
+                  ref={inputRef}
+                  type="date"
+                  min={today}
+                  max={maxDateStr}
+                  value={tempDate}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className="date-field flex-1 min-w-0 bg-transparent text-left text-base sm:text-lg font-serif text-[#1f1f1f] outline-none cursor-pointer"
+                />
+              </div>
+              <p className="text-xs text-[#9a8a6a] mt-4 text-center">{t('menuBuilder.datePicker.inputHint')}</p>
             </div>
 
             {/* Display Selected Date */}
@@ -82,12 +104,10 @@ export default function DatePickerSelector({ selectedDate, onDateChange }: DateP
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center pt-6 border-t border-[#dcd3c5] w-full"
+                className="text-center pt-6 border-t border-[#e7ddcb] w-full"
               >
-                <p className="text-xs tracking-[0.25em] text-[#6c655b] uppercase mb-2">Your event date</p>
-                <p className="text-base font-serif text-[#1f1f1f] tracking-[0.08em]">
-                  {formatDisplayDate(selectedDate)}
-                </p>
+                <p className="text-[11px] tracking-[0.28em] text-[#a8824a] uppercase mb-2">{t('menuBuilder.datePicker.yourDate')}</p>
+                <p className="text-lg font-serif text-[#1f1f1f] tracking-[0.06em]">{formatDisplayDate(selectedDate)}</p>
               </motion.div>
             )}
           </div>
@@ -100,12 +120,14 @@ export default function DatePickerSelector({ selectedDate, onDateChange }: DateP
           transition={{ delay: 0.3 }}
           className="mt-8 text-center"
         >
-          <p className="text-xs text-[#8a8275] tracking-[0.25em] font-light uppercase">
-            We recommend booking at least 2 weeks in advance for optimal service
+          <p className="text-[11px] text-[#8a8275] tracking-[0.22em] font-light uppercase">
+            {t('menuBuilder.datePicker.recommendation')}
           </p>
         </motion.div>
       </div>
     </div>
   );
 }
+
+export default memo(DatePickerSelector);
 

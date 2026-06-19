@@ -13,8 +13,10 @@ export default function CustomCursor() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Only enable on fine-pointer (mouse) devices that don't request reduced motion.
     const finePointer = window.matchMedia('(pointer: fine)').matches;
-    setEnabled(finePointer);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setEnabled(finePointer && !reducedMotion);
   }, []);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function CustomCursor() {
       canvas.height = window.innerHeight;
     };
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', resize, { passive: true });
 
     const drawCursor = () => {
       if (!showRef.current) return;
@@ -57,35 +59,39 @@ export default function CustomCursor() {
       ctx.restore();
     };
 
+    // Only repaint the canvas when something actually changed (cuts idle GPU/CPU cost).
+    let dirty = true;
     const draw = () => {
       rafRef.current = requestAnimationFrame(draw);
+      if (!dirty) return;
+      dirty = false;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawCursor();
     };
 
     const handleMove = (e: MouseEvent) => {
       cursorPos.current = { x: e.clientX, y: e.clientY, visible: true };
+      dirty = true;
       const target = e.target as HTMLElement | null;
       const interactive = target?.closest(
         'input, textarea, select, button, [role="button"], [contenteditable="true"], a'
       );
-      if (interactive) {
-        showRef.current = false;
-        document.body.style.cursor = 'auto';
-      } else {
-        showRef.current = true;
-        document.body.style.cursor = 'none';
+      const nextShow = !interactive;
+      if (nextShow !== showRef.current) {
+        showRef.current = nextShow;
+        document.body.style.cursor = nextShow ? 'none' : 'auto';
       }
     };
 
     const handleLeave = () => {
       showRef.current = false;
       cursorPos.current = { x: 0, y: 0, visible: false };
+      dirty = true;
       document.body.style.cursor = 'auto';
     };
 
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseleave', handleLeave);
+    document.addEventListener('mousemove', handleMove, { passive: true });
+    document.addEventListener('mouseleave', handleLeave, { passive: true });
     draw();
 
     return () => {

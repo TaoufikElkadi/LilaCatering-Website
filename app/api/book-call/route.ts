@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     // Prepare email options
     const mailOptions: any = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: process.env.CONTACT_EMAIL || 'info@lilacatering.com',
+      to: process.env.CONTACT_EMAIL || 'info@lilacatering.nl',
       replyTo: email,
       subject: emailSubject,
       html: emailBody,

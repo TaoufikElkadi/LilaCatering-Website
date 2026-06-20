@@ -189,7 +189,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Tradition, open-fire cooking, and rare ingredients come together to share the calm hospitality of Morocco—crafted slowly, served with intention.',
       cta: 'More about Lila',
       pillars: [
-        { number: '01', title: 'Mechoui', text: 'Slow-roasted over glowing embers, in the centuries-old Moroccan way.' },
+        { number: '01', title: 'Honest flavour', text: 'Rich, authentic flavours that capture the soul of Moroccan cuisine.' },
         { number: '02', title: 'Living tradition', text: 'Centuries-old recipes, prepared with patience.' },
         { number: '03', title: 'Fresh harvest', text: 'Rare spices and produce, prepared fresh each day.' },
       ],
@@ -889,7 +889,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: "Tradition, cuisson au feu et ingrédients rares se rejoignent pour partager l'hospitalité sereine du Maroc—élaborée lentement, servie avec intention.",
       cta: 'En savoir plus sur Lila',
       pillars: [
-        { number: '01', title: 'Méchoui', text: 'Rôti lentement sur les braises, selon la tradition marocaine ancestrale.' },
+        { number: '01', title: 'Saveur sincère', text: "Des saveurs riches et authentiques qui capturent l'âme de la cuisine marocaine." },
         { number: '02', title: 'Tradition vivante', text: 'Recettes séculaires, préparées avec patience.' },
         { number: '03', title: 'Récolte fraîche', text: 'Épices et produits rares, préparés frais chaque jour.' },
       ],
@@ -1589,7 +1589,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Traditie, koken op open vuur en bijzondere ingrediënten komen samen in de warme gastvrijheid van Marokko—met geduld bereid, met liefde geserveerd.',
       cta: 'Meer over Lila',
       pillars: [
-        { number: '01', title: 'Mechoui', text: 'Langzaam gegaard boven gloeiende kolen, volgens eeuwenoude Marokkaanse traditie.' },
+        { number: '01', title: 'Eerlijke smaak', text: 'Rijke, authentieke smaken die de ziel van de Marokkaanse keuken vangen.' },
         { number: '02', title: 'Levende traditie', text: 'Eeuwenoude recepten, met geduld bereid.' },
         { number: '03', title: 'Verse oogst', text: 'Bijzondere specerijen en producten, elke dag vers bereid.' },
       ],

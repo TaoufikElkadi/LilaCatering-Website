@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -110,6 +111,8 @@ export default function Navigation() {
             ? 'backdrop-blur-xl bg-black/60 shadow-lg shadow-black/10'
             : mobileMenuOpen
             ? 'backdrop-blur-xl bg-black/60'
+            : isHome
+            ? 'bg-transparent'
             : 'bg-gradient-to-b from-black/50 to-transparent'
         }`}
       >
@@ -121,7 +124,7 @@ export default function Navigation() {
         />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
-          <div className="flex items-center justify-between h-14 sm:h-16 lg:h-20 text-white">
+          <div className="relative flex items-center justify-between h-14 sm:h-16 lg:h-20 text-white">
             {/* Mobile: Hamburger button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -160,26 +163,23 @@ export default function Navigation() {
               ))}
             </div>
 
-            {/* Center brand — hidden on the homepage hero (big wordmark stands in) */}
+            {/* Center brand — logo mark; hidden on the homepage hero (full logo stands in) */}
             <Link
               href={basePath}
-              className={`flex flex-col items-center justify-center group transition-opacity duration-500 ${
+              aria-label="Lila Catering"
+              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center group transition-opacity duration-500 ${
                 hideBrand ? 'opacity-0 pointer-events-none' : 'opacity-100'
               }`}
               onClick={closeMobileMenu}
             >
-              {/* Decorative element */}
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: scrolled ? 24 : 32 }}
-                className="h-[1px] bg-gradient-to-r from-transparent via-[#C19A5B] to-transparent mb-1.5 hidden sm:block"
+              <Image
+                src="/logo-mark.png"
+                alt="Lila Catering"
+                width={460}
+                height={828}
+                priority
+                className="h-9 sm:h-10 w-auto"
               />
-              <span className="text-base sm:text-lg font-serif tracking-[0.15em] sm:tracking-[0.2em] uppercase">
-                Lila
-              </span>
-              <span className="text-[8px] sm:text-[9px] tracking-[0.3em] uppercase text-white/60 -mt-0.5">
-                Catering
-              </span>
             </Link>
 
             {/* Desktop: Right rail - actions */}

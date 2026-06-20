@@ -332,7 +332,7 @@ export default function Testimonials() {
                 href="#menu-builder"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="mt-6 h-11 w-full flex items-center justify-center bg-[#1f1f1f] text-white text-sm font-light uppercase tracking-[0.25em] hover:bg-[#2f2a25] transition-colors"
+                className="mt-6 min-h-[44px] w-full flex items-center justify-center text-center bg-[#1f1f1f] text-white text-xs font-light uppercase tracking-[0.14em] px-3 leading-tight hover:bg-[#2f2a25] transition-colors"
               >
                 {t('testimonials.stats.bookEvent')}
               </motion.a>

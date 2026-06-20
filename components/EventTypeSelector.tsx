@@ -12,12 +12,6 @@ interface EventTypeSelectorProps {
   onEventTypeChange: (eventType: EventType) => void;
 }
 
-const StarSeal = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M12 1.6l2.47 4.2 4.73-1.27-1.27 4.73 4.2 2.47-4.2 2.47 1.27 4.73-4.73-1.27L12 22.4l-2.47-4.2-4.73 1.27 1.27-4.73L1.6 12l4.2-2.47L4.53 4.8l4.73 1.27L12 1.6z" />
-  </svg>
-);
-
 function EventTypeSelector({ selectedEventType, onEventTypeChange }: EventTypeSelectorProps) {
   const { t } = useLanguage();
 
@@ -69,12 +63,8 @@ function EventTypeSelector({ selectedEventType, onEventTypeChange }: EventTypeSe
                       : 'border-[#C19A5B]/0 opacity-0 group-hover:border-[#C19A5B]/30 group-hover:opacity-100'
                   }`}
                 />
-                {/* faint corner ornament */}
-                <StarSeal className="pointer-events-none absolute -top-4 -right-4 w-24 h-24 text-[#C19A5B]/[0.06]" />
-
                 <div className="relative space-y-3">
-                  <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#b39256]">
-                    <StarSeal className="w-2.5 h-2.5" />
+                  <span className="block text-[10px] uppercase tracking-[0.3em] text-[#b39256]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <h4 className="text-xl font-serif font-light tracking-[0.05em] text-[#1f1f1f] leading-tight">

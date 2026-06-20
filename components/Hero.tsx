@@ -24,7 +24,7 @@ const L = {
 } as const;
 
 export default function Hero() {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [enableVideo, setEnableVideo] = useState(false);
@@ -117,11 +117,11 @@ export default function Hero() {
   const eventOptions = L.eventOptions[lang];
 
   return (
-    <section className="relative h-screen min-h-[640px] w-full overflow-hidden bg-black text-white">
+    <section className="relative h-[108vh] min-h-[720px] w-full overflow-hidden bg-black text-white">
       {/* Background video */}
       <div className="absolute inset-0 bg-black">
         <Image
-          src="/lp1-poster.jpg"
+          src="/herovideoAI-poster.jpg"
           alt=""
           aria-hidden="true"
           fill
@@ -136,7 +136,7 @@ export default function Hero() {
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               isVideoLoaded ? 'opacity-100' : 'opacity-0'
             }`}
-            poster="/lp1-poster.jpg"
+            poster="/herovideoAI-poster.jpg"
             autoPlay
             muted
             loop
@@ -146,17 +146,25 @@ export default function Hero() {
             controls={false}
             style={{ pointerEvents: 'none' }}
           >
-            <source src="/lp1-hero.mp4" type="video/mp4" />
+            <source src="/herovideoAI.mp4" type="video/mp4" />
           </video>
         )}
-        {/* Cinematic overlays: even darkening + top & bottom gradients */}
-        <div className="absolute inset-0 bg-black/45 pointer-events-none" />
-        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+        {/* No overall tint — only soft top/bottom gradients so the nav, tagline
+            and reservation bar stay legible over the video. */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/55 to-transparent pointer-events-none" />
       </div>
 
-      {/* Centered logo lockup */}
-      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 pb-40 sm:pb-44">
+      {/* Soft focal glow behind the logo so it stays legible over bright video
+          frames, without tinting the whole video. */}
+      <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[760px] h-[620px] max-w-[92vw] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45),rgba(0,0,0,0.2)_45%,transparent_70%)]" />
+
+      {/* Foreground: the FIRST viewport holds the centered logo + reservation bar
+          (so the bar is always fully visible); the section itself is a touch
+          taller, so a sliver of video shows below the fold. */}
+      <div className="relative z-10 h-screen flex flex-col">
+        {/* Centered logo lockup */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
         {/* Location / tagline */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -169,40 +177,27 @@ export default function Hero() {
           ))}
         </motion.div>
 
-        {/* Placeholder crest */}
+        {/* Full logo — LCP element */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.85 }}
+          initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="my-5 sm:my-6"
+          transition={{ duration: 0.8, delay: 0.1 }}
+          className="mt-6 sm:mt-8"
         >
-          <span className="relative flex items-center justify-center w-16 h-16 sm:w-[72px] sm:h-[72px]">
-            <span className="absolute inset-0 rounded-full border border-white/45" />
-            <span className="absolute inset-[7px] rounded-full border border-white/20" />
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-7 h-7 sm:w-8 sm:h-8 text-white/90">
-              <path d="M12 1.6l2.47 4.2 4.73-1.27-1.27 4.73 4.2 2.47-4.2 2.47 1.27 4.73-4.73-1.27L12 22.4l-2.47-4.2-4.73 1.27 1.27-4.73L1.6 12l4.2-2.47L4.53 4.8l4.73 1.27L12 1.6z" />
-            </svg>
-            {/* placeholder hint */}
-            <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[7px] tracking-[0.3em] text-white/35 uppercase">Logo</span>
-          </span>
+          <Image
+            src="/logo-full.png"
+            alt="Lila Catering"
+            width={937}
+            height={1016}
+            priority
+            sizes="(max-width: 640px) 210px, 300px"
+            className="w-[200px] sm:w-[260px] md:w-[300px] h-auto drop-shadow-[0_10px_34px_rgba(0,0,0,0.5)]"
+          />
         </motion.div>
-
-        {/* Outlined wordmark — LCP element, no entrance delay */}
-        <h1 className="mt-2 leading-none">
-          <span
-            className="block font-serif uppercase text-6xl sm:text-7xl md:text-8xl tracking-[0.12em]"
-            style={{ WebkitTextStroke: '1.4px rgba(255,255,255,0.92)', color: 'transparent' }}
-          >
-            {t('hero.kicker').split(' ')[0] || 'Lila'}
-          </span>
-          <span className="mt-3 sm:mt-4 block font-serif uppercase text-xl sm:text-2xl md:text-[1.75rem] tracking-[0.55em] text-white pl-[0.55em]">
-            Catering
-          </span>
-        </h1>
       </div>
 
-      {/* Reservation bar */}
-      <div className="absolute inset-x-0 bottom-6 sm:bottom-8 z-20 px-4 sm:px-6 lg:px-10">
+        {/* Reservation bar — pinned to the bottom of the first viewport */}
+        <div className="px-4 sm:px-6 lg:px-10 pb-6 sm:pb-8">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -251,6 +246,7 @@ export default function Hero() {
             </a>
           </div>
         </motion.div>
+        </div>
       </div>
     </section>
   );

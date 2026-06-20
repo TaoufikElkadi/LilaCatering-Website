@@ -189,7 +189,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Tradition, open-fire cooking, and rare ingredients come together to share the calm hospitality of Morocco—crafted slowly, served with intention.',
       cta: 'More about Lila',
       pillars: [
-        { number: '01', title: 'Open fire', text: 'Grilled over charcoal and wood for deep, smoky flavour.' },
+        { number: '01', title: 'Mechoui', text: 'Slow-roasted over glowing embers, in the centuries-old Moroccan way.' },
         { number: '02', title: 'Living tradition', text: 'Centuries-old recipes, prepared with patience.' },
         { number: '03', title: 'Fresh harvest', text: 'Rare spices and produce, prepared fresh each day.' },
       ],
@@ -889,7 +889,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: "Tradition, cuisson au feu et ingrédients rares se rejoignent pour partager l'hospitalité sereine du Maroc—élaborée lentement, servie avec intention.",
       cta: 'En savoir plus sur Lila',
       pillars: [
-        { number: '01', title: 'Feu ouvert', text: 'Grillé au charbon et au bois pour une saveur fumée intense.' },
+        { number: '01', title: 'Méchoui', text: 'Rôti lentement sur les braises, selon la tradition marocaine ancestrale.' },
         { number: '02', title: 'Tradition vivante', text: 'Recettes séculaires, préparées avec patience.' },
         { number: '03', title: 'Récolte fraîche', text: 'Épices et produits rares, préparés frais chaque jour.' },
       ],
@@ -1589,7 +1589,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Traditie, koken op open vuur en bijzondere ingrediënten komen samen in de warme gastvrijheid van Marokko—met geduld bereid, met liefde geserveerd.',
       cta: 'Meer over Lila',
       pillars: [
-        { number: '01', title: 'Open vuur', text: 'Gegrild op houtskool en hout, voor een diepe rokerige smaak.' },
+        { number: '01', title: 'Mechoui', text: 'Langzaam gegaard boven gloeiende kolen, volgens eeuwenoude Marokkaanse traditie.' },
         { number: '02', title: 'Levende traditie', text: 'Eeuwenoude recepten, met geduld bereid.' },
         { number: '03', title: 'Verse oogst', text: 'Bijzondere specerijen en producten, elke dag vers bereid.' },
       ],

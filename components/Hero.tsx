@@ -16,6 +16,7 @@ const L = {
   guests: { nl: 'Aantal gasten', en: 'Guests', fr: 'Convives' },
   eventType: { nl: 'Type evenement', en: 'Event type', fr: "Type d'événement" },
   reserve: { nl: 'Reserveren', en: 'Reserve', fr: 'Réserver' },
+  cta: { nl: 'Reserveer uw evenement', en: 'Book your event', fr: 'Réservez votre événement' },
   eventOptions: {
     nl: ['Bruiloft', 'Privédiner', 'Zakelijk evenement', 'Feest'],
     en: ['Wedding', 'Private dinner', 'Corporate event', 'Celebration'],
@@ -190,8 +191,8 @@ export default function Hero() {
             width={937}
             height={1016}
             priority
-            sizes="(max-width: 640px) 210px, 300px"
-            className="w-[200px] sm:w-[260px] md:w-[300px] h-auto drop-shadow-[0_10px_34px_rgba(0,0,0,0.5)]"
+            sizes="(max-width: 640px) 240px, 300px"
+            className="w-[230px] sm:w-[260px] md:w-[300px] h-auto drop-shadow-[0_10px_34px_rgba(0,0,0,0.5)]"
           />
         </motion.div>
       </div>
@@ -204,7 +205,20 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="relative max-w-5xl mx-auto"
         >
-          <div className="bg-white rounded-[4px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] flex flex-col md:flex-row md:items-stretch overflow-hidden">
+          {/* Mobile: a single clean CTA (the full builder collects the details) */}
+          <a
+            href="#menu-builder"
+            className="md:hidden group/cta relative flex items-center justify-center gap-2.5 w-full min-h-[60px] rounded-[4px] bg-gradient-to-r from-[#cda769] via-[#C19A5B] to-[#b8905a] text-[#1f1f1f] text-sm uppercase tracking-[0.2em] font-medium shadow-[0_18px_44px_-16px_rgba(193,154,91,0.85)] active:scale-[0.98] transition-transform"
+          >
+            <span className="pointer-events-none absolute inset-[5px] rounded-[3px] border border-white/30" />
+            <span className="relative">{L.cta[lang]}</span>
+            <svg className="relative w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+
+          {/* Desktop: full reservation bar */}
+          <div className="hidden md:flex bg-white rounded-[4px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] md:flex-row md:items-stretch overflow-hidden">
             {/* Field: Date */}
             <label className="flex-1 flex flex-col justify-center px-6 py-4 border-b md:border-b-0 md:border-r border-[#e7ddcb] cursor-pointer">
               <span className="text-[10px] uppercase tracking-[0.25em] text-[#a8824a] mb-1.5">{L.date[lang]}</span>

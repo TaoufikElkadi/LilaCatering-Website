@@ -169,7 +169,7 @@ export default function Hero() {
   return (
     <section className="relative h-[108vh] min-h-[720px] w-full overflow-hidden bg-black text-white">
       {/* Looping hero ambience (starts on first interaction; muteable) */}
-      <audio ref={audioRef} src="/hero_sound.mp3" loop preload="auto" />
+      <audio ref={audioRef} src="/hero_sound_ambiance_andalus.mp3" loop preload="auto" />
 
       {/* Background video */}
       <div className="absolute inset-0 bg-black">

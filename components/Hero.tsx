@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { Volume2, VolumeX } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 
 // Inline, language-aware micro-copy for the hero / reservation bar.
@@ -27,8 +28,56 @@ const L = {
 export default function Hero() {
   const { lang } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [enableVideo, setEnableVideo] = useState(false);
+  // Hero ambience: looping background sound. Browsers block autoplay with
+  // sound, so it starts on the first user interaction; the toggle lets the
+  // visitor mute it. Default "on" (intent to play once a gesture allows it).
+  const [soundOn, setSoundOn] = useState(true);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = 0.45;
+
+    const tryPlay = () => {
+      if (soundOn) audio.play().catch(() => { /* awaiting a user gesture */ });
+    };
+    tryPlay();
+
+    const onInteract = () => tryPlay();
+    document.addEventListener('pointerdown', onInteract, { once: true });
+    document.addEventListener('touchstart', onInteract, { once: true });
+    document.addEventListener('keydown', onInteract, { once: true });
+    document.addEventListener('scroll', onInteract, { once: true, passive: true });
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') tryPlay();
+      else audio.pause();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      document.removeEventListener('pointerdown', onInteract);
+      document.removeEventListener('touchstart', onInteract);
+      document.removeEventListener('keydown', onInteract);
+      document.removeEventListener('scroll', onInteract);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [soundOn]);
+
+  const toggleSound = () => {
+    const audio = audioRef.current;
+    setSoundOn((prev) => {
+      const next = !prev;
+      if (audio) {
+        if (next) audio.play().catch(() => {});
+        else audio.pause();
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined' &&
@@ -119,6 +168,9 @@ export default function Hero() {
 
   return (
     <section className="relative h-[108vh] min-h-[720px] w-full overflow-hidden bg-black text-white">
+      {/* Looping hero ambience (starts on first interaction; muteable) */}
+      <audio ref={audioRef} src="/hero_sound.mp3" loop preload="auto" />
+
       {/* Background video */}
       <div className="absolute inset-0 bg-black">
         <Image
@@ -159,6 +211,17 @@ export default function Hero() {
       {/* Soft focal glow behind the logo so it stays legible over bright video
           frames, without tinting the whole video. */}
       <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[760px] h-[620px] max-w-[92vw] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45),rgba(0,0,0,0.2)_45%,transparent_70%)]" />
+
+      {/* Sound toggle */}
+      <button
+        type="button"
+        onClick={toggleSound}
+        aria-label={soundOn ? 'Geluid uit' : 'Geluid aan'}
+        aria-pressed={soundOn}
+        className="absolute z-20 bottom-24 right-4 sm:bottom-28 sm:right-6 flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-sm border border-white/30 text-white/90 hover:bg-black/60 hover:border-white/50 transition-colors"
+      >
+        {soundOn ? <Volume2 className="w-[18px] h-[18px]" /> : <VolumeX className="w-[18px] h-[18px]" />}
+      </button>
 
       {/* Foreground: the FIRST viewport holds the centered logo + reservation bar
           (so the bar is always fully visible); the section itself is a touch

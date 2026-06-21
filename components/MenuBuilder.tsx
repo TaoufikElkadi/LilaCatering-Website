@@ -306,6 +306,25 @@ export default function MenuBuilder() {
     }
   }, [currentStep, scrollToBuilder]);
 
+  // Advance to the next step regardless of the (just-set) validation — used by
+  // the auto-advance selections below, where the new choice is always valid.
+  const advanceStep = useCallback(() => {
+    setCurrentStep((s) => (s < TOTAL_STEPS ? ((s + 1) as FlowStep) : s));
+    scrollToBuilder();
+  }, [scrollToBuilder]);
+
+  // Picking an event type or a date moves the flow forward automatically (the
+  // short delay lets the selection state register). Users can always step back.
+  const handleEventTypeSelect = useCallback((eventType: EventType) => {
+    setSelectedEventType(eventType);
+    window.setTimeout(advanceStep, 220);
+  }, [advanceStep]);
+
+  const handleDateSelect = useCallback((date: string) => {
+    setSelectedDate(date);
+    if (date) window.setTimeout(advanceStep, 220);
+  }, [advanceStep]);
+
   // Step labels for progress indicator — courses use their category name.
   const stepKeyForKind: Record<Exclude<StepKind, 'menu'>, string> = {
     event: 'event',
@@ -341,7 +360,7 @@ export default function MenuBuilder() {
       {currentStep === 1 && (
         <motion.div key="step-1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="py-2 sm:py-6">
-            <EventTypeSelector selectedEventType={selectedEventType} onEventTypeChange={setSelectedEventType} />
+            <EventTypeSelector selectedEventType={selectedEventType} onEventTypeChange={handleEventTypeSelect} />
           </div>
         </motion.div>
       )}
@@ -448,7 +467,7 @@ export default function MenuBuilder() {
       {currentDef.kind === 'date' && (
         <motion.div key="step-date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="py-2 sm:py-6">
-            <DatePickerSelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
+            <DatePickerSelector selectedDate={selectedDate} onDateChange={handleDateSelect} />
           </div>
         </motion.div>
       )}

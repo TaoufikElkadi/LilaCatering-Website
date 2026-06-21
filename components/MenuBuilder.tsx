@@ -543,6 +543,10 @@ export default function MenuBuilder() {
                 ))}
               </AnimatePresence>
             </motion.div>
+
+            <p className="mt-8 text-center text-[10px] tracking-[0.12em] text-[#a89e8d] font-light italic">
+              {t('menuBuilder.imageDisclaimer')}
+            </p>
           </div>
         </motion.div>
       )}

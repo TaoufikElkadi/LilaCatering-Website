@@ -204,6 +204,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Move through each step to shape the menu, details, and date for your event.',
       stepOf: 'Step {current} of {total}',
       appetizerHint: 'Choose up to 2 appetizers — 2 basic appetizers are included',
+      imageDisclaimer: 'Images are for illustration and may differ from the actual dish.',
       steps: {
         event: 'Event',
         menu: 'Menu',
@@ -930,6 +931,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Parcourez chaque étape pour composer le menu, les détails et la date de votre événement.',
       stepOf: 'Étape {current} sur {total}',
       appetizerHint: 'Choisissez 2 amuse-bouches max — 2 amuse-bouches basic sont inclus',
+      imageDisclaimer: 'Les images sont à titre d’illustration et peuvent différer du plat réel.',
       steps: {
         event: 'Événement',
         menu: 'Menu',
@@ -1656,6 +1658,7 @@ const translations: Record<Lang, TranslationTree> = {
       description: 'Doorloop de stappen om het menu, de details en de datum van uw evenement te bepalen.',
       stepOf: 'Stap {current} van {total}',
       appetizerHint: 'Kies maximaal 2 hapjes — 2 basic hapjes zijn inbegrepen',
+      imageDisclaimer: 'Afbeeldingen zijn ter illustratie en kunnen afwijken van het werkelijke gerecht.',
       steps: {
         event: 'Type',
         menu: 'Menu',

@@ -14,6 +14,10 @@ import {
   getTransportCost,
   getEstimatedTotal,
   formatEuro,
+  TABLE_EXTRA_PRICES,
+  TEA_SHOW_FEES,
+  type TableExtraId,
+  type TeaShowId,
 } from '@/lib/pricing';
 import type { PlaceResult } from '@/lib/geocode';
 import MenuCard from './MenuCard';
@@ -33,9 +37,11 @@ type StepKind = 'event' | 'date' | 'location' | 'guests' | 'starterTemp' | 'menu
 
 // Starter temperature: cold = salads, hot = pastilla + soups.
 type StarterTemp = 'hot' | 'cold';
+// Soups are now an extra service (see ServiceSelector), so a warm starter is
+// pastilla only; cold is salads.
 const STARTER_TEMP_SUBS: Record<StarterTemp, MenuSubCategory[]> = {
   cold: ['salad'],
-  hot: ['pastilla', 'soup'],
+  hot: ['pastilla'],
 };
 
 // Faint eight-pointed-star (khatam) zellige texture for the section atmosphere.
@@ -107,6 +113,9 @@ export default function MenuBuilder() {
   const [guestCount, setGuestCount] = useState<number>(MIN_GUESTS);
   const [coffeeLuxe, setCoffeeLuxe] = useState<boolean>(false);
   const [cookiesLuxe, setCookiesLuxe] = useState<boolean>(false);
+  const [tableExtras, setTableExtras] = useState<TableExtraId[]>([]);
+  const [teaShow, setTeaShow] = useState<TeaShowId>('standard');
+  const [mocktailMix, setMocktailMix] = useState<boolean>(false);
   const [selectedDecoration, setSelectedDecoration] = useState<DecorationType>('basic');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedLocation, setSelectedLocation] = useState<PlaceResult | null>(null);
@@ -168,7 +177,7 @@ export default function MenuBuilder() {
   // Sub-categories available per top-level category.
   const subCategoryMap: Record<MenuCategory, MenuSubCategory[]> = {
     appetizer: ['warm', 'luxe'],
-    starter: ['salad', 'soup', 'pastilla'],
+    starter: ['salad', 'pastilla'],
     main: ['meat', 'chicken', 'fish', 'buffet', 'couscous'],
     dessert: [],
   };
@@ -245,10 +254,12 @@ export default function MenuBuilder() {
     return getEstimatedTotal(selectedItems, guestCount, {
       coffeeLuxe,
       cookiesLuxe,
+      tableExtras,
+      teaShowFee: TEA_SHOW_FEES[teaShow],
       decorationFee: DECORATION_PRICES[selectedDecoration],
       transportFee,
     });
-  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration, transportFee]);
+  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, selectedDecoration, transportFee]);
 
   // Compact, customer-facing total (rounded euros, locale-grouped).
   const localeTag = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -270,6 +281,9 @@ export default function MenuBuilder() {
       guestCount,
       coffeeLuxe,
       cookiesLuxe,
+      tableExtras,
+      mocktailMix,
+      teaShow,
       selectedDecoration,
       venueName: locationUnknown ? t('menuBuilder.location.unknownShort') : selectedLocation?.label,
       transportFee,
@@ -277,7 +291,7 @@ export default function MenuBuilder() {
       totalPrice: getTotalPrice(),
       lang,
     });
-  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
+  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, selectedDecoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
 
   // Step index of the last course (Desserts) — leaving it requires ≥1 dish.
   // Last course (dessert) step — derived so it survives step reordering.
@@ -388,11 +402,16 @@ export default function MenuBuilder() {
   const nextLabel = currentStep < TOTAL_STEPS ? stepLabels[currentStep].label : '';
 
   // Short service summary line for the review screen.
-  const serviceSummary = `${t('menuBuilder.extras.coffeeName')}: ${
-    coffeeLuxe ? t('menuBuilder.extras.luxeName') : t('menuBuilder.extras.standardName')
-  } · ${t('menuBuilder.extras.cookiesName')}: ${
-    cookiesLuxe ? t('menuBuilder.extras.luxeName') : t('menuBuilder.extras.standardName')
-  }`;
+  const serviceSummary = (() => {
+    const parts = [
+      `${t('menuBuilder.extras.coffeeName')}: ${coffeeLuxe ? t('menuBuilder.extras.luxeName') : t('menuBuilder.extras.standardName')}`,
+      `${t('menuBuilder.extras.cookiesName')}: ${cookiesLuxe ? t('menuBuilder.extras.luxeName') : t('menuBuilder.extras.standardName')}`,
+    ];
+    tableExtras.forEach((id) => parts.push(t(`menuBuilder.extras.items.${id}`)));
+    if (mocktailMix) parts.push(`${t('menuBuilder.extras.mocktailMixName')} (${t('menuBuilder.extras.onRequest')})`);
+    parts.push(`${t('menuBuilder.extras.teaShowLabel')}: ${t(`menuBuilder.extras.teaShows.${teaShow}`)}`);
+    return parts.join(' · ');
+  })();
 
   // ---- Step content (shared by desktop inline layout and mobile flow) -------
   const renderStepContent = () => (
@@ -546,6 +565,14 @@ export default function MenuBuilder() {
               cookiesLuxe={cookiesLuxe}
               onCoffeeLuxeToggle={setCoffeeLuxe}
               onCookiesLuxeToggle={setCookiesLuxe}
+              tableExtras={tableExtras}
+              onToggleTableExtra={(id) =>
+                setTableExtras((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+              }
+              mocktailMix={mocktailMix}
+              onMocktailMixToggle={setMocktailMix}
+              teaShow={teaShow}
+              onTeaShowChange={setTeaShow}
             />
           </div>
         </motion.div>

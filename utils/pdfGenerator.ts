@@ -8,6 +8,10 @@ import {
   BASE_PRICE,
   getPerPersonPrice,
   formatEuro,
+  TABLE_EXTRA_PRICES,
+  TEA_SHOW_FEES,
+  type TableExtraId,
+  type TeaShowId,
 } from '@/lib/pricing';
 
 interface OfferteData {
@@ -17,6 +21,9 @@ interface OfferteData {
   guestCount: number;
   coffeeLuxe: boolean;
   cookiesLuxe: boolean;
+  tableExtras?: TableExtraId[];
+  mocktailMix?: boolean;
+  teaShow?: TeaShowId;
   selectedDecoration: DecorationType;
   venueName?: string;
   venueCity?: string;
@@ -443,6 +450,39 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
       t('menuBuilder.pdf.extras.cookiesLuxeDesc'),
       formatEuro(3),
       formatEuro(3 * data.guestCount)
+    ]);
+  }
+
+  // Optional per-guest table extras / soups.
+  (data.tableExtras ?? []).forEach((id) => {
+    const price = TABLE_EXTRA_PRICES[id];
+    extrasRows.push([
+      t(`menuBuilder.extras.items.${id}`),
+      t('menuBuilder.extras.tableExtrasLabel'),
+      formatEuro(price),
+      formatEuro(price * data.guestCount),
+    ]);
+  });
+
+  // 4-soort mocktail & smoothie mix — on request.
+  if (data.mocktailMix) {
+    extrasRows.push([
+      t('menuBuilder.extras.mocktailMixName'),
+      t('menuBuilder.extras.extraServicesLabel'),
+      '-',
+      t('menuBuilder.pdf.onRequest'),
+    ]);
+  }
+
+  // Tea show (standard included; Jbala / Chleuh are one-time fees).
+  {
+    const teaShow = data.teaShow ?? 'standard';
+    const fee = TEA_SHOW_FEES[teaShow];
+    extrasRows.push([
+      t(`menuBuilder.extras.teaShows.${teaShow}`),
+      t('menuBuilder.extras.teaShowLabel'),
+      '-',
+      fee === 0 ? t('menuBuilder.pdf.included') : formatEuro(fee),
     ]);
   }
 

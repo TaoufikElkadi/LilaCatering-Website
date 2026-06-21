@@ -1,10 +1,20 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Coffee, Cookie, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
-import { COFFEE_LUXE_PER_GUEST, COOKIES_LUXE_PER_GUEST, formatEuro } from '@/lib/pricing';
+import {
+  COFFEE_LUXE_PER_GUEST,
+  COOKIES_LUXE_PER_GUEST,
+  TABLE_EXTRA_PRICES,
+  TABLE_EXTRA_IDS,
+  TEA_SHOW_FEES,
+  TEA_SHOW_IDS,
+  formatEuro,
+  type TableExtraId,
+  type TeaShowId,
+} from '@/lib/pricing';
 import { StepHeader, StarSeal, InsetFrame } from './MenuDecor';
 
 interface ServiceSelectorProps {
@@ -12,6 +22,12 @@ interface ServiceSelectorProps {
   cookiesLuxe: boolean;
   onCoffeeLuxeToggle: (value: boolean) => void;
   onCookiesLuxeToggle: (value: boolean) => void;
+  tableExtras: TableExtraId[];
+  onToggleTableExtra: (id: TableExtraId) => void;
+  mocktailMix: boolean;
+  onMocktailMixToggle: (value: boolean) => void;
+  teaShow: TeaShowId;
+  onTeaShowChange: (id: TeaShowId) => void;
 }
 
 function ServiceSelector({
@@ -19,6 +35,12 @@ function ServiceSelector({
   cookiesLuxe,
   onCoffeeLuxeToggle,
   onCookiesLuxeToggle,
+  tableExtras,
+  onToggleTableExtra,
+  mocktailMix,
+  onMocktailMixToggle,
+  teaShow,
+  onTeaShowChange,
 }: ServiceSelectorProps) {
   const { t } = useLanguage();
 
@@ -143,7 +165,124 @@ function ServiceSelector({
           ))}
         </div>
       </div>
+
+      {/* Optional table extras (per person) */}
+      <div className="max-w-3xl mx-auto">
+        <SectionHeading label={t('menuBuilder.extras.tableExtrasLabel')} />
+        <div className="border-[1.5px] border-[#e0d3b8] divide-y divide-[#ece2cf] bg-white/40">
+          {TABLE_EXTRA_IDS.map((id) => {
+            const active = tableExtras.includes(id);
+            return (
+              <ToggleRow
+                key={id}
+                active={active}
+                onClick={() => onToggleTableExtra(id)}
+                label={t(`menuBuilder.extras.items.${id}`)}
+                right={
+                  <>
+                    +{formatEuro(TABLE_EXTRA_PRICES[id])}{' '}
+                    <span className="text-[#bcae96]">{t('menuBuilder.extras.perGuest')}</span>
+                  </>
+                }
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Extra services */}
+      <div className="max-w-3xl mx-auto">
+        <SectionHeading label={t('menuBuilder.extras.extraServicesLabel')} />
+        <div className="border-[1.5px] border-[#e0d3b8] bg-white/40">
+          <ToggleRow
+            active={mocktailMix}
+            onClick={() => onMocktailMixToggle(!mocktailMix)}
+            label={t('menuBuilder.extras.mocktailMixName')}
+            right={<span className="text-[#9a8d77]">{t('menuBuilder.extras.onRequest')}</span>}
+          />
+        </div>
+      </div>
+
+      {/* Tea show — pick one */}
+      <div className="max-w-3xl mx-auto">
+        <SectionHeading label={t('menuBuilder.extras.teaShowLabel')} />
+        <div className="border-[1.5px] border-[#e0d3b8] divide-y divide-[#ece2cf] bg-white/40">
+          {TEA_SHOW_IDS.map((id) => {
+            const active = teaShow === id;
+            const fee = TEA_SHOW_FEES[id];
+            return (
+              <ToggleRow
+                key={id}
+                radio
+                active={active}
+                onClick={() => onTeaShowChange(id)}
+                label={t(`menuBuilder.extras.teaShows.${id}`)}
+                right={
+                  fee === 0 ? (
+                    <span className="text-[#9a8d77]">{t('menuBuilder.extras.includedTag')}</span>
+                  ) : (
+                    <>+{formatEuro(fee)}</>
+                  )
+                }
+              />
+            );
+          })}
+        </div>
+      </div>
     </div>
+  );
+}
+
+/** Centered section label with hairline rules on each side. */
+function SectionHeading({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-4 mb-5">
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#dccba8]" />
+      <span className="text-[11px] tracking-[0.3em] text-[#a8824a] uppercase whitespace-nowrap">{label}</span>
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#dccba8]" />
+    </div>
+  );
+}
+
+/** A clean, icon-free selectable row (checkbox or radio indicator). */
+function ToggleRow({
+  active,
+  onClick,
+  label,
+  right,
+  radio = false,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  right: ReactNode;
+  radio?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`group flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 ${
+        active ? 'bg-[#C19A5B]/[0.08]' : 'hover:bg-[#f3ead9]/60'
+      }`}
+    >
+      <span className="flex min-w-0 items-center gap-3.5">
+        <span
+          className={`grid place-items-center w-[18px] h-[18px] shrink-0 border-[1.5px] transition-colors ${
+            radio ? 'rounded-full' : 'rounded-[2px]'
+          } ${active ? 'border-[#C19A5B] bg-[#C19A5B] text-white' : 'border-[#c9b487] text-transparent group-hover:border-[#C19A5B]'}`}
+        >
+          {radio ? (
+            active && <span className="w-1.5 h-1.5 rounded-full bg-white" />
+          ) : (
+            <Check className="w-3 h-3" strokeWidth={3} />
+          )}
+        </span>
+        <span className={`truncate text-[13.5px] sm:text-sm tracking-[0.01em] ${active ? 'text-[#1f1f1f] font-medium' : 'text-[#4a443b]'}`}>
+          {label}
+        </span>
+      </span>
+      <span className="shrink-0 text-[11px] tracking-[0.12em] text-[#a8824a] tabular-nums">{right}</span>
+    </button>
   );
 }
 

@@ -57,11 +57,43 @@ export function getFlatFeesTotal(selectedItems: MenuItem[]): number {
   );
 }
 
+/**
+ * Optional per-guest "op tafel" table extras and soups. Each selected toggle
+ * adds its price × guests (inside the guest multiplier, like the luxe upgrades).
+ */
+export const TABLE_EXTRA_PRICES = {
+  macarons: 2,
+  bonbons: 1.5,
+  fekkasGhribia: 2.5,
+  mocktailTable: 3.5,
+  redVelvet: 2,
+  harira: 3.5,
+  fishSoup: 4.5,
+} as const;
+export type TableExtraId = keyof typeof TABLE_EXTRA_PRICES;
+export const TABLE_EXTRA_IDS = Object.keys(TABLE_EXTRA_PRICES) as TableExtraId[];
+
+/**
+ * Tea-show flat fees (one-time, pass-through — NOT marked up by the multiplier).
+ * The standard Moroccan tea show is included.
+ */
+export const TEA_SHOW_FEES = {
+  standard: 0,
+  jbala: 450,
+  chleuh: 300,
+} as const;
+export type TeaShowId = keyof typeof TEA_SHOW_FEES;
+export const TEA_SHOW_IDS = Object.keys(TEA_SHOW_FEES) as TeaShowId[];
+
 export interface ServiceOptions {
   /** Upgrade the included coffee service to the luxe selection (+per guest). */
   coffeeLuxe?: boolean;
   /** Upgrade the included Moroccan cookies to the luxe assortment (+per guest). */
   cookiesLuxe?: boolean;
+  /** Selected per-guest table extras / soups (each adds its price × guests). */
+  tableExtras?: TableExtraId[];
+  /** One-time tea-show fee (added as-is, NOT marked up by the guest multiplier). */
+  teaShowFee?: number;
   /** One-time decoration-collection fee. */
   decorationFee?: number;
   /** One-time transport fee (added as-is, NOT marked up by the guest multiplier). */
@@ -90,9 +122,14 @@ export const COOKIES_LUXE_PER_GUEST = 3;
 
 /** Per-guest surcharge for the chosen service upgrades (0 when both standard). */
 export function getServicePerGuest(service: ServiceOptions = {}): number {
+  const extras = (service.tableExtras ?? []).reduce(
+    (sum, id) => sum + (TABLE_EXTRA_PRICES[id] ?? 0),
+    0
+  );
   return (
     (service.coffeeLuxe ? COFFEE_LUXE_PER_GUEST : 0) +
-    (service.cookiesLuxe ? COOKIES_LUXE_PER_GUEST : 0)
+    (service.cookiesLuxe ? COOKIES_LUXE_PER_GUEST : 0) +
+    extras
   );
 }
 
@@ -120,8 +157,13 @@ export function getEstimatedTotal(
   const flatFees = getFlatFeesTotal(selectedItems);
   const decorationFee = service.decorationFee ?? 0;
   const transportFee = service.transportFee ?? 0;
+  const teaShowFee = service.teaShowFee ?? 0;
 
-  return (menuTotal + serviceTotal + flatFees + decorationFee) * multiplier + transportFee;
+  return (
+    (menuTotal + serviceTotal + flatFees + decorationFee) * multiplier +
+    transportFee +
+    teaShowFee
+  );
 }
 
 /** Format a number as a euro string, e.g. 38.95 → "€38,95". */

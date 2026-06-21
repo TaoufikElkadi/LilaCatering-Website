@@ -213,6 +213,7 @@ const translations: Record<Lang, TranslationTree> = {
         date: 'Date',
         location: 'Location',
         review: 'Overview',
+        starterTemp: 'Hot or Cold',
       },
       categories: {
         appetizer: 'Appetizers',
@@ -231,6 +232,12 @@ const translations: Record<Lang, TranslationTree> = {
         fish: 'Fish',
         buffet: 'Table Buffets',
         couscous: 'Couscous',
+      },
+      starterTemp: {
+        title: 'Hot or cold starter?',
+        subtitle: 'Choose how you’d like your starter served',
+        hot: { name: 'Hot', description: 'Pastilla & soups' },
+        cold: { name: 'Cold', description: 'Fresh salads' },
       },
       mainCategories: {
         fish: 'Fish',
@@ -913,6 +920,7 @@ const translations: Record<Lang, TranslationTree> = {
         date: 'Date',
         location: 'Lieu',
         review: 'Récapitulatif',
+        starterTemp: 'Chaud ou Froid',
       },
       categories: {
         appetizer: 'Amuse-bouches',
@@ -931,6 +939,12 @@ const translations: Record<Lang, TranslationTree> = {
         fish: 'Poisson',
         buffet: 'Buffets à table',
         couscous: 'Couscous',
+      },
+      starterTemp: {
+        title: 'Entrée chaude ou froide ?',
+        subtitle: 'Choisissez la température de votre entrée',
+        hot: { name: 'Chaud', description: 'Pastilla & soupes' },
+        cold: { name: 'Froid', description: 'Salades fraîches' },
       },
       mainCategories: {
         fish: 'Poisson',
@@ -1613,6 +1627,7 @@ const translations: Record<Lang, TranslationTree> = {
         date: 'Datum',
         location: 'Locatie',
         review: 'Overzicht',
+        starterTemp: 'Warm of Koud',
       },
       categories: {
         appetizer: 'Hapjes',
@@ -1631,6 +1646,12 @@ const translations: Record<Lang, TranslationTree> = {
         fish: 'Vis',
         buffet: 'Buffetten op tafel',
         couscous: 'Couscous',
+      },
+      starterTemp: {
+        title: 'Warm of koud voorgerecht?',
+        subtitle: 'Kies hoe u uw voorgerecht geserveerd wilt',
+        hot: { name: 'Warm', description: 'Pastilla & soepen' },
+        cold: { name: 'Koud', description: 'Verse salades' },
       },
       mainCategories: {
         fish: 'Vis',

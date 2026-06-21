@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef, Fragment } from 'rea
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Script from 'next/script';
-import { X } from 'lucide-react';
+import { X, Flame, Snowflake } from 'lucide-react';
 import { menuItems, MenuItem, MenuCategory, MenuSubCategory } from '@/data/menuData';
 import {
   BASE_PRICE,
@@ -28,8 +28,15 @@ import { getTranslatedMenuItem } from '@/utils/translations';
 import { StarSeal as DecorStar } from './MenuDecor';
 import { smoothScrollTo, getLenis } from '@/lib/lenis';
 
-type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
-type StepKind = 'event' | 'date' | 'location' | 'guests' | 'menu' | 'service' | 'decor' | 'review';
+type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+type StepKind = 'event' | 'date' | 'location' | 'guests' | 'starterTemp' | 'menu' | 'service' | 'decor' | 'review';
+
+// Starter temperature: cold = salads, hot = pastilla + soups.
+type StarterTemp = 'hot' | 'cold';
+const STARTER_TEMP_SUBS: Record<StarterTemp, MenuSubCategory[]> = {
+  cold: ['salad'],
+  hot: ['pastilla', 'soup'],
+};
 
 // Faint eight-pointed-star (khatam) zellige texture for the section atmosphere.
 const ZELLIGE_TEXTURE =
@@ -54,6 +61,7 @@ export default function MenuBuilder() {
   // Event and Menu selection state
   const [selectedEventType, setSelectedEventType] = useState<EventType | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<MenuSubCategory | null>(null);
+  const [starterTemp, setStarterTemp] = useState<StarterTemp | null>(null);
   const [selectedItems, setSelectedItems] = useState<MenuItem[]>([]);
 
   // Create translated menu items
@@ -173,17 +181,28 @@ export default function MenuBuilder() {
     { step: 3, kind: 'location' },
     { step: 4, kind: 'guests' },
     { step: 5, kind: 'menu', category: 'appetizer' },
-    { step: 6, kind: 'menu', category: 'starter' },
-    { step: 7, kind: 'menu', category: 'main' },
-    { step: 8, kind: 'menu', category: 'dessert' },
-    { step: 9, kind: 'service' },
-    { step: 10, kind: 'decor' },
-    { step: 11, kind: 'review' },
+    { step: 6, kind: 'starterTemp' },
+    { step: 7, kind: 'menu', category: 'starter' },
+    { step: 8, kind: 'menu', category: 'main' },
+    { step: 9, kind: 'menu', category: 'dessert' },
+    { step: 10, kind: 'service' },
+    { step: 11, kind: 'decor' },
+    { step: 12, kind: 'review' },
   ];
   const TOTAL_STEPS = STEP_DEFS.length;
   const currentDef = STEP_DEFS[currentStep - 1];
   const activeMenuCategory: MenuCategory | null = currentDef.kind === 'menu' ? currentDef.category! : null;
-  const activeSubCategories = activeMenuCategory ? subCategoryMap[activeMenuCategory] : [];
+  // For the starter course, only show the sub-categories that match the chosen
+  // temperature (cold = salads, hot = pastilla + soups).
+  const activeSubCategories = (() => {
+    if (!activeMenuCategory) return [];
+    const subs = subCategoryMap[activeMenuCategory];
+    if (activeMenuCategory === 'starter' && starterTemp) {
+      const allowed = STARTER_TEMP_SUBS[starterTemp];
+      return subs.filter((s) => allowed.includes(s));
+    }
+    return subs;
+  })();
 
   // Reset the sub-category filter whenever the step changes.
   useEffect(() => {
@@ -194,12 +213,16 @@ export default function MenuBuilder() {
     if (!activeMenuCategory) return [];
     return translatedMenuItems.filter((item) => {
       if (item.category !== activeMenuCategory) return false;
+      // Starters are gated by the chosen temperature first.
+      if (activeMenuCategory === 'starter' && starterTemp) {
+        if (!STARTER_TEMP_SUBS[starterTemp].includes(item.subCategory as MenuSubCategory)) return false;
+      }
       if (selectedSubCategory) {
         return item.subCategory === selectedSubCategory;
       }
       return true;
     });
-  }, [translatedMenuItems, activeMenuCategory, selectedSubCategory]);
+  }, [translatedMenuItems, activeMenuCategory, selectedSubCategory, starterTemp]);
 
   // Hapjes (appetizers) are capped at 2 selections — 2 basic hapjes are included.
   const APPETIZER_MAX = 2;
@@ -257,12 +280,14 @@ export default function MenuBuilder() {
   }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, selectedDecoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
 
   // Step index of the last course (Desserts) — leaving it requires ≥1 dish.
-  const LAST_COURSE_STEP = 8;
+  // Last course (dessert) step — derived so it survives step reordering.
+  const LAST_COURSE_STEP = STEP_DEFS.filter((d) => d.kind === 'menu').slice(-1)[0]?.step ?? TOTAL_STEPS;
 
   const canProceedToNextStep = () => {
     if (currentDef.kind === 'event') return selectedEventType !== null;
     if (currentDef.kind === 'date') return selectedDate !== '';
     if (currentDef.kind === 'location') return locationUnknown || selectedLocation !== null;
+    if (currentDef.kind === 'starterTemp') return starterTemp !== null;
     // Same rule for every event type: at least one dish before continuing.
     if (currentStep === LAST_COURSE_STEP) return selectedItems.length > 0;
     return true;
@@ -325,12 +350,28 @@ export default function MenuBuilder() {
     if (date) window.setTimeout(advanceStep, 220);
   }, [advanceStep]);
 
+  // Choosing hot/cold for the starter: drop any already-selected starters that
+  // don't match the new temperature, then advance to the starter dishes.
+  const handleStarterTempSelect = useCallback((temp: StarterTemp) => {
+    setStarterTemp((prev) => {
+      if (prev !== temp) {
+        const allowed = STARTER_TEMP_SUBS[temp];
+        setSelectedItems((items) =>
+          items.filter((i) => i.category !== 'starter' || allowed.includes(i.subCategory as MenuSubCategory))
+        );
+      }
+      return temp;
+    });
+    window.setTimeout(advanceStep, 220);
+  }, [advanceStep]);
+
   // Step labels for progress indicator — courses use their category name.
   const stepKeyForKind: Record<Exclude<StepKind, 'menu'>, string> = {
     event: 'event',
     date: 'date',
     location: 'location',
     guests: 'guests',
+    starterTemp: 'starterTemp',
     service: 'extras',
     decor: 'decor',
     review: 'review',
@@ -365,6 +406,62 @@ export default function MenuBuilder() {
         </motion.div>
       )}
 
+      {/* Step: Starter temperature — warm of koud */}
+      {currentDef.kind === 'starterTemp' && (
+        <motion.div key="step-startertemp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="space-y-10 sm:space-y-12 py-2 sm:py-6">
+            <div className="text-center space-y-3">
+              <h3 className="text-2xl md:text-3xl font-serif font-light tracking-[0.08em] text-[#1f1f1f] uppercase">
+                {t('menuBuilder.starterTemp.title')}
+              </h3>
+              <p className="text-xs text-[#6c655b] tracking-[0.25em] font-light uppercase">
+                {t('menuBuilder.starterTemp.subtitle')}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 max-w-3xl mx-auto">
+              {([
+                { temp: 'hot' as StarterTemp, Icon: Flame },
+                { temp: 'cold' as StarterTemp, Icon: Snowflake },
+              ]).map(({ temp, Icon }) => {
+                const isSelected = starterTemp === temp;
+                return (
+                  <motion.button
+                    key={temp}
+                    type="button"
+                    whileHover={{ y: -5 }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => handleStarterTempSelect(temp)}
+                    className={`group relative overflow-hidden rounded-[3px] bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] p-8 sm:p-10 text-center transition-[box-shadow,border-color] duration-500 ${
+                      isSelected
+                        ? 'border border-[#C19A5B] shadow-[0_22px_56px_-22px_rgba(120,90,40,0.5)]'
+                        : 'border border-[#e7ddcb] shadow-[0_10px_30px_-18px_rgba(60,45,25,0.28)] hover:border-[#d6c39d] hover:shadow-[0_24px_58px_-24px_rgba(80,60,30,0.38)]'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none absolute inset-[6px] rounded-[2px] border transition-opacity duration-500 ${
+                        isSelected ? 'border-[#C19A5B]/55 opacity-100' : 'border-[#C19A5B]/0 opacity-0 group-hover:border-[#C19A5B]/30 group-hover:opacity-100'
+                      }`}
+                    />
+                    <div className="relative flex flex-col items-center gap-4">
+                      <span className={`flex items-center justify-center w-14 h-14 rounded-full transition-colors ${isSelected ? 'bg-[#C19A5B] text-white' : 'bg-[#f0e7d4] text-[#a8824a] group-hover:text-[#1f1f1f]'}`}>
+                        <Icon className="w-6 h-6" strokeWidth={1.75} />
+                      </span>
+                      <h4 className="text-xl font-serif font-light tracking-[0.05em] text-[#1f1f1f]">
+                        {t(`menuBuilder.starterTemp.${temp}.name`)}
+                      </h4>
+                      <p className="text-[13px] text-[#6c655b] leading-relaxed font-light">
+                        {t(`menuBuilder.starterTemp.${temp}.description`)}
+                      </p>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Course steps: Hapjes / Voorgerechten / Hoofdgerechten / Desserts */}
       {currentDef.kind === 'menu' && activeMenuCategory && (
         <motion.div key={`menu-${activeMenuCategory}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -377,8 +474,8 @@ export default function MenuBuilder() {
               <StarDivider />
             </div>
 
-            {/* Sub-Category Selector */}
-            {activeSubCategories.length > 0 && (
+            {/* Sub-Category Selector (hidden when there's only one option) */}
+            {activeSubCategories.length > 1 && (
               <div className="mb-8 sm:mb-12">
                 <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:overflow-visible">
                   <div className="flex sm:justify-center gap-2 sm:gap-4 min-w-max sm:min-w-0">

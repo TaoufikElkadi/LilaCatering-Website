@@ -94,6 +94,8 @@ export interface ServiceOptions {
   tableExtras?: TableExtraId[];
   /** One-time tea-show fee (added as-is, NOT marked up by the guest multiplier). */
   teaShowFee?: number;
+  /** 4-soort mocktail & smoothie mix in glasses (per guest). */
+  mocktailMix?: boolean;
   /** One-time decoration-collection fee. */
   decorationFee?: number;
   /** One-time transport fee (added as-is, NOT marked up by the guest multiplier). */
@@ -120,6 +122,9 @@ export function getTransportCost(
 export const COFFEE_LUXE_PER_GUEST = 4.5;
 export const COOKIES_LUXE_PER_GUEST = 3;
 
+/** Per-guest price for the 4-soort mocktail & smoothie mix in glasses. */
+export const SMOOTHIE_MIX_PER_GUEST = 4.5;
+
 /** Per-guest surcharge for the chosen service upgrades (0 when both standard). */
 export function getServicePerGuest(service: ServiceOptions = {}): number {
   const extras = (service.tableExtras ?? []).reduce(
@@ -129,6 +134,7 @@ export function getServicePerGuest(service: ServiceOptions = {}): number {
   return (
     (service.coffeeLuxe ? COFFEE_LUXE_PER_GUEST : 0) +
     (service.cookiesLuxe ? COOKIES_LUXE_PER_GUEST : 0) +
+    (service.mocktailMix ? SMOOTHIE_MIX_PER_GUEST : 0) +
     extras
   );
 }

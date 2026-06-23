@@ -10,6 +10,7 @@ import {
   formatEuro,
   TABLE_EXTRA_PRICES,
   TEA_SHOW_FEES,
+  SMOOTHIE_MIX_PER_GUEST,
   type TableExtraId,
   type TeaShowId,
 } from '@/lib/pricing';
@@ -469,8 +470,8 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
     extrasRows.push([
       t('menuBuilder.extras.mocktailMixName'),
       t('menuBuilder.extras.extraServicesLabel'),
-      '-',
-      t('menuBuilder.pdf.onRequest'),
+      formatEuro(SMOOTHIE_MIX_PER_GUEST),
+      formatEuro(SMOOTHIE_MIX_PER_GUEST * data.guestCount),
     ]);
   }
 

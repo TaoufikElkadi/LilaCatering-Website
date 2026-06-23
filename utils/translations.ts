@@ -301,6 +301,38 @@ const translations: Record<Lang, TranslationTree> = {
         description: 'Choose a convenient time for us to discuss your event details.',
         confirmation: "We'll send a confirmation email with all the details.",
       },
+      booking: {
+        sectionTitle: 'Ready to book?',
+        sectionSubtitle: 'Reserve your date with a deposit, or schedule a consultation at our office.',
+        back: 'Back',
+        reserve: {
+          title: 'Reserve your date',
+          desc: 'Pay a deposit to lock in your event date right away.',
+          depositNote: '20% deposit',
+          payButton: 'Pay deposit',
+          notConfigured: 'Online payment is coming soon — we will contact you to finalise.',
+        },
+        appointment: {
+          title: 'Schedule an office appointment',
+          desc: 'Pick a time to discuss everything in person at our office.',
+          openButton: 'Choose a time',
+        },
+        form: {
+          name: 'Full name',
+          email: 'Email',
+          phone: 'Phone',
+          submitting: 'One moment…',
+        },
+        scheduler: {
+          pickDate: 'Choose a date',
+          pickTime: 'Choose a time',
+          noSlots: 'No available times right now — please check back soon.',
+          confirm: 'Confirm appointment',
+          success: 'Your appointment is confirmed!',
+          successDesc: 'We have sent a confirmation with a calendar invite to your email.',
+          error: 'Something went wrong. Please try again.',
+        },
+      },
       pdf: {
         header: {
           tagline: 'Authentic Moroccan Catering',
@@ -1028,6 +1060,38 @@ const translations: Record<Lang, TranslationTree> = {
         description: 'Choisissez un moment qui vous convient pour discuter des détails de votre événement.',
         confirmation: 'Nous vous enverrons un e-mail de confirmation avec tous les détails.',
       },
+      booking: {
+        sectionTitle: 'Prêt à réserver ?',
+        sectionSubtitle: 'Réservez votre date avec un acompte, ou planifiez un rendez-vous à notre bureau.',
+        back: 'Retour',
+        reserve: {
+          title: 'Réservez votre date',
+          desc: 'Payez un acompte pour bloquer immédiatement la date de votre événement.',
+          depositNote: 'Acompte de 20%',
+          payButton: 'Payer l’acompte',
+          notConfigured: 'Le paiement en ligne arrive bientôt — nous vous contacterons pour finaliser.',
+        },
+        appointment: {
+          title: 'Planifier un rendez-vous au bureau',
+          desc: 'Choisissez un créneau pour tout discuter en personne à notre bureau.',
+          openButton: 'Choisir un horaire',
+        },
+        form: {
+          name: 'Nom complet',
+          email: 'E-mail',
+          phone: 'Téléphone',
+          submitting: 'Un instant…',
+        },
+        scheduler: {
+          pickDate: 'Choisissez une date',
+          pickTime: 'Choisissez un horaire',
+          noSlots: 'Aucun créneau disponible pour le moment — revenez bientôt.',
+          confirm: 'Confirmer le rendez-vous',
+          success: 'Votre rendez-vous est confirmé !',
+          successDesc: 'Nous avons envoyé une confirmation avec une invitation agenda à votre e-mail.',
+          error: 'Une erreur est survenue. Veuillez réessayer.',
+        },
+      },
       pdf: {
         header: {
           tagline: 'Cuisine Marocaine Authentique',
@@ -1754,6 +1818,38 @@ const translations: Record<Lang, TranslationTree> = {
         title: 'Plan een gesprek',
         description: 'Kies een moment dat u uitkomt om de details van uw evenement te bespreken.',
         confirmation: 'U ontvangt een bevestigingsmail met alle gegevens.',
+      },
+      booking: {
+        sectionTitle: 'Klaar om te boeken?',
+        sectionSubtitle: 'Reserveer uw datum met een aanbetaling, of plan een afspraak op ons kantoor.',
+        back: 'Terug',
+        reserve: {
+          title: 'Reserveer uw datum',
+          desc: 'Betaal een aanbetaling om uw datum direct vast te leggen.',
+          depositNote: '20% aanbetaling',
+          payButton: 'Betaal aanbetaling',
+          notConfigured: 'Online betalen is binnenkort beschikbaar — we nemen contact met u op om af te ronden.',
+        },
+        appointment: {
+          title: 'Plan een afspraak op kantoor',
+          desc: 'Kies een tijd om alles persoonlijk te bespreken op ons kantoor.',
+          openButton: 'Kies een tijd',
+        },
+        form: {
+          name: 'Volledige naam',
+          email: 'E-mail',
+          phone: 'Telefoon',
+          submitting: 'Een moment…',
+        },
+        scheduler: {
+          pickDate: 'Kies een datum',
+          pickTime: 'Kies een tijd',
+          noSlots: 'Op dit moment geen beschikbare tijden — kom binnenkort terug.',
+          confirm: 'Afspraak bevestigen',
+          success: 'Uw afspraak is bevestigd!',
+          successDesc: 'We hebben een bevestiging met agenda-uitnodiging naar uw e-mail gestuurd.',
+          error: 'Er ging iets mis. Probeer het opnieuw.',
+        },
       },
       pdf: {
         header: {

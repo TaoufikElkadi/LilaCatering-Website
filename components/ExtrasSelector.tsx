@@ -11,6 +11,7 @@ import {
   TABLE_EXTRA_IDS,
   TEA_SHOW_FEES,
   TEA_SHOW_IDS,
+  SMOOTHIE_MIX_PER_GUEST,
   formatEuro,
   type TableExtraId,
   type TeaShowId,
@@ -198,7 +199,12 @@ function ServiceSelector({
             active={mocktailMix}
             onClick={() => onMocktailMixToggle(!mocktailMix)}
             label={t('menuBuilder.extras.mocktailMixName')}
-            right={<span className="text-[#9a8d77]">{t('menuBuilder.extras.onRequest')}</span>}
+            right={
+              <>
+                +{formatEuro(SMOOTHIE_MIX_PER_GUEST)}{' '}
+                <span className="text-[#bcae96]">{t('menuBuilder.extras.perGuest')}</span>
+              </>
+            }
           />
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Script from 'next/script';
+import BookingActions from './BookingActions';
 import { X, Flame, Snowflake } from 'lucide-react';
 import { menuItems, MenuItem, MenuCategory, MenuSubCategory } from '@/data/menuData';
 import {
@@ -255,11 +255,12 @@ export default function MenuBuilder() {
       coffeeLuxe,
       cookiesLuxe,
       tableExtras,
+      mocktailMix,
       teaShowFee: TEA_SHOW_FEES[teaShow],
       decorationFee: DECORATION_PRICES[selectedDecoration],
       transportFee,
     });
-  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, selectedDecoration, transportFee]);
+  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, selectedDecoration, transportFee]);
 
   // Compact, customer-facing total (rounded euros, locale-grouped).
   const localeTag = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -408,9 +409,23 @@ export default function MenuBuilder() {
       `${t('menuBuilder.extras.cookiesName')}: ${cookiesLuxe ? t('menuBuilder.extras.luxeName') : t('menuBuilder.extras.standardName')}`,
     ];
     tableExtras.forEach((id) => parts.push(t(`menuBuilder.extras.items.${id}`)));
-    if (mocktailMix) parts.push(`${t('menuBuilder.extras.mocktailMixName')} (${t('menuBuilder.extras.onRequest')})`);
+    if (mocktailMix) parts.push(t('menuBuilder.extras.mocktailMixName'));
     parts.push(`${t('menuBuilder.extras.teaShowLabel')}: ${t(`menuBuilder.extras.teaShows.${teaShow}`)}`);
     return parts.join(' · ');
+  })();
+
+  // Compact text offerte used in booking emails / calendar invites.
+  const offerteSummary = (() => {
+    const eventName = selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : '';
+    const dishes = selectedItems.map((i) => i.name).join(', ');
+    return [
+      `${eventName} · ${guestCount} ${t('menuBuilder.guestCount.guests')} · ${selectedDate}`,
+      dishes ? `Menu: ${dishes}` : '',
+      serviceSummary,
+      `${t('menuBuilder.review.estimatedTotal')}: ${formatEuro(getTotalPrice())}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
   })();
 
   // ---- Step content (shared by desktop inline layout and mobile flow) -------
@@ -755,22 +770,14 @@ export default function MenuBuilder() {
                     <span className="relative">{t('menuBuilder.buttons.downloadPDF')}</span>
                   </motion.button>
 
-                  {/* Calendly Scheduling Widget */}
-                  <div className="mt-8 sm:mt-12 border-t border-[#dcd3c5] pt-8 sm:pt-12">
-                    <div className="text-center mb-6 sm:mb-8">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-serif text-[#1f1f1f] mb-2 sm:mb-3">{t('menuBuilder.calendly.title')}</h3>
-                      <p className="text-xs sm:text-sm text-[#6c655b] max-w-xl mx-auto px-2">{t('menuBuilder.calendly.description')}</p>
-                    </div>
-
-                    <div
-                      className="calendly-inline-widget rounded-lg"
-                      data-url="https://calendly.com/taoufik-el-kadi/offerte-gesprek?hide_gdpr_banner=1&background_color=ffffff&text_color=1f1f1f&primary_color=C19A5B"
-                      style={{ minWidth: '280px', width: '100%', height: '700px' }}
-                    />
-                    <Script src="https://assets.calendly.com/assets/external/widget.js" strategy="lazyOnload" />
-
-                    <p className="text-[10px] sm:text-xs text-[#8a8275] text-center mt-4">{t('menuBuilder.calendly.confirmation')}</p>
-                  </div>
+                  {/* Reserve (deposit) or schedule an office appointment */}
+                  <BookingActions
+                    totalPrice={getTotalPrice()}
+                    eventDate={selectedDate}
+                    eventType={selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : ''}
+                    guestCount={guestCount}
+                    offerteSummary={offerteSummary}
+                  />
                 </div>
               </motion.div>
           </div>

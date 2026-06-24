@@ -7,10 +7,7 @@ import BookingActions from './BookingActions';
 import { X, Flame, Snowflake } from 'lucide-react';
 import { menuItems, MenuItem, MenuCategory, MenuSubCategory } from '@/data/menuData';
 import {
-  BASE_PRICE,
   MIN_GUESTS,
-  getPerPersonPrice,
-  getServicePerGuest,
   getTransportCost,
   getEstimatedTotal,
   formatEuro,
@@ -127,6 +124,9 @@ export default function MenuBuilder() {
   const [isDesktop, setIsDesktop] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
+  // Latest-value refs so stable callbacks/listeners avoid stale closures.
+  const advanceStepRef = useRef<() => void>(() => {});
+  const currentStepRef = useRef<FlowStep>(1);
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 640px)');
@@ -236,7 +236,18 @@ export default function MenuBuilder() {
   // Hapjes (appetizers) are capped at 2 selections — 2 basic hapjes are included.
   const APPETIZER_MAX = 2;
 
+  // Once a course reaches its threshold, the flow auto-continues to the next
+  // step (appetizers need 2, every other course needs 1).
+  const COURSE_THRESHOLDS: Record<MenuCategory, number> = {
+    appetizer: 2,
+    starter: 1,
+    main: 1,
+    dessert: 1,
+  };
+
   const handleSelectItem = useCallback((item: MenuItem) => {
+    const isRemoval = selectedItems.some((i) => i.id === item.id);
+
     setSelectedItems((prev) => {
       const exists = prev.find((i) => i.id === item.id);
       if (exists) return prev.filter((i) => i.id !== item.id);
@@ -246,7 +257,19 @@ export default function MenuBuilder() {
       }
       return [...prev, item];
     });
-  }, []);
+
+    // Auto-continue when this add completes the current course (adds only).
+    if (isRemoval) return;
+    if (currentDef.kind !== 'menu' || !activeMenuCategory) return;
+    if (item.category !== activeMenuCategory) return;
+    const currentCount = selectedItems.filter((i) => i.category === activeMenuCategory).length;
+    if (item.category === 'appetizer' && currentCount >= APPETIZER_MAX) return; // add was ignored
+    const newCount = currentCount + 1;
+    if (newCount >= COURSE_THRESHOLDS[activeMenuCategory]) {
+      window.setTimeout(() => advanceStepRef.current(), 220);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItems, currentDef.kind, activeMenuCategory]);
 
   const appetizerCount = selectedItems.filter((i) => i.category === 'appetizer').length;
 
@@ -352,6 +375,47 @@ export default function MenuBuilder() {
     setCurrentStep((s) => (s < TOTAL_STEPS ? ((s + 1) as FlowStep) : s));
     scrollToBuilder();
   }, [scrollToBuilder]);
+
+  // Keep latest-value refs in sync for stable callbacks / event listeners.
+  useEffect(() => {
+    advanceStepRef.current = advanceStep;
+  }, [advanceStep]);
+  useEffect(() => {
+    currentStepRef.current = currentStep;
+  }, [currentStep]);
+
+  // Browser Back steps the builder backward instead of leaving the site — on
+  // desktop (inline) and mobile (full-screen) alike. We arm one guard history
+  // entry once the builder is "engaged" (past step 1, or the mobile flow open)
+  // and re-arm it after each step-back; at step 1, Back leaves / closes the flow.
+  const guardArmedRef = useRef(false);
+  const mobileOpenRef = useRef(false);
+  useEffect(() => {
+    mobileOpenRef.current = mobileOpen;
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const onPop = () => {
+      if (currentStepRef.current > 1) {
+        setCurrentStep((s) => (s > 1 ? ((s - 1) as FlowStep) : s));
+        scrollToBuilder();
+        history.pushState({ lilaGuard: true }, ''); // re-arm
+      } else {
+        guardArmedRef.current = false;
+        if (mobileOpenRef.current) setMobileOpen(false);
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [scrollToBuilder]);
+
+  useEffect(() => {
+    const engaged = mobileOpen || currentStep > 1;
+    if (engaged && !guardArmedRef.current) {
+      history.pushState({ lilaGuard: true }, '');
+      guardArmedRef.current = true;
+    }
+  }, [mobileOpen, currentStep]);
 
   // Picking an event type or a date moves the flow forward automatically (the
   // short delay lets the selection state register). Users can always step back.
@@ -727,14 +791,6 @@ export default function MenuBuilder() {
 
                     {/* Pricing breakdown */}
                     <div className="space-y-1.5 sm:space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275]">{t('menuBuilder.review.basePrice')}</p>
-                        <p className="text-sm text-[#1f1f1f]">{formatEuro(BASE_PRICE)}</p>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275]">{t('menuBuilder.review.perPersonPrice')}</p>
-                        <p className="text-sm text-[#1f1f1f]">{formatEuro(getPerPersonPrice(selectedItems) + getServicePerGuest({ coffeeLuxe, cookiesLuxe }))}</p>
-                      </div>
                       {!locationUnknown && transportFee > 0 && (
                         <div className="flex items-center justify-between">
                           <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275]">{t('menuBuilder.review.transportLabel')}</p>

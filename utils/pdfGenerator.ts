@@ -5,8 +5,6 @@ import { EventType } from '@/components/EventTypeSelector';
 import { DecorationType } from '@/components/DecorationSelector';
 import { getTranslation, Lang } from './translations';
 import {
-  BASE_PRICE,
-  getPerPersonPrice,
   formatEuro,
   TABLE_EXTRA_PRICES,
   TEA_SHOW_FEES,
@@ -280,24 +278,6 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
     }
     return [item.name, item.description, perGuest, total];
   };
-
-  // Base price summary line
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...COLORS.darkText);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...COLORS.gold);
-  doc.text(t('menuBuilder.pdf.basePrice'), 25, yPos + 4);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...COLORS.darkText);
-  doc.text(
-    `${formatEuro(BASE_PRICE)}  •  ${formatEuro(getPerPersonPrice(data.selectedItems))} / ${t('menuBuilder.pdf.numberOfGuests').toLowerCase()}`,
-    75,
-    yPos + 4
-  );
-
-  yPos += 8;
 
   // Enhanced table styling
   const tableConfig = {

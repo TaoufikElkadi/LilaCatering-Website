@@ -444,6 +444,19 @@ export default function MenuBuilder() {
     window.setTimeout(advanceStep, 220);
   }, [advanceStep]);
 
+  // Picking a venue moves the flow forward automatically, mirroring the event
+  // type / date steps. Ticking "venue unknown" is an equally valid answer, so it
+  // advances too — but only on check, never when the user unticks it.
+  const handleLocationSelect = useCallback((loc: typeof selectedLocation) => {
+    setSelectedLocation(loc);
+    if (loc) window.setTimeout(advanceStep, 220);
+  }, [advanceStep]);
+
+  const handleLocationUnknown = useCallback((unknown: boolean) => {
+    setLocationUnknown(unknown);
+    if (unknown) window.setTimeout(advanceStep, 220);
+  }, [advanceStep]);
+
   // Step labels for progress indicator — courses use their category name.
   const stepKeyForKind: Record<Exclude<StepKind, 'menu'>, string> = {
     event: 'event',
@@ -685,9 +698,9 @@ export default function MenuBuilder() {
           <div className="py-2 sm:py-6">
             <LocationSelector
               selectedLocation={selectedLocation}
-              onLocationChange={setSelectedLocation}
+              onLocationChange={handleLocationSelect}
               unknown={locationUnknown}
-              onUnknownChange={setLocationUnknown}
+              onUnknownChange={handleLocationUnknown}
             />
           </div>
         </motion.div>

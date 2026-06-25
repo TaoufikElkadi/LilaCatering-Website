@@ -2,11 +2,17 @@
 // server (no node-only modules here — CalDAV/Mollie/mail live in server files).
 
 export const OFFICE_TIMEZONE = 'Europe/Amsterdam';
-/** Office appointment days: Sunday (0) and Wednesday (3). */
-export const OFFICE_DAYS = [0, 3];
-/** Office hours (local Amsterdam time). Slots start on the hour. */
-export const OFFICE_START_HOUR = 9;
-export const OFFICE_END_HOUR = 17;
+/**
+ * Per-weekday office hours (local Amsterdam time). Key = weekday
+ * (0=Sun..6=Sat). A day absent from this map is closed.
+ * Slots start on the hour; the last slot starts so it ends by `endHour`.
+ *   Tuesday  (2): 15:00–21:00  → starts 15,16,17,18,19,20
+ *   Wednesday(3): 17:00–21:00  → starts 17,18,19,20
+ */
+export const OFFICE_SCHEDULE: Record<number, { startHour: number; endHour: number }> = {
+  2: { startHour: 15, endHour: 21 },
+  3: { startHour: 17, endHour: 21 },
+};
 export const APPOINTMENT_DURATION_MIN = 60;
 /** Reservation deposit = this fraction of the estimated total. */
 export const DEPOSIT_RATE = 0.2;
@@ -108,10 +114,11 @@ export function generateAvailableSlots(busy: BusyRange[], now = new Date()): Slo
 
   for (let i = 0; i <= BOOKING_WINDOW_DAYS; i++) {
     const dateStr = addDays(startDate, i);
-    if (!OFFICE_DAYS.includes(weekdayOf(dateStr))) continue;
+    const hours = OFFICE_SCHEDULE[weekdayOf(dateStr)];
+    if (!hours) continue;
 
     const [y, m, d] = dateStr.split('-').map((n) => parseInt(n, 10));
-    for (let hour = OFFICE_START_HOUR; hour + APPOINTMENT_DURATION_MIN / 60 <= OFFICE_END_HOUR; hour++) {
+    for (let hour = hours.startHour; hour + APPOINTMENT_DURATION_MIN / 60 <= hours.endHour; hour++) {
       const start = zonedWallTimeToInstant(y, m, d, hour, 0, OFFICE_TIMEZONE);
       const end = new Date(start.getTime() + APPOINTMENT_DURATION_MIN * 60000);
       if (start.getTime() < minStart) continue;

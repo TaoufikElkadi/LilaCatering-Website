@@ -41,18 +41,20 @@ export async function POST(request: NextRequest) {
     const uid = `lila-appt-${start.getTime()}-${crypto.randomUUID()}`;
 
     const descriptionLines = [
-      `Kennismakingsafspraak met ${name}.`,
-      `Telefoon: ${phone || '-'}`,
-      `E-mail: ${email}`,
+      'Kennismakingsafspraak.',
+      offerteSummary ? `\nOfferte van de klant:\n${offerteSummary}` : '',
       '',
-      offerteSummary ? `Offerte van de klant:\n${offerteSummary}` : '',
+      'Contact:',
+      name,
+      `Tel: ${phone || '-'}`,
+      `E-mail: ${email}`,
     ].filter(Boolean);
 
     const icsString = buildTimedEventICS({
       uid,
       start,
       end: finish,
-      summary: `Afspraak — ${name} (Lila Catering)`,
+      summary: `Lila Catering <> ${name}`,
       description: descriptionLines.join('\n'),
       location: OFFICE_ADDRESS,
       organizer: { name: 'Lila Catering', email: OFFICE_EMAIL },

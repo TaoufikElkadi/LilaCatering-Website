@@ -198,6 +198,8 @@ export default function Craft() {
             ))}
           </div>
 
+          {/* Ons Verhaal CTA temporarily hidden — page still WIP. Flip `false` to re-enable. */}
+          {false && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -219,6 +221,7 @@ export default function Craft() {
               </svg>
             </Link>
           </motion.div>
+          )}
         </div>
 
         {/* ── Asymmetric visual composition ───────────────────────────── */}

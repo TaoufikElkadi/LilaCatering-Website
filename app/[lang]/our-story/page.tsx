@@ -2,9 +2,13 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 import { useLanguage } from '@/components/LanguageProvider';
 
 export default function OurStory() {
+  // Temporarily hidden from visitors — page still WIP. Remove this line to re-enable.
+  notFound();
+
   const { t } = useLanguage();
   const hero = t('aboutPage.hero');
   const journey = t('aboutPage.journey');

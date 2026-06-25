@@ -60,7 +60,7 @@ export default function Navigation() {
   const hideBrand = isHome && !scrolled && !mobileMenuOpen;
   const navLinks = [
     { name: t('nav.home'), href: basePath },
-    { name: t('nav.ourStory'), href: `${basePath}/our-story` },
+    // Ons Verhaal temporarily hidden — page still WIP.
     { name: t('nav.about'), href: `${basePath}#about` },
     { name: t('nav.gallery'), href: `${basePath}#gallery` },
   ];
@@ -70,7 +70,7 @@ export default function Navigation() {
     { name: t('footer.services'), href: `${basePath}#services` },
     { name: t('nav.gallery'), href: `${basePath}#gallery` },
     { name: t('nav.about'), href: `${basePath}#about` },
-    { name: t('nav.ourStory'), href: `${basePath}/our-story` },
+    // Ons Verhaal temporarily hidden — page still WIP.
   ];
 
   const languages: { code: 'en' | 'fr' | 'nl'; label: string }[] = [

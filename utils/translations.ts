@@ -494,6 +494,10 @@ const translations: Record<Lang, TranslationTree> = {
         inputHint: 'Click the calendar icon or type a date',
         yourDate: 'Your event date',
         recommendation: 'We recommend booking at least 2 weeks in advance for optimal service',
+        oneSpotLeft: '1 spot left',
+        fullyBooked: 'Fully booked',
+        prevMonth: 'Previous month',
+        nextMonth: 'Next month',
       },
       menuItems: {
         'app-warm-1': { name: 'Vietnamese Spring Roll (chicken)', description: '' },
@@ -1253,6 +1257,10 @@ const translations: Record<Lang, TranslationTree> = {
         inputHint: "Cliquez sur l'icône du calendrier ou tapez une date",
         yourDate: 'Date de votre événement',
         recommendation: 'Nous recommandons de réserver au moins 2 semaines à l\'avance pour un service optimal',
+        oneSpotLeft: '1 place restante',
+        fullyBooked: 'Complet',
+        prevMonth: 'Mois précédent',
+        nextMonth: 'Mois suivant',
       },
       menuItems: {
         'app-warm-1': { name: 'Rouleau de printemps vietnamien (poulet)', description: '' },
@@ -2012,6 +2020,10 @@ const translations: Record<Lang, TranslationTree> = {
         inputHint: 'Klik op het kalendericoon of typ een datum',
         yourDate: 'Datum van uw evenement',
         recommendation: 'Wij adviseren minimaal 2 weken van tevoren te reserveren',
+        oneSpotLeft: '1 plek beschikbaar',
+        fullyBooked: 'Volgeboekt',
+        prevMonth: 'Vorige maand',
+        nextMonth: 'Volgende maand',
       },
       menuItems: {
         'app-warm-1': { name: 'Vietnamese Loempia (kip)', description: '' },

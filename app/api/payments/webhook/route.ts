@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMollieClient, PaymentStatus } from '@mollie/api-client';
-import { createCalendarObject, isCalendarConfigured } from '@/lib/appleCalendar';
+import { createBookingObject, isCalendarConfigured } from '@/lib/appleCalendar';
 import { sendMail, OFFICE_EMAIL } from '@/lib/mailer';
 import { buildAllDayEventICS } from '@/lib/ics';
 import { formatEuro } from '@/lib/pricing';
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           description,
           organizer: { name: 'Lila Catering', email: OFFICE_EMAIL },
         });
-        await createCalendarObject(uid, ics);
+        await createBookingObject(uid, ics);
       } catch (e) {
         // Likely a duplicate (webhook retried) — treat as already processed.
         console.warn('[webhook] calendar write skipped (likely duplicate):', e);

@@ -5,6 +5,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import SmoothScroll from "@/components/SmoothScroll";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { baseMetadataForLang } from "@/lib/seo";
@@ -88,6 +89,7 @@ export default async function RootLayout({
               {children}
               <Footer />
               <ScrollToTop />
+              <WhatsAppButton />
             </SmoothScroll>
           </LanguageProvider>
         )}

@@ -55,6 +55,14 @@ export default function ComingSoon() {
             info@lilacatering.nl
           </a>
           <a
+            href="https://wa.me/31203635478?text=Hallo%20Lila%20Catering%2C%20ik%20heb%20een%20vraag%20over..."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm tracking-[0.08em] text-[#f4ecdd] border-b border-[#C19A5B]/40 pb-0.5 transition-colors hover:text-[#C19A5B]"
+          >
+            WhatsApp
+          </a>
+          <a
             href="https://www.instagram.com/lilacatering/"
             target="_blank"
             rel="noopener noreferrer"

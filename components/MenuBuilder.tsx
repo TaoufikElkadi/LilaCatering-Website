@@ -22,7 +22,15 @@ import EventTypeSelector, { EventType } from './EventTypeSelector';
 import GuestCountSelector from './GuestCountSelector';
 import LocationSelector from './LocationSelector';
 import ServiceSelector from './ExtrasSelector';
-import DecorationSelector, { DecorationComponentId, decorationFeeFor } from './DecorationSelector';
+import DecorationSelector, {
+  DecorationComponentId,
+  DecorationTier,
+  DecorationSelection,
+  DECORATION_COMPONENTS,
+  decorationFeeFor,
+  decorationPrice,
+  isDecorationComplete,
+} from './DecorationSelector';
 import DatePickerSelector from './DatePickerSelector';
 import EventTimeSelector from './EventTimeSelector';
 import { useLanguage } from './LanguageProvider';
@@ -114,9 +122,9 @@ export default function MenuBuilder() {
   const [tableExtras, setTableExtras] = useState<TableExtraId[]>([]);
   const [teaShow, setTeaShow] = useState<TeaShowId>('standard');
   const [mocktailMix, setMocktailMix] = useState<boolean>(false);
-  const [decorationComponents, setDecorationComponents] = useState<DecorationComponentId[]>([]);
-  const toggleDecoration = useCallback((id: DecorationComponentId) => {
-    setDecorationComponents((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const [decoration, setDecoration] = useState<DecorationSelection>({});
+  const selectDecoration = useCallback((id: DecorationComponentId, tier: DecorationTier) => {
+    setDecoration((prev) => ({ ...prev, [id]: tier }));
   }, []);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [eventStart, setEventStart] = useState<string>('');
@@ -288,10 +296,10 @@ export default function MenuBuilder() {
       tableExtras,
       mocktailMix,
       teaShowFee: TEA_SHOW_FEES[teaShow],
-      decorationFee: decorationFeeFor(decorationComponents),
+      decorationFee: decorationFeeFor(decoration),
       transportFee,
     });
-  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decorationComponents, transportFee]);
+  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decoration, transportFee]);
 
   // Compact, customer-facing total (rounded euros, locale-grouped).
   const localeTag = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -316,14 +324,14 @@ export default function MenuBuilder() {
       tableExtras,
       mocktailMix,
       teaShow,
-      decorationComponents,
+      decoration,
       venueName: locationUnknown ? t('menuBuilder.location.unknownShort') : selectedLocation?.label,
       transportFee,
       transportOnRequest: locationUnknown,
       totalPrice: getTotalPrice(),
       lang,
     });
-  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decorationComponents, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
+  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
 
   // Step index of the last course (Desserts) — leaving it requires ≥1 dish.
   // Last course (dessert) step — derived so it survives step reordering.
@@ -334,6 +342,8 @@ export default function MenuBuilder() {
     if (currentDef.kind === 'date') return selectedDate !== '';
     if (currentDef.kind === 'location') return locationUnknown || selectedLocation !== null;
     if (currentDef.kind === 'starterTemp') return starterTemp !== null;
+    // Decoration: a tier must be chosen for every component.
+    if (currentDef.kind === 'decor') return isDecorationComplete(decoration);
     // Same rule for every event type: at least one dish before continuing.
     if (currentStep === LAST_COURSE_STEP) return selectedItems.length > 0;
     return true;
@@ -509,6 +519,13 @@ export default function MenuBuilder() {
     return parts.join(' · ');
   })();
 
+  // Chosen decoration, formatted as "Name: Tier (€price)" per component.
+  const decorationLines = DECORATION_COMPONENTS.map(({ id }) => {
+    const tier = decoration[id];
+    if (!tier) return null;
+    return `${t(`menuBuilder.decoration.components.${id}.name`)}: ${t(`menuBuilder.decoration.tiers.${tier}`)} (${formatEuro(decorationPrice(id, tier))})`;
+  }).filter(Boolean) as string[];
+
   // Compact text offerte used in booking emails / calendar invites.
   const offerteSummary = (() => {
     const eventName = selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : '';
@@ -518,8 +535,8 @@ export default function MenuBuilder() {
       timesSummary ? `${t('menuBuilder.eventTime.title')}: ${timesSummary}` : '',
       dishes ? `Menu: ${dishes}` : '',
       serviceSummary,
-      decorationComponents.length
-        ? `${t('menuBuilder.review.decorationLabel')}: ${decorationComponents.map((id) => t(`menuBuilder.decoration.components.${id}.name`)).join(', ')}`
+      decorationLines.length
+        ? `${t('menuBuilder.review.decorationLabel')}: ${decorationLines.join(', ')}`
         : '',
       `${t('menuBuilder.review.estimatedTotal')}: ${formatEuro(getTotalPrice())}`,
     ]
@@ -713,7 +730,7 @@ export default function MenuBuilder() {
       {currentDef.kind === 'decor' && (
         <motion.div key="step-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="py-2 sm:py-6">
-            <DecorationSelector selected={decorationComponents} onToggle={toggleDecoration} />
+            <DecorationSelector selection={decoration} onSelect={selectDecoration} />
           </div>
         </motion.div>
       )}
@@ -829,7 +846,7 @@ export default function MenuBuilder() {
                       </div>
                       <div>
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.decorationLabel')}</p>
-                        <p className="text-xs sm:text-sm text-[#1f1f1f]">{decorationComponents.length ? decorationComponents.map((id) => t(`menuBuilder.decoration.components.${id}.name`)).join(', ') : t('menuBuilder.decoration.noneSelected')}</p>
+                        <p className="text-xs sm:text-sm text-[#1f1f1f]">{decorationLines.length ? decorationLines.join(', ') : t('menuBuilder.decoration.noneSelected')}</p>
                       </div>
                     </div>
 

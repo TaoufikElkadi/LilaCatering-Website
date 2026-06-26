@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MenuItem } from '@/data/menuData';
 import { EventType } from '@/components/EventTypeSelector';
-import { DecorationComponentId, DECORATION_PRICE_BY_ID } from '@/components/DecorationSelector';
+import { DecorationSelection, DECORATION_COMPONENTS, decorationPrice } from '@/components/DecorationSelector';
 import { getTranslation, Lang } from './translations';
 import {
   formatEuro,
@@ -23,7 +23,7 @@ interface OfferteData {
   tableExtras?: TableExtraId[];
   mocktailMix?: boolean;
   teaShow?: TeaShowId;
-  decorationComponents: DecorationComponentId[];
+  decoration: DecorationSelection;
   venueName?: string;
   venueCity?: string;
   transportFee?: number;
@@ -467,13 +467,15 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
     ]);
   }
 
-  // Modular decoration — one row per chosen component.
-  data.decorationComponents.forEach((id) => {
+  // Modular decoration — one row per component, showing the chosen tier.
+  DECORATION_COMPONENTS.forEach(({ id }) => {
+    const tier = data.decoration[id];
+    if (!tier) return;
     extrasRows.push([
-      t(`menuBuilder.decoration.components.${id}.name`),
+      `${t(`menuBuilder.decoration.components.${id}.name`)} — ${t(`menuBuilder.decoration.tiers.${tier}`)}`,
       t('menuBuilder.pdf.extras.decoration'),
       '-',
-      formatEuro(DECORATION_PRICE_BY_ID[id] ?? 0),
+      formatEuro(decorationPrice(id, tier)),
     ]);
   });
 

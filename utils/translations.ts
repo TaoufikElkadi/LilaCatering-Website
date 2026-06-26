@@ -500,10 +500,12 @@ const translations: Record<Lang, TranslationTree> = {
       },
       decoration: {
         title: 'Decoration & Ambiance',
-        subtitle: 'Choose the decoration components you would like to add.',
+        subtitle: 'Choose a tier for each decoration component.',
         componentsLabel: 'Decoration components',
         noneSelected: 'None selected',
         setupInfo: 'All decoration includes setup and takedown.',
+        chooseAllHint: 'Choose a tier for each component to continue.',
+        tiers: { basic: 'Basic', premium: 'Premium', luxury: 'Luxury' },
         components: {
           tafeldecoratie: { name: 'Table decoration', description: 'Tasteful styling of the tables with centerpieces and accents.' },
           servies: { name: 'Tableware', description: 'Curated plates, glassware and cutlery to match your event.' },
@@ -1286,10 +1288,12 @@ const translations: Record<Lang, TranslationTree> = {
       },
       decoration: {
         title: 'Décoration & Ambiance',
-        subtitle: 'Choisissez les éléments de décoration que vous souhaitez ajouter.',
+        subtitle: 'Choisissez une formule pour chaque élément de décoration.',
         componentsLabel: 'Éléments de décoration',
         noneSelected: 'Aucun sélectionné',
         setupInfo: 'Toute la décoration inclut la mise en place et le démontage.',
+        chooseAllHint: 'Choisissez une formule pour chaque élément pour continuer.',
+        tiers: { basic: 'Essentiel', premium: 'Premium', luxury: 'Luxe' },
         components: {
           tafeldecoratie: { name: 'Décoration de table', description: 'Habillage élégant des tables avec centres de table et accents.' },
           servies: { name: 'Vaisselle', description: 'Assiettes, verrerie et couverts assortis à votre événement.' },
@@ -2072,10 +2076,12 @@ const translations: Record<Lang, TranslationTree> = {
       },
       decoration: {
         title: 'Decoratie & sfeer',
-        subtitle: 'Kies de decoratie-onderdelen die u wilt toevoegen.',
+        subtitle: 'Kies voor elk decoratie-onderdeel een uitvoering.',
         componentsLabel: 'Decoratie-onderdelen',
         noneSelected: 'Geen gekozen',
         setupInfo: 'Alle decoratie is inclusief opbouw en afbraak.',
+        chooseAllHint: 'Kies voor elk onderdeel een uitvoering om door te gaan.',
+        tiers: { basic: 'Basis', premium: 'Premium', luxury: 'Luxe' },
         components: {
           tafeldecoratie: { name: 'Tafeldecoratie', description: 'Stijlvolle aankleding van de tafels met tafelstukken en accenten.' },
           servies: { name: 'Servies', description: 'Zorgvuldig gekozen borden, glaswerk en bestek passend bij uw evenement.' },

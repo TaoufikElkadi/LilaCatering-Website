@@ -22,7 +22,7 @@ import EventTypeSelector, { EventType } from './EventTypeSelector';
 import GuestCountSelector from './GuestCountSelector';
 import LocationSelector from './LocationSelector';
 import ServiceSelector from './ExtrasSelector';
-import DecorationSelector, { DecorationType, DECORATION_PRICES } from './DecorationSelector';
+import DecorationSelector, { DecorationComponentId, decorationFeeFor } from './DecorationSelector';
 import DatePickerSelector from './DatePickerSelector';
 import EventTimeSelector from './EventTimeSelector';
 import { useLanguage } from './LanguageProvider';
@@ -114,7 +114,10 @@ export default function MenuBuilder() {
   const [tableExtras, setTableExtras] = useState<TableExtraId[]>([]);
   const [teaShow, setTeaShow] = useState<TeaShowId>('standard');
   const [mocktailMix, setMocktailMix] = useState<boolean>(false);
-  const [selectedDecoration, setSelectedDecoration] = useState<DecorationType>('basic');
+  const [decorationComponents, setDecorationComponents] = useState<DecorationComponentId[]>([]);
+  const toggleDecoration = useCallback((id: DecorationComponentId) => {
+    setDecorationComponents((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }, []);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [eventStart, setEventStart] = useState<string>('');
   const [eventEnd, setEventEnd] = useState<string>('');
@@ -285,10 +288,10 @@ export default function MenuBuilder() {
       tableExtras,
       mocktailMix,
       teaShowFee: TEA_SHOW_FEES[teaShow],
-      decorationFee: DECORATION_PRICES[selectedDecoration],
+      decorationFee: decorationFeeFor(decorationComponents),
       transportFee,
     });
-  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, selectedDecoration, transportFee]);
+  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decorationComponents, transportFee]);
 
   // Compact, customer-facing total (rounded euros, locale-grouped).
   const localeTag = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -313,14 +316,14 @@ export default function MenuBuilder() {
       tableExtras,
       mocktailMix,
       teaShow,
-      selectedDecoration,
+      decorationComponents,
       venueName: locationUnknown ? t('menuBuilder.location.unknownShort') : selectedLocation?.label,
       transportFee,
       transportOnRequest: locationUnknown,
       totalPrice: getTotalPrice(),
       lang,
     });
-  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, selectedDecoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
+  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decorationComponents, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
 
   // Step index of the last course (Desserts) — leaving it requires ≥1 dish.
   // Last course (dessert) step — derived so it survives step reordering.
@@ -515,6 +518,9 @@ export default function MenuBuilder() {
       timesSummary ? `${t('menuBuilder.eventTime.title')}: ${timesSummary}` : '',
       dishes ? `Menu: ${dishes}` : '',
       serviceSummary,
+      decorationComponents.length
+        ? `${t('menuBuilder.review.decorationLabel')}: ${decorationComponents.map((id) => t(`menuBuilder.decoration.components.${id}.name`)).join(', ')}`
+        : '',
       `${t('menuBuilder.review.estimatedTotal')}: ${formatEuro(getTotalPrice())}`,
     ]
       .filter(Boolean)
@@ -707,7 +713,7 @@ export default function MenuBuilder() {
       {currentDef.kind === 'decor' && (
         <motion.div key="step-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="py-2 sm:py-6">
-            <DecorationSelector selectedDecoration={selectedDecoration} onDecorationChange={setSelectedDecoration} />
+            <DecorationSelector selected={decorationComponents} onToggle={toggleDecoration} />
           </div>
         </motion.div>
       )}
@@ -823,7 +829,7 @@ export default function MenuBuilder() {
                       </div>
                       <div>
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.decorationLabel')}</p>
-                        <p className="text-xs sm:text-sm text-[#1f1f1f]">{t(`menuBuilder.decoration.packages.${selectedDecoration}.name`)}</p>
+                        <p className="text-xs sm:text-sm text-[#1f1f1f]">{decorationComponents.length ? decorationComponents.map((id) => t(`menuBuilder.decoration.components.${id}.name`)).join(', ') : t('menuBuilder.decoration.noneSelected')}</p>
                       </div>
                     </div>
 

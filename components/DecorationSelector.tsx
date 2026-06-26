@@ -4,32 +4,35 @@ import { motion } from 'framer-motion';
 import { memo } from 'react';
 import { useLanguage } from './LanguageProvider';
 import { StepHeader, StarSeal, InsetFrame, cardShell, CheckSeal } from './MenuDecor';
+import { formatEuro } from '@/lib/pricing';
 
-export type DecorationType = 'basic' | 'classic' | 'grace' | 'custom';
+export type DecorationComponentId = 'tafeldecoratie' | 'servies' | 'sfeeraankleding';
 
-interface DecorationSelectorProps {
-  selectedDecoration: DecorationType;
-  onDecorationChange: (decoration: DecorationType) => void;
+// Modular decoration add-ons. Each is an independent one-time fee.
+// NOTE: placeholder prices — adjust here.
+export const DECORATION_COMPONENTS: { id: DecorationComponentId; price: number }[] = [
+  { id: 'tafeldecoratie', price: 150 }, // placeholder price
+  { id: 'servies', price: 200 }, // placeholder price
+  { id: 'sfeeraankleding', price: 250 }, // placeholder price
+];
+
+export const DECORATION_PRICE_BY_ID: Record<DecorationComponentId, number> = DECORATION_COMPONENTS.reduce(
+  (acc, c) => ({ ...acc, [c.id]: c.price }),
+  {} as Record<DecorationComponentId, number>
+);
+
+/** One-time decoration fee for the selected components. */
+export function decorationFeeFor(selected: DecorationComponentId[]): number {
+  return selected.reduce((sum, id) => sum + (DECORATION_PRICE_BY_ID[id] ?? 0), 0);
 }
 
-// One-time fees (totals). Basic is included; Custom is quoted per event.
-export const DECORATION_PRICES: Record<DecorationType, number> = {
-  basic: 0,
-  classic: 500,
-  grace: 1000,
-  custom: 0,
-};
+interface DecorationSelectorProps {
+  selected: DecorationComponentId[];
+  onToggle: (id: DecorationComponentId) => void;
+}
 
-function DecorationSelector({ selectedDecoration, onDecorationChange }: DecorationSelectorProps) {
+function DecorationSelector({ selected, onToggle }: DecorationSelectorProps) {
   const { t } = useLanguage();
-
-  const collectionIds: DecorationType[] = ['basic', 'classic', 'grace', 'custom'];
-
-  const priceLabel = (id: DecorationType): string => {
-    if (id === 'custom') return t('menuBuilder.decoration.onRequest');
-    if (DECORATION_PRICES[id] === 0) return t('menuBuilder.decoration.includedTag');
-    return `+€${DECORATION_PRICES[id]}`;
-  };
 
   return (
     <div className="space-y-12">
@@ -37,11 +40,11 @@ function DecorationSelector({ selectedDecoration, onDecorationChange }: Decorati
 
       <div>
         <p className="text-[11px] tracking-[0.28em] text-[#a8824a] mb-6 text-center uppercase">
-          {t('menuBuilder.decoration.packagesLabel')}
+          {t('menuBuilder.decoration.componentsLabel')}
         </p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {collectionIds.map((id, index) => {
-            const isActive = selectedDecoration === id;
+        <div className="grid sm:grid-cols-3 gap-4 sm:gap-5 max-w-4xl mx-auto">
+          {DECORATION_COMPONENTS.map(({ id, price }, index) => {
+            const isActive = selected.includes(id);
             return (
               <motion.div
                 key={id}
@@ -50,7 +53,7 @@ function DecorationSelector({ selectedDecoration, onDecorationChange }: Decorati
                 transition={{ duration: 0.5, delay: index * 0.05 }}
                 whileHover={{ y: -5 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onDecorationChange(id)}
+                onClick={() => onToggle(id)}
                 className="group relative cursor-pointer"
               >
                 <div className={`${cardShell(isActive)} p-6 h-full flex flex-col`}>
@@ -59,16 +62,16 @@ function DecorationSelector({ selectedDecoration, onDecorationChange }: Decorati
 
                   <div className="relative space-y-2 text-center flex-1">
                     <h4 className={`text-sm font-serif font-light tracking-[0.05em] ${isActive ? 'text-[#1f1f1f]' : 'text-[#3a352c]'}`}>
-                      {t(`menuBuilder.decoration.packages.${id}.name`)}
+                      {t(`menuBuilder.decoration.components.${id}.name`)}
                     </h4>
                     <p className="text-[11px] text-[#6c655b] leading-relaxed font-light min-h-[3.75rem]">
-                      {t(`menuBuilder.decoration.packages.${id}.description`)}
+                      {t(`menuBuilder.decoration.components.${id}.description`)}
                     </p>
                   </div>
 
                   <div className="relative text-center pt-3 mt-3 border-t border-[#e7ddcb]">
                     <span className={`text-xs font-serif tracking-[0.22em] uppercase ${isActive ? 'text-[#a8824a]' : 'text-[#6c655b]'}`}>
-                      {priceLabel(id)}
+                      +{formatEuro(price)}
                     </span>
                   </div>
                 </div>

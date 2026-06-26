@@ -4,9 +4,30 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Search, X, Loader2, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
-import { searchPlaces, resolvePlace, Prediction, PlaceResult } from '@/lib/geocode';
+import { searchPlaces, resolvePlace, Prediction, PlaceResult, BASE_COORD } from '@/lib/geocode';
 import { getTransportCost, formatEuro } from '@/lib/pricing';
 import { StepHeader, StarSeal } from './MenuDecor';
+
+// Partner venues we recommend — shown as quick-picks under the search bar.
+// All in Amsterdam (flat transport fee). Edit this list to add partners.
+const PARTNER_VENUES: { name: string }[] = [
+  { name: 'de Diamant' },
+  { name: 'De Koning' },
+  { name: 'Royal' },
+  { name: 'Majestic' },
+];
+
+/** Build a transport-ready PlaceResult for an Amsterdam partner venue. */
+function partnerToPlace(name: string): PlaceResult {
+  return {
+    label: `${name} · Amsterdam`,
+    city: 'Amsterdam',
+    lat: BASE_COORD.lat,
+    lon: BASE_COORD.lon,
+    isAmsterdam: true,
+    distanceKm: 0,
+  };
+}
 
 interface LocationSelectorProps {
   selectedLocation: PlaceResult | null;
@@ -159,6 +180,26 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                 </motion.ul>
               )}
             </AnimatePresence>
+
+            {/* Suggested partner venues */}
+            <div className="mt-5">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-[#a8824a] mb-3">
+                {t('menuBuilder.location.suggestedLabel')}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {PARTNER_VENUES.map(({ name }) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => onLocationChange(partnerToPlace(name))}
+                    className="flex items-center gap-1.5 rounded-full border border-[#dcc8a4] bg-white px-3.5 py-1.5 text-xs text-[#4a4742] transition-colors hover:border-[#C19A5B] hover:bg-[#f6f1e8]"
+                  >
+                    <MapPin className="w-3 h-3 text-[#C19A5B]" strokeWidth={2} />
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -182,6 +223,11 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
           />
           <span className="text-sm text-[#4a4742] font-light">{t('menuBuilder.location.unknownCheckbox')}</span>
         </label>
+
+        {/* Service / kitchen cost disclaimer */}
+        <p className="mt-6 text-[11px] leading-relaxed text-[#9a8a6a] border-t border-[#e7ddcb] pt-4">
+          {t('menuBuilder.location.kitchenCostDisclaimer')}
+        </p>
       </div>
     </div>
   );

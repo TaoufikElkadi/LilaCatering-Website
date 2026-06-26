@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MenuItem } from '@/data/menuData';
 import { EventType } from '@/components/EventTypeSelector';
-import { DecorationType } from '@/components/DecorationSelector';
+import { DecorationComponentId, DECORATION_PRICE_BY_ID } from '@/components/DecorationSelector';
 import { getTranslation, Lang } from './translations';
 import {
   formatEuro,
@@ -23,7 +23,7 @@ interface OfferteData {
   tableExtras?: TableExtraId[];
   mocktailMix?: boolean;
   teaShow?: TeaShowId;
-  selectedDecoration: DecorationType;
+  decorationComponents: DecorationComponentId[];
   venueName?: string;
   venueCity?: string;
   transportFee?: number;
@@ -467,23 +467,15 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
     ]);
   }
 
-  const decorationPrices: Record<DecorationType, number> = {
-    basic: 0,
-    classic: 500,
-    grace: 1000,
-    custom: 0,
-  };
-
-  extrasRows.push([
-    t(`menuBuilder.pdf.decoration.${data.selectedDecoration}`),
-    t('menuBuilder.pdf.extras.decoration'),
-    '-',
-    data.selectedDecoration === 'custom'
-      ? t('menuBuilder.pdf.onRequest')
-      : data.selectedDecoration === 'basic'
-      ? t('menuBuilder.pdf.included')
-      : formatEuro(decorationPrices[data.selectedDecoration])
-  ]);
+  // Modular decoration — one row per chosen component.
+  data.decorationComponents.forEach((id) => {
+    extrasRows.push([
+      t(`menuBuilder.decoration.components.${id}.name`),
+      t('menuBuilder.pdf.extras.decoration'),
+      '-',
+      formatEuro(DECORATION_PRICE_BY_ID[id] ?? 0),
+    ]);
+  });
 
   // Transport — venue-based; one-time, not multiplied.
   if (data.venueName) {

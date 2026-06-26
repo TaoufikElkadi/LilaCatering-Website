@@ -339,6 +339,10 @@ const translations: Record<Lang, TranslationTree> = {
           lastName: 'Last name',
           requiredNote: 'First name, email and phone are required.',
           emailInvalid: 'Please enter a valid email address.',
+          discountPlaceholder: 'Discount code',
+          discountApply: 'Apply',
+          discountApplied: 'Code applied:',
+          discountInvalid: 'This discount code is not valid.',
           submitting: 'One moment…',
         },
         scheduler: {
@@ -450,6 +454,8 @@ const translations: Record<Lang, TranslationTree> = {
         unknownCheckbox: "I don't have a location yet",
         unknownShort: 'Location to be confirmed',
         info: 'Within Amsterdam €150 · outside €3.50 per km',
+        suggestedLabel: 'Suggested venues',
+        kitchenCostDisclaimer: 'Please note: at external venues, the hall’s own service and kitchen costs may be charged separately and are not included in this amount.',
       },
       extras: {
         title: 'Service & sweets',
@@ -493,16 +499,14 @@ const translations: Record<Lang, TranslationTree> = {
       },
       decoration: {
         title: 'Decoration & Ambiance',
-        subtitle: 'Choose the collection that fits your event.',
-        packagesLabel: 'Decoration collections',
-        includedTag: 'Included',
-        onRequest: 'On request',
-        setupInfo: 'All collections include setup and takedown.',
-        packages: {
-          basic: { name: 'Basic Collection', description: 'Tasteful base styling of the table, included with every package.' },
-          classic: { name: 'Classic Collection', description: 'Atmospheric Moroccan styling with lanterns, textiles and warm accents.' },
-          grace: { name: 'Grace Collection', description: 'Full luxe styling with ornate details and floral arrangements.' },
-          custom: { name: 'Custom Collection', description: 'Fully bespoke — designed together with you for your venue.' },
+        subtitle: 'Choose the decoration components you would like to add.',
+        componentsLabel: 'Decoration components',
+        noneSelected: 'None selected',
+        setupInfo: 'All decoration includes setup and takedown.',
+        components: {
+          tafeldecoratie: { name: 'Table decoration', description: 'Tasteful styling of the tables with centerpieces and accents.' },
+          servies: { name: 'Tableware', description: 'Curated plates, glassware and cutlery to match your event.' },
+          sfeeraankleding: { name: 'Ambiance styling', description: 'Lanterns, textiles and warm Moroccan accents throughout the space.' },
         },
       },
       datePicker: {
@@ -1120,6 +1124,10 @@ const translations: Record<Lang, TranslationTree> = {
           lastName: 'Nom',
           requiredNote: 'Le prénom, l’e-mail et le téléphone sont obligatoires.',
           emailInvalid: 'Veuillez saisir une adresse e-mail valide.',
+          discountPlaceholder: 'Code de réduction',
+          discountApply: 'Appliquer',
+          discountApplied: 'Code appliqué :',
+          discountInvalid: 'Ce code de réduction n’est pas valide.',
           submitting: 'Un instant…',
         },
         scheduler: {
@@ -1231,6 +1239,8 @@ const translations: Record<Lang, TranslationTree> = {
         unknownCheckbox: "Je n'ai pas encore de lieu",
         unknownShort: 'Lieu à confirmer',
         info: 'Dans Amsterdam 150 € · au-delà 3,50 € par km',
+        suggestedLabel: 'Salles suggérées',
+        kitchenCostDisclaimer: 'Remarque : dans les lieux externes, les frais de service et de cuisine de la salle peuvent être facturés séparément et ne sont pas inclus dans ce montant.',
       },
       extras: {
         title: 'Service & douceurs',
@@ -1274,16 +1284,14 @@ const translations: Record<Lang, TranslationTree> = {
       },
       decoration: {
         title: 'Décoration & Ambiance',
-        subtitle: 'Choisissez la collection adaptée à votre événement.',
-        packagesLabel: 'Collections de décoration',
-        includedTag: 'Inclus',
-        onRequest: 'Sur devis',
-        setupInfo: 'Toutes les collections incluent la mise en place et le démontage.',
-        packages: {
-          basic: { name: 'Collection Basic', description: 'Habillage de base élégant de la table, inclus dans chaque formule.' },
-          classic: { name: 'Collection Classic', description: 'Décor marocain chaleureux avec lanternes, textiles et accents.' },
-          grace: { name: 'Collection Grace', description: 'Style luxe complet avec détails ornés et compositions florales.' },
-          custom: { name: 'Collection sur mesure', description: 'Entièrement sur mesure — conçue avec vous pour votre lieu.' },
+        subtitle: 'Choisissez les éléments de décoration que vous souhaitez ajouter.',
+        componentsLabel: 'Éléments de décoration',
+        noneSelected: 'Aucun sélectionné',
+        setupInfo: 'Toute la décoration inclut la mise en place et le démontage.',
+        components: {
+          tafeldecoratie: { name: 'Décoration de table', description: 'Habillage élégant des tables avec centres de table et accents.' },
+          servies: { name: 'Vaisselle', description: 'Assiettes, verrerie et couverts assortis à votre événement.' },
+          sfeeraankleding: { name: "Décor d'ambiance", description: "Lanternes, textiles et accents marocains chaleureux dans l'espace." },
         },
       },
       datePicker: {
@@ -1901,6 +1909,10 @@ const translations: Record<Lang, TranslationTree> = {
           lastName: 'Achternaam',
           requiredNote: 'Voornaam, e-mail en telefoonnummer zijn verplicht.',
           emailInvalid: 'Voer een geldig e-mailadres in.',
+          discountPlaceholder: 'Kortingscode',
+          discountApply: 'Toepassen',
+          discountApplied: 'Code toegepast:',
+          discountInvalid: 'Deze kortingscode is niet geldig.',
           submitting: 'Een moment…',
         },
         scheduler: {
@@ -2012,6 +2024,8 @@ const translations: Record<Lang, TranslationTree> = {
         unknownCheckbox: 'Ik heb nog geen locatie',
         unknownShort: 'Locatie nog te bevestigen',
         info: 'Binnen Amsterdam €150 · daarbuiten €3,50 per km',
+        suggestedLabel: 'Voorgestelde zalen',
+        kitchenCostDisclaimer: 'Let op: bij externe locaties kunnen service- en keukenkosten van de zaal apart in rekening worden gebracht en zijn deze niet inbegrepen in dit bedrag.',
       },
       extras: {
         title: 'Service & zoetigheden',
@@ -2055,16 +2069,14 @@ const translations: Record<Lang, TranslationTree> = {
       },
       decoration: {
         title: 'Decoratie & sfeer',
-        subtitle: 'Kies de collectie die bij uw evenement past.',
-        packagesLabel: 'Decoratiecollecties',
-        includedTag: 'Inbegrepen',
-        onRequest: 'Op aanvraag',
-        setupInfo: 'Alle collecties zijn inclusief opbouw en afbraak.',
-        packages: {
-          basic: { name: 'Basic Collection', description: 'Stijlvolle basisaankleding van de tafel, inbegrepen bij elke formule.' },
-          classic: { name: 'Classic Collection', description: 'Sfeervolle Marokkaanse aankleding met lantaarns, textiel en accenten.' },
-          grace: { name: 'Grace Collection', description: 'Volledige luxe styling met sierlijke details en bloemwerk.' },
-          custom: { name: 'Custom Collection', description: 'Volledig op maat ontworpen — samen met u samengesteld.' },
+        subtitle: 'Kies de decoratie-onderdelen die u wilt toevoegen.',
+        componentsLabel: 'Decoratie-onderdelen',
+        noneSelected: 'Geen gekozen',
+        setupInfo: 'Alle decoratie is inclusief opbouw en afbraak.',
+        components: {
+          tafeldecoratie: { name: 'Tafeldecoratie', description: 'Stijlvolle aankleding van de tafels met tafelstukken en accenten.' },
+          servies: { name: 'Servies', description: 'Zorgvuldig gekozen borden, glaswerk en bestek passend bij uw evenement.' },
+          sfeeraankleding: { name: 'Sfeeraankleding', description: 'Lantaarns, textiel en warme Marokkaanse accenten door de hele ruimte.' },
         },
       },
       datePicker: {

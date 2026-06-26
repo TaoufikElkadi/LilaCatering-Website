@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMollieClient } from '@mollie/api-client';
 import { getDepositAmount } from '@/lib/booking';
+import { applyDiscount } from '@/lib/discount';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
       eventStart,
       eventEnd,
       foodTime,
+      discountCode,
       customer,
       summary,
       lang,
@@ -32,6 +34,7 @@ export async function POST(request: NextRequest) {
       eventStart?: string;
       eventEnd?: string;
       foodTime?: string;
+      discountCode?: string;
       customer?: { name?: string; firstName?: string; lastName?: string; email?: string; phone?: string };
       summary?: string;
       lang?: string;
@@ -48,7 +51,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'missing_fields' }, { status: 400 });
     }
 
-    const deposit = getDepositAmount(totalPrice);
+    // Apply the discount SERVER-SIDE — never trust a client-sent amount.
+    const discount = applyDiscount(totalPrice, discountCode);
+    const chargedTotal = discount ? discount.discountedTotal : totalPrice;
+    const deposit = getDepositAmount(chargedTotal);
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const locale = lang === 'fr' ? 'fr' : lang === 'en' ? 'en' : 'nl';
 
@@ -67,6 +73,9 @@ export async function POST(request: NextRequest) {
         eventType: eventType ?? '',
         guestCount: guestCount ?? 0,
         totalPrice,
+        discountCode: discount ? discount.code : '',
+        discountAmount: discount ? discount.discountAmount : 0,
+        chargedTotal,
         deposit,
         name: fullName || firstName,
         firstName,

@@ -5,6 +5,7 @@ import { CalendarCheck, CreditCard } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { formatEuro } from '@/lib/pricing';
 import { getDepositAmount } from '@/lib/booking';
+import { applyDiscount, type AppliedDiscount } from '@/lib/discount';
 import AppointmentScheduler from './AppointmentScheduler';
 
 interface Props {
@@ -38,7 +39,24 @@ export default function BookingActions({
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error' | 'unavailable'>('idle');
 
-  const deposit = getDepositAmount(totalPrice);
+  // Discount code (validated again server-side before charging).
+  const [discountCode, setDiscountCode] = useState('');
+  const [applied, setApplied] = useState<AppliedDiscount | null>(null);
+  const [discountError, setDiscountError] = useState(false);
+
+  const effectiveTotal = applied ? applied.discountedTotal : totalPrice;
+  const deposit = getDepositAmount(effectiveTotal);
+
+  const applyCode = () => {
+    const result = applyDiscount(totalPrice, discountCode);
+    if (result) {
+      setApplied(result);
+      setDiscountError(false);
+    } else {
+      setApplied(null);
+      setDiscountError(true);
+    }
+  };
 
   // All three contact details are required; the email must be well-formed.
   const emailValid = EMAIL_RE.test(email.trim());
@@ -60,6 +78,7 @@ export default function BookingActions({
           eventStart,
           eventEnd,
           foodTime,
+          discountCode: applied?.code,
           customer: { name: fullName, firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), phone: phone.trim() },
           summary: offerteSummary,
           lang,
@@ -126,7 +145,16 @@ export default function BookingActions({
           </button>
           <p className="text-sm text-[#6c655b]">
             {t('menuBuilder.booking.reserve.depositNote')}: <strong className="text-[#1f1f1f]">{formatEuro(deposit)}</strong>{' '}
-            ({t('menuBuilder.review.estimatedTotal')}: {formatEuro(totalPrice)})
+            ({t('menuBuilder.review.estimatedTotal')}:{' '}
+            {applied ? (
+              <>
+                <span className="line-through text-[#a39e94]">{formatEuro(totalPrice)}</span>{' '}
+                <span className="text-[#1f1f1f]">{formatEuro(effectiveTotal)}</span>
+              </>
+            ) : (
+              formatEuro(totalPrice)
+            )}
+            )
           </p>
           <p className="text-[11px] text-[#8a8275]">{t('menuBuilder.booking.form.requiredNote')}</p>
           <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={`${t('menuBuilder.booking.form.firstName')} *`} autoComplete="given-name"
@@ -140,6 +168,33 @@ export default function BookingActions({
           )}
           <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={`${t('menuBuilder.booking.form.phone')} *`} autoComplete="tel"
             className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
+
+          {/* Discount code */}
+          <div className="flex gap-2">
+            <input
+              value={discountCode}
+              onChange={(e) => { setDiscountCode(e.target.value); setDiscountError(false); }}
+              placeholder={t('menuBuilder.booking.form.discountPlaceholder')}
+              className="flex-1 border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm uppercase tracking-wider outline-none focus:border-[#C19A5B] rounded-[2px]"
+            />
+            <button
+              type="button"
+              onClick={applyCode}
+              disabled={discountCode.trim() === ''}
+              className="shrink-0 border-[1.5px] border-[#C19A5B] px-4 text-xs uppercase tracking-[0.18em] text-[#a8824a] rounded-[2px] disabled:opacity-40 hover:bg-[#C19A5B]/10 transition-colors"
+            >
+              {t('menuBuilder.booking.form.discountApply')}
+            </button>
+          </div>
+          {applied && (
+            <p className="text-xs text-[#3f7d52]">
+              {t('menuBuilder.booking.form.discountApplied')} {applied.code} · −{formatEuro(applied.discountAmount)}
+            </p>
+          )}
+          {discountError && (
+            <p className="text-xs text-[#b4493f]">{t('menuBuilder.booking.form.discountInvalid')}</p>
+          )}
+
           {status === 'unavailable' && (
             <p className="text-xs text-[#8a8275]">{t('menuBuilder.booking.reserve.notConfigured')}</p>
           )}

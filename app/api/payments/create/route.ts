@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
       eventDate,
       eventType,
       guestCount,
+      eventStart,
+      eventEnd,
+      foodTime,
       customer,
       summary,
       lang,
@@ -26,12 +29,22 @@ export async function POST(request: NextRequest) {
       eventDate?: string;
       eventType?: string;
       guestCount?: number;
-      customer?: { name?: string; email?: string; phone?: string };
+      eventStart?: string;
+      eventEnd?: string;
+      foodTime?: string;
+      customer?: { name?: string; firstName?: string; lastName?: string; email?: string; phone?: string };
       summary?: string;
       lang?: string;
     };
 
-    if (!totalPrice || !eventDate || !customer?.name || !customer?.email) {
+    const firstName = (customer?.firstName ?? '').trim();
+    const fullName = (customer?.name ?? '').trim();
+    const email = (customer?.email ?? '').trim();
+    const phone = (customer?.phone ?? '').trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    // First name, phone and a valid email are all mandatory.
+    if (!totalPrice || !eventDate || !(firstName || fullName) || !emailValid || !phone) {
       return NextResponse.json({ error: 'missing_fields' }, { status: 400 });
     }
 
@@ -48,13 +61,18 @@ export async function POST(request: NextRequest) {
       metadata: {
         kind: 'reservation',
         eventDate,
+        eventStart: eventStart ?? '',
+        eventEnd: eventEnd ?? '',
+        foodTime: foodTime ?? '',
         eventType: eventType ?? '',
         guestCount: guestCount ?? 0,
         totalPrice,
         deposit,
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone ?? '',
+        name: fullName || firstName,
+        firstName,
+        lastName: (customer?.lastName ?? '').trim(),
+        email,
+        phone,
         summary: (summary ?? '').slice(0, 600),
       },
     });

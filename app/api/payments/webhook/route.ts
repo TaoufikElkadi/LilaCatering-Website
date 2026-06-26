@@ -23,6 +23,9 @@ export async function POST(request: NextRequest) {
 
     const m = (payment.metadata ?? {}) as Record<string, unknown>;
     const eventDate = String(m.eventDate ?? '');
+    const eventStart = String(m.eventStart ?? '');
+    const eventEnd = String(m.eventEnd ?? '');
+    const foodTime = String(m.foodTime ?? '');
     const name = String(m.name ?? '');
     const email = String(m.email ?? '');
     const phone = String(m.phone ?? '');
@@ -44,6 +47,9 @@ export async function POST(request: NextRequest) {
         `Telefoon: ${phone || '-'}`,
         `Type: ${eventType || '-'}`,
         `Aantal gasten: ${guestCount}`,
+        (eventStart || foodTime || eventEnd)
+          ? `Tijden: ${[eventStart && `aanvang ${eventStart}`, foodTime && `serveren ${foodTime}`, eventEnd && `einde ${eventEnd}`].filter(Boolean).join(' · ')}`
+          : '',
         `Geschat totaal: ${formatEuro(totalPrice)}`,
         `Aanbetaling: ${formatEuro(deposit)} (betaald)`,
         `Mollie: ${payment.id}`,

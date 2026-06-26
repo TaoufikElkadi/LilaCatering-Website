@@ -24,13 +24,14 @@ import LocationSelector from './LocationSelector';
 import ServiceSelector from './ExtrasSelector';
 import DecorationSelector, { DecorationType, DECORATION_PRICES } from './DecorationSelector';
 import DatePickerSelector from './DatePickerSelector';
+import EventTimeSelector from './EventTimeSelector';
 import { useLanguage } from './LanguageProvider';
 import { getTranslatedMenuItem } from '@/utils/translations';
 import { StarSeal as DecorStar } from './MenuDecor';
 import { smoothScrollTo, getLenis } from '@/lib/lenis';
 
-type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-type StepKind = 'event' | 'date' | 'location' | 'guests' | 'starterTemp' | 'menu' | 'service' | 'decor' | 'review';
+type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+type StepKind = 'event' | 'date' | 'time' | 'location' | 'guests' | 'starterTemp' | 'menu' | 'service' | 'decor' | 'review';
 
 // Starter temperature: cold = salads, hot = pastilla + soups.
 type StarterTemp = 'hot' | 'cold';
@@ -115,6 +116,9 @@ export default function MenuBuilder() {
   const [mocktailMix, setMocktailMix] = useState<boolean>(false);
   const [selectedDecoration, setSelectedDecoration] = useState<DecorationType>('basic');
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [eventStart, setEventStart] = useState<string>('');
+  const [eventEnd, setEventEnd] = useState<string>('');
+  const [foodTime, setFoodTime] = useState<string>('');
   const [selectedLocation, setSelectedLocation] = useState<PlaceResult | null>(null);
   const [locationUnknown, setLocationUnknown] = useState<boolean>(false);
 
@@ -187,16 +191,17 @@ export default function MenuBuilder() {
   const STEP_DEFS: { step: FlowStep; kind: StepKind; category?: MenuCategory }[] = [
     { step: 1, kind: 'event' },
     { step: 2, kind: 'date' },
-    { step: 3, kind: 'location' },
-    { step: 4, kind: 'guests' },
-    { step: 5, kind: 'menu', category: 'appetizer' },
-    { step: 6, kind: 'starterTemp' },
-    { step: 7, kind: 'menu', category: 'starter' },
-    { step: 8, kind: 'menu', category: 'main' },
-    { step: 9, kind: 'menu', category: 'dessert' },
-    { step: 10, kind: 'service' },
-    { step: 11, kind: 'decor' },
-    { step: 12, kind: 'review' },
+    { step: 3, kind: 'time' },
+    { step: 4, kind: 'location' },
+    { step: 5, kind: 'guests' },
+    { step: 6, kind: 'menu', category: 'appetizer' },
+    { step: 7, kind: 'starterTemp' },
+    { step: 8, kind: 'menu', category: 'starter' },
+    { step: 9, kind: 'menu', category: 'main' },
+    { step: 10, kind: 'menu', category: 'dessert' },
+    { step: 11, kind: 'service' },
+    { step: 12, kind: 'decor' },
+    { step: 13, kind: 'review' },
   ];
   const TOTAL_STEPS = STEP_DEFS.length;
   const currentDef = STEP_DEFS[currentStep - 1];
@@ -461,6 +466,7 @@ export default function MenuBuilder() {
   const stepKeyForKind: Record<Exclude<StepKind, 'menu'>, string> = {
     event: 'event',
     date: 'date',
+    time: 'time',
     location: 'location',
     guests: 'guests',
     starterTemp: 'starterTemp',
@@ -491,12 +497,22 @@ export default function MenuBuilder() {
     return parts.join(' · ');
   })();
 
+  // Human-readable timing line (only the parts the customer filled in).
+  const timesSummary = (() => {
+    const parts: string[] = [];
+    if (eventStart) parts.push(`${t('menuBuilder.eventTime.startLabel')} ${eventStart}`);
+    if (foodTime) parts.push(`${t('menuBuilder.eventTime.foodLabel')} ${foodTime}`);
+    if (eventEnd) parts.push(`${t('menuBuilder.eventTime.endLabel')} ${eventEnd}`);
+    return parts.join(' · ');
+  })();
+
   // Compact text offerte used in booking emails / calendar invites.
   const offerteSummary = (() => {
     const eventName = selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : '';
     const dishes = selectedItems.map((i) => i.name).join(', ');
     return [
       `${eventName} · ${guestCount} ${t('menuBuilder.guestCount.guests')} · ${selectedDate}`,
+      timesSummary ? `${t('menuBuilder.eventTime.title')}: ${timesSummary}` : '',
       dishes ? `Menu: ${dishes}` : '',
       serviceSummary,
       `${t('menuBuilder.review.estimatedTotal')}: ${formatEuro(getTotalPrice())}`,
@@ -583,6 +599,19 @@ export default function MenuBuilder() {
                 {t(`menuBuilder.categories.${activeMenuCategory}`)}
               </h3>
               <StarDivider />
+              {activeMenuCategory === 'appetizer' && (
+                <div className="flex flex-col items-center gap-2.5 pt-1">
+                  <p className="text-sm text-[#6c655b] font-light">
+                    <span className="text-[#1f1f1f]">{t('menuBuilder.hapjes.choose')}</span>
+                    {' — '}
+                    <span className="text-[#a8824a]">{t('menuBuilder.hapjes.included')}</span>
+                  </p>
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#C19A5B]/40 bg-[#C19A5B]/[0.07] text-[11px] uppercase tracking-[0.22em] text-[#a8824a]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C19A5B]" />
+                    {t('menuBuilder.hapjes.counter').replace('{count}', String(appetizerCount))}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Sub-Category Selector (hidden when there's only one option) */}
@@ -688,6 +717,22 @@ export default function MenuBuilder() {
         <motion.div key="step-date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="py-2 sm:py-6">
             <DatePickerSelector selectedDate={selectedDate} onDateChange={handleDateSelect} />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Step: Event timing — start / food served / end */}
+      {currentDef.kind === 'time' && (
+        <motion.div key="step-time" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div className="py-2 sm:py-6">
+            <EventTimeSelector
+              eventStart={eventStart}
+              eventEnd={eventEnd}
+              foodTime={foodTime}
+              onEventStartChange={setEventStart}
+              onEventEndChange={setEventEnd}
+              onFoodTimeChange={setFoodTime}
+            />
           </div>
         </motion.div>
       )}
@@ -845,6 +890,9 @@ export default function MenuBuilder() {
                     eventDate={selectedDate}
                     eventType={selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : ''}
                     guestCount={guestCount}
+                    eventStart={eventStart}
+                    eventEnd={eventEnd}
+                    foodTime={foodTime}
                     offerteSummary={offerteSummary}
                   />
                 </div>

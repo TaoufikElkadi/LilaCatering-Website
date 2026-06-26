@@ -12,22 +12,42 @@ interface Props {
   eventDate: string;
   eventType: string;
   guestCount: number;
+  eventStart?: string;
+  eventEnd?: string;
+  foodTime?: string;
   offerteSummary: string;
 }
 
-export default function BookingActions({ totalPrice, eventDate, eventType, guestCount, offerteSummary }: Props) {
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export default function BookingActions({
+  totalPrice,
+  eventDate,
+  eventType,
+  guestCount,
+  eventStart,
+  eventEnd,
+  foodTime,
+  offerteSummary,
+}: Props) {
   const { t, lang } = useLanguage();
   const [mode, setMode] = useState<'choose' | 'reserve' | 'appointment'>('choose');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error' | 'unavailable'>('idle');
 
   const deposit = getDepositAmount(totalPrice);
 
+  // All three contact details are required; the email must be well-formed.
+  const emailValid = EMAIL_RE.test(email.trim());
+  const canSubmit = firstName.trim() !== '' && phone.trim() !== '' && emailValid;
+
   const startPayment = async () => {
-    if (!name || !email) return;
+    if (!canSubmit) return;
     setStatus('submitting');
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     try {
       const res = await fetch('/api/payments/create', {
         method: 'POST',
@@ -37,7 +57,10 @@ export default function BookingActions({ totalPrice, eventDate, eventType, guest
           eventDate,
           eventType,
           guestCount,
-          customer: { name, email, phone },
+          eventStart,
+          eventEnd,
+          foodTime,
+          customer: { name: fullName, firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), phone: phone.trim() },
           summary: offerteSummary,
           lang,
         }),
@@ -105,11 +128,17 @@ export default function BookingActions({ totalPrice, eventDate, eventType, guest
             {t('menuBuilder.booking.reserve.depositNote')}: <strong className="text-[#1f1f1f]">{formatEuro(deposit)}</strong>{' '}
             ({t('menuBuilder.review.estimatedTotal')}: {formatEuro(totalPrice)})
           </p>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('menuBuilder.booking.form.name')}
+          <p className="text-[11px] text-[#8a8275]">{t('menuBuilder.booking.form.requiredNote')}</p>
+          <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder={`${t('menuBuilder.booking.form.firstName')} *`} autoComplete="given-name"
             className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('menuBuilder.booking.form.email')}
+          <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder={t('menuBuilder.booking.form.lastName')} autoComplete="family-name"
             className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
-          <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('menuBuilder.booking.form.phone')}
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={`${t('menuBuilder.booking.form.email')} *`} autoComplete="email"
+            className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
+          {email.trim() !== '' && !emailValid && (
+            <p className="text-xs text-[#b4493f]">{t('menuBuilder.booking.form.emailInvalid')}</p>
+          )}
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={`${t('menuBuilder.booking.form.phone')} *`} autoComplete="tel"
             className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
           {status === 'unavailable' && (
             <p className="text-xs text-[#8a8275]">{t('menuBuilder.booking.reserve.notConfigured')}</p>
@@ -117,8 +146,8 @@ export default function BookingActions({ totalPrice, eventDate, eventType, guest
           {status === 'error' && <p className="text-xs text-[#b4493f]">{t('menuBuilder.booking.scheduler.error')}</p>}
           <button
             onClick={startPayment}
-            disabled={!name || !email || status === 'submitting'}
-            className="w-full min-h-[52px] bg-gradient-to-r from-[#cda769] via-[#C19A5B] to-[#b8905a] text-[#1f1f1f] text-sm uppercase tracking-[0.2em] font-medium rounded-[3px] disabled:opacity-50 transition-opacity"
+            disabled={!canSubmit || status === 'submitting'}
+            className="w-full min-h-[52px] bg-gradient-to-r from-[#cda769] via-[#C19A5B] to-[#b8905a] text-[#1f1f1f] text-sm uppercase tracking-[0.2em] font-medium rounded-[3px] disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
           >
             {status === 'submitting'
               ? t('menuBuilder.booking.form.submitting')

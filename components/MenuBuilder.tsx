@@ -612,7 +612,7 @@ export default function MenuBuilder() {
                     {' — '}
                     <span className="text-[#a8824a]">{t('menuBuilder.hapjes.included')}</span>
                   </p>
-                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#C19A5B]/40 bg-[#C19A5B]/[0.07] text-[11px] uppercase tracking-[0.22em] text-[#a8824a]">
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-[3px] border border-[#C19A5B]/40 bg-[#C19A5B]/[0.07] text-[11px] uppercase tracking-[0.22em] text-[#a8824a]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#C19A5B]" />
                     {t('menuBuilder.hapjes.counter').replace('{count}', String(appetizerCount))}
                   </span>

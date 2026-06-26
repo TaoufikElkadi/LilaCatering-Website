@@ -6,15 +6,17 @@ import { MapPin, Search, X, Loader2, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { searchPlaces, resolvePlace, Prediction, PlaceResult, BASE_COORD } from '@/lib/geocode';
 import { getTransportCost, formatEuro } from '@/lib/pricing';
-import { StepHeader, StarSeal } from './MenuDecor';
+import { StepHeader } from './MenuDecor';
 
-// Partner venues we recommend — shown as quick-picks under the search bar.
-// All in Amsterdam (flat transport fee). Edit this list to add partners.
-const PARTNER_VENUES: { name: string }[] = [
-  { name: 'de Diamant' },
-  { name: 'De Koning' },
-  { name: 'Royal' },
-  { name: 'Majestic' },
+// Partner venues we recommend — shown as cards under the search bar.
+// All in Amsterdam (flat transport fee). serviceCost is the venue's own
+// service fee (informational — billed by the venue, not included in our total).
+// Edit this list to add partners. (serviceCost values are placeholders.)
+const PARTNER_VENUES: { name: string; city: string; serviceCost: number }[] = [
+  { name: 'de Diamant', city: 'Amsterdam', serviceCost: 350 },
+  { name: 'De Koning', city: 'Amsterdam', serviceCost: 300 },
+  { name: 'Royal', city: 'Amsterdam', serviceCost: 400 },
+  { name: 'Majestic', city: 'Amsterdam', serviceCost: 450 },
 ];
 
 /** Build a transport-ready PlaceResult for an Amsterdam partner venue. */
@@ -118,7 +120,6 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
             animate={{ opacity: 1, y: 0 }}
             className="relative overflow-hidden rounded-[3px] border border-[#C19A5B] bg-gradient-to-br from-[#fdfbf7] to-[#f5efe3] p-5 sm:p-6 shadow-[0_16px_44px_-22px_rgba(80,60,30,0.34)]"
           >
-            <StarSeal className="pointer-events-none absolute -top-5 -right-5 w-24 h-24 text-[#C19A5B]/[0.06]" />
             <div className="relative flex items-start gap-3">
               <span className="mt-0.5 flex items-center justify-center w-8 h-8 rounded-full bg-[#C19A5B] text-white shrink-0">
                 <Check className="w-4 h-4" strokeWidth={3} />
@@ -181,21 +182,27 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
               )}
             </AnimatePresence>
 
-            {/* Suggested partner venues */}
+            {/* Suggested partner venues — cards with name, location, service cost */}
             <div className="mt-5">
               <p className="text-[10px] uppercase tracking-[0.24em] text-[#a8824a] mb-3">
                 {t('menuBuilder.location.suggestedLabel')}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {PARTNER_VENUES.map(({ name }) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {PARTNER_VENUES.map(({ name, city, serviceCost }) => (
                   <button
                     key={name}
                     type="button"
                     onClick={() => onLocationChange(partnerToPlace(name))}
-                    className="flex items-center gap-1.5 rounded-full border border-[#dcc8a4] bg-white px-3.5 py-1.5 text-xs text-[#4a4742] transition-colors hover:border-[#C19A5B] hover:bg-[#f6f1e8]"
+                    className="flex flex-col items-start gap-1 rounded-[3px] border border-[#dcc8a4] bg-white px-4 py-3 text-left transition-colors hover:border-[#C19A5B] hover:bg-[#f6f1e8]"
                   >
-                    <MapPin className="w-3 h-3 text-[#C19A5B]" strokeWidth={2} />
-                    {name}
+                    <span className="flex items-center gap-1.5 text-sm font-medium text-[#1f1f1f]">
+                      <MapPin className="w-3.5 h-3.5 text-[#C19A5B]" strokeWidth={2} />
+                      {name}
+                    </span>
+                    <span className="text-[11px] text-[#8a8275]">{city}</span>
+                    <span className="text-[11px] text-[#a8824a]">
+                      {t('menuBuilder.location.serviceCostLabel')}: {formatEuro(serviceCost)}
+                    </span>
                   </button>
                 ))}
               </div>

@@ -455,6 +455,7 @@ const translations: Record<Lang, TranslationTree> = {
         unknownShort: 'Location to be confirmed',
         info: 'Within Amsterdam €150 · outside €3.50 per km',
         suggestedLabel: 'Suggested venues',
+        serviceCostLabel: 'Service costs',
         kitchenCostDisclaimer: 'Please note: at external venues, the hall’s own service and kitchen costs may be charged separately and are not included in this amount.',
       },
       extras: {
@@ -1240,6 +1241,7 @@ const translations: Record<Lang, TranslationTree> = {
         unknownShort: 'Lieu à confirmer',
         info: 'Dans Amsterdam 150 € · au-delà 3,50 € par km',
         suggestedLabel: 'Salles suggérées',
+        serviceCostLabel: 'Frais de service',
         kitchenCostDisclaimer: 'Remarque : dans les lieux externes, les frais de service et de cuisine de la salle peuvent être facturés séparément et ne sont pas inclus dans ce montant.',
       },
       extras: {
@@ -2025,6 +2027,7 @@ const translations: Record<Lang, TranslationTree> = {
         unknownShort: 'Locatie nog te bevestigen',
         info: 'Binnen Amsterdam €150 · daarbuiten €3,50 per km',
         suggestedLabel: 'Voorgestelde zalen',
+        serviceCostLabel: 'Servicekosten',
         kitchenCostDisclaimer: 'Let op: bij externe locaties kunnen service- en keukenkosten van de zaal apart in rekening worden gebracht en zijn deze niet inbegrepen in dit bedrag.',
       },
       extras: {

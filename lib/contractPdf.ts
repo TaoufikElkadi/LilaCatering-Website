@@ -354,6 +354,63 @@ export async function generateContractPdf(b: ContractBooking): Promise<Uint8Arra
   return w.doc.save();
 }
 
+/** Capitalise the first letter of each word (so "donderdag 30 april" → "Donderdag 30 April"). */
+function titleCaseWords(s: string): string {
+  return s.replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+}
+
+/** Format a YYYY-MM-DD date in Dutch, e.g. "Donderdag 30 April 2026" (or without weekday). */
+export function formatDutchDate(iso: string, withWeekday = false): string {
+  const d = new Date(`${iso}T12:00:00Z`);
+  const fmt = new Intl.DateTimeFormat('nl-NL', {
+    weekday: withWeekday ? 'long' : undefined,
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  return titleCaseWords(fmt.format(d));
+}
+
+function addDaysISO(iso: string, days: number): string {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Build a ContractBooking from raw reservation data (formats dates, reservation nr). */
+export function buildContractBooking(input: {
+  customer: ContractBooking['customer'];
+  eventDateISO: string; // YYYY-MM-DD
+  eventStart?: string;
+  eventEnd?: string;
+  foodTime?: string;
+  guestCount: number;
+  venue?: string;
+  menu: ContractBooking['menu'];
+  decoration: ContractBooking['decoration'];
+  total: number;
+  deposit: number;
+  todayISO: string; // YYYY-MM-DD (offer issue date)
+}): ContractBooking {
+  return {
+    customer: input.customer,
+    eventDateLabel: formatDutchDate(input.eventDateISO, true),
+    eventStart: input.eventStart,
+    eventEnd: input.eventEnd,
+    foodTime: input.foodTime,
+    guestCount: input.guestCount,
+    venue: input.venue,
+    menu: input.menu,
+    decoration: input.decoration,
+    total: input.total,
+    deposit: input.deposit,
+    reservationNumber: buildReservationNumber(input.eventDateISO, 1),
+    issueDateLabel: formatDutchDate(input.todayISO, false),
+    optionDateLabel: formatDutchDate(addDaysISO(input.todayISO, 7), false),
+  };
+}
+
 /** A realistic sample booking for previewing the contract layout. */
 export function sampleBooking(): ContractBooking {
   const total = 7250;

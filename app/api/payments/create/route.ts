@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createMollieClient } from '@mollie/api-client';
-import { getDepositAmount } from '@/lib/booking';
+import { getDepositAmount, todayInZone, OFFICE_TIMEZONE } from '@/lib/booking';
 import { applyDiscount } from '@/lib/discount';
+import { generateContractPdf, buildContractBooking, type ContractBooking } from '@/lib/contractPdf';
+import { createContractTransaction, isSignhostConfigured } from '@/lib/signhost';
+import { OFFICE_EMAIL } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,6 +27,8 @@ export async function POST(request: NextRequest) {
       foodTime,
       discountCode,
       customer,
+      contract,
+      termsAccepted,
       summary,
       lang,
     } = body as {
@@ -36,6 +41,8 @@ export async function POST(request: NextRequest) {
       foodTime?: string;
       discountCode?: string;
       customer?: { name?: string; firstName?: string; lastName?: string; email?: string; phone?: string; address?: string; postcode?: string; city?: string };
+      contract?: { menu?: ContractBooking['menu']; decoration?: ContractBooking['decoration']; venue?: string };
+      termsAccepted?: boolean;
       summary?: string;
       lang?: string;
     };
@@ -57,6 +64,50 @@ export async function POST(request: NextRequest) {
     const deposit = getDepositAmount(chargedTotal);
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const locale = lang === 'fr' ? 'fr' : lang === 'en' ? 'en' : 'nl';
+
+    // Create the Signhost contract transaction now (generate PDF + upload), but
+    // DON'T start it — the webhook starts it on payment success. Never block the
+    // payment if Signhost is unconfigured or errors.
+    let signhostTransactionId = '';
+    if (isSignhostConfigured() && contract) {
+      try {
+        const booking = buildContractBooking({
+          customer: {
+            firstName,
+            lastName: (customer?.lastName ?? '').trim(),
+            name: fullName || firstName,
+            email,
+            phone,
+            address: (customer?.address ?? '').trim(),
+            postcode: (customer?.postcode ?? '').trim(),
+            city: (customer?.city ?? '').trim(),
+          },
+          eventDateISO: eventDate!,
+          eventStart,
+          eventEnd,
+          foodTime,
+          guestCount: guestCount ?? 0,
+          venue: contract.venue,
+          menu: contract.menu ?? { hapjes: [], voorgerecht: [], hoofdgerecht: [], nagerecht: [] },
+          decoration: contract.decoration ?? {},
+          total: chargedTotal,
+          deposit,
+          todayISO: todayInZone(OFFICE_TIMEZONE),
+        });
+        const pdf = await generateContractPdf(booking);
+        signhostTransactionId = await createContractTransaction({
+          pdf,
+          customer: { name: fullName || firstName, email },
+          office: { name: 'Lila Catering', email: OFFICE_EMAIL },
+          message:
+            'Gelieve de overeenkomst voor uw evenement bij Lila Catering digitaal te ondertekenen.',
+          postbackUrl: `${baseUrl}/api/signhost/webhook`,
+          reference: `${eventDate} ${fullName || firstName}`.slice(0, 100),
+        });
+      } catch (e) {
+        console.error('[payments/create] signhost setup failed (continuing):', e);
+      }
+    }
 
     const mollie = createMollieClient({ apiKey });
     const payment = await mollie.payments.create({
@@ -85,6 +136,8 @@ export async function POST(request: NextRequest) {
         address: (customer?.address ?? '').trim(),
         postcode: (customer?.postcode ?? '').trim(),
         city: (customer?.city ?? '').trim(),
+        signhostTransactionId,
+        termsAccepted: termsAccepted ? 1 : 0,
         summary: (summary ?? '').slice(0, 600),
       },
     });

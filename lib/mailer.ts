@@ -17,14 +17,21 @@ function getTransporter() {
   });
 }
 
+interface MailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType?: string;
+}
+
 interface SendArgs {
   to: string | string[];
   subject: string;
   html: string;
   ics?: { content: string; method?: 'REQUEST' | 'PUBLISH' };
+  attachments?: MailAttachment[];
 }
 
-export async function sendMail({ to, subject, html, ics }: SendArgs): Promise<void> {
+export async function sendMail({ to, subject, html, ics, attachments }: SendArgs): Promise<void> {
   if (!isMailConfigured()) {
     console.warn('[mailer] SMTP not configured — skipping email:', subject);
     return;
@@ -35,6 +42,7 @@ export async function sendMail({ to, subject, html, ics }: SendArgs): Promise<vo
     to,
     subject,
     html,
+    ...(attachments && attachments.length ? { attachments } : {}),
     ...(ics
       ? {
           icalEvent: {

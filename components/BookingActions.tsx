@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarCheck, CreditCard } from 'lucide-react';
+import { CalendarCheck, CreditCard, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { formatEuro } from '@/lib/pricing';
 import { getDepositAmount } from '@/lib/booking';
 import { applyDiscount, type AppliedDiscount } from '@/lib/discount';
 import AppointmentScheduler from './AppointmentScheduler';
+
+type DecorTier = 'basic' | 'premium' | 'luxury';
 
 interface Props {
   totalPrice: number;
@@ -17,6 +19,12 @@ interface Props {
   eventEnd?: string;
   foodTime?: string;
   offerteSummary: string;
+  /** Structured booking used to generate the Signhost contract. */
+  contractData?: {
+    menu: { hapjes: string[]; voorgerecht: string[]; hoofdgerecht: string[]; nagerecht: string[] };
+    decoration: Partial<Record<'tafeldecoratie' | 'servies' | 'sfeeraankleding', DecorTier>>;
+    venue?: string;
+  };
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,6 +38,7 @@ export default function BookingActions({
   eventEnd,
   foodTime,
   offerteSummary,
+  contractData,
 }: Props) {
   const { t, lang } = useLanguage();
   const [mode, setMode] = useState<'choose' | 'reserve' | 'appointment'>('choose');
@@ -40,6 +49,7 @@ export default function BookingActions({
   const [address, setAddress] = useState('');
   const [postcode, setPostcode] = useState('');
   const [city, setCity] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error' | 'unavailable'>('idle');
 
   // Discount code (validated again server-side before charging).
@@ -69,7 +79,8 @@ export default function BookingActions({
     emailValid &&
     address.trim() !== '' &&
     postcode.trim() !== '' &&
-    city.trim() !== '';
+    city.trim() !== '' &&
+    termsAccepted;
 
   const startPayment = async () => {
     if (!canSubmit) return;
@@ -98,6 +109,8 @@ export default function BookingActions({
             postcode: postcode.trim(),
             city: city.trim(),
           },
+          contract: contractData,
+          termsAccepted,
           summary: offerteSummary,
           lang,
         }),
@@ -220,6 +233,20 @@ export default function BookingActions({
           {discountError && (
             <p className="text-xs text-[#b4493f]">{t('menuBuilder.booking.form.discountInvalid')}</p>
           )}
+
+          {/* Algemene voorwaarden — required before paying */}
+          <label className="flex items-start gap-2.5 cursor-pointer select-none pt-1">
+            <span
+              onClick={() => setTermsAccepted((v) => !v)}
+              className={`mt-0.5 flex items-center justify-center w-5 h-5 shrink-0 rounded-[3px] border transition-colors duration-200 ${
+                termsAccepted ? 'bg-[#C19A5B] border-[#C19A5B] text-white' : 'border-[#dcc8a4] bg-white text-transparent'
+              }`}
+            >
+              <Check className="w-3.5 h-3.5" strokeWidth={3} />
+            </span>
+            <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="sr-only" />
+            <span className="text-[12px] text-[#6c655b] leading-snug">{t('menuBuilder.booking.form.terms')}</span>
+          </label>
 
           {status === 'unavailable' && (
             <p className="text-xs text-[#8a8275]">{t('menuBuilder.booking.reserve.notConfigured')}</p>

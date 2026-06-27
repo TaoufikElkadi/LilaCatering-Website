@@ -346,6 +346,7 @@ const translations: Record<Lang, TranslationTree> = {
           discountApply: 'Apply',
           discountApplied: 'Code applied:',
           discountInvalid: 'This discount code is not valid.',
+          terms: 'I agree to the general terms and conditions, and to receiving the catering agreement for digital signature.',
           submitting: 'One moment…',
         },
         scheduler: {
@@ -1137,6 +1138,7 @@ const translations: Record<Lang, TranslationTree> = {
           discountApply: 'Appliquer',
           discountApplied: 'Code appliqué :',
           discountInvalid: 'Ce code de réduction n’est pas valide.',
+          terms: 'J’accepte les conditions générales et la réception du contrat de traiteur pour signature numérique.',
           submitting: 'Un instant…',
         },
         scheduler: {
@@ -1928,6 +1930,7 @@ const translations: Record<Lang, TranslationTree> = {
           discountApply: 'Toepassen',
           discountApplied: 'Code toegepast:',
           discountInvalid: 'Deze kortingscode is niet geldig.',
+          terms: 'Ik ga akkoord met de algemene voorwaarden en met het ontvangen van de overeenkomst ter digitale ondertekening.',
           submitting: 'Een moment…',
         },
         scheduler: {

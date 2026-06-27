@@ -544,6 +544,18 @@ export default function MenuBuilder() {
       .join('\n');
   })();
 
+  // Structured booking for the Signhost contract (menu grouped by course).
+  const contractData = {
+    menu: {
+      hapjes: selectedItems.filter((i) => i.category === 'appetizer').map((i) => i.name),
+      voorgerecht: selectedItems.filter((i) => i.category === 'starter').map((i) => i.name),
+      hoofdgerecht: selectedItems.filter((i) => i.category === 'main').map((i) => i.name),
+      nagerecht: selectedItems.filter((i) => i.category === 'dessert').map((i) => i.name),
+    },
+    decoration,
+    venue: locationUnknown ? '' : selectedLocation?.label ?? '',
+  };
+
   // ---- Step content (shared by desktop inline layout and mobile flow) -------
   const renderStepContent = () => (
     <>
@@ -917,6 +929,7 @@ export default function MenuBuilder() {
                     eventEnd={eventEnd}
                     foodTime={foodTime}
                     offerteSummary={offerteSummary}
+                    contractData={contractData}
                   />
                 </div>
               </motion.div>

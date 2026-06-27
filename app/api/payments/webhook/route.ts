@@ -4,6 +4,7 @@ import { createBookingObject, isCalendarConfigured } from '@/lib/appleCalendar';
 import { sendMail, OFFICE_EMAIL } from '@/lib/mailer';
 import { buildAllDayEventICS } from '@/lib/ics';
 import { formatEuro } from '@/lib/pricing';
+import { startTransaction, isSignhostConfigured } from '@/lib/signhost';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -37,7 +38,18 @@ export async function POST(request: NextRequest) {
     const totalPrice = Number(m.totalPrice ?? 0);
     const deposit = Number(m.deposit ?? 0);
     const summary = String(m.summary ?? '');
+    const signhostTransactionId = String(m.signhostTransactionId ?? '');
     if (!eventDate) return NextResponse.json({ ok: true });
+
+    // Kick off the contract signing: payment is in, so email the customer the
+    // Signhost contract. Best-effort — never break the confirmation flow.
+    if (signhostTransactionId && isSignhostConfigured()) {
+      try {
+        await startTransaction(signhostTransactionId);
+      } catch (e) {
+        console.error('[webhook] signhost start failed:', e);
+      }
+    }
 
     // Deterministic UID → repeated webhook calls won't create duplicate events.
     const uid = `lila-reservation-${payment.id}`;

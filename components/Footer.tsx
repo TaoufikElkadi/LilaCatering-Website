@@ -1,107 +1,245 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { MapPin, Mail, Phone } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
+
+const GOLD = '#C19A5B';
+
+// Four small Moroccan ornaments (one per column heading).
+const Ornaments = [
+  // quatrefoil
+  (
+    <g key="o1" fill="none" stroke={GOLD} strokeWidth={1.1}>
+      <circle cx="12" cy="7.2" r="3.1" />
+      <circle cx="12" cy="16.8" r="3.1" />
+      <circle cx="7.2" cy="12" r="3.1" />
+      <circle cx="16.8" cy="12" r="3.1" />
+    </g>
+  ),
+  // eight-point star (two squares)
+  (
+    <g key="o2" fill="none" stroke={GOLD} strokeWidth={1.1}>
+      <rect x="5.5" y="5.5" width="13" height="13" />
+      <rect x="5.5" y="5.5" width="13" height="13" transform="rotate(45 12 12)" />
+    </g>
+  ),
+  // interlaced diamond + ring
+  (
+    <g key="o3" fill="none" stroke={GOLD} strokeWidth={1.1}>
+      <path d="M12 3.2 L20.8 12 L12 20.8 L3.2 12 Z" />
+      <circle cx="12" cy="12" r="3.4" />
+    </g>
+  ),
+  // petal flower
+  (
+    <g key="o4" fill="none" stroke={GOLD} strokeWidth={1.1}>
+      <circle cx="12" cy="12" r="2.6" />
+      {[0, 60, 120, 180, 240, 300].map((a) => (
+        <ellipse key={a} cx="12" cy="5.4" rx="2" ry="3.4" transform={`rotate(${a} 12 12)`} />
+      ))}
+    </g>
+  ),
+];
+
+function Ornament({ i }: { i: number }) {
+  return (
+    <svg viewBox="0 0 24 24" className="w-9 h-9 mb-5" aria-hidden="true">
+      {Ornaments[i % Ornaments.length]}
+    </svg>
+  );
+}
 
 export default function Footer() {
   const { t, lang } = useLanguage();
-  const [currentYear, setCurrentYear] = useState(2026);
-  const basePath = `/${lang}`;
+  const [year, setYear] = useState(2026);
+  const base = `/${lang}`;
+  useEffect(() => setYear(new Date().getFullYear()), []);
 
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
+  const columns = [
+    {
+      title: t('footer.companyTitle'),
+      links: [
+        { label: t('footer.lOverOns'), href: `${base}#about` },
+        { label: t('footer.lWerkwijze'), href: `${base}#about` },
+        { label: t('footer.lReferenties'), href: `${base}#gallery` },
+        { label: t('footer.lContact'), href: `${base}#booking` },
+      ],
+    },
+    {
+      title: t('footer.servicesTitle'),
+      links: [
+        { label: t('footer.lBruiloften'), href: `${base}#services` },
+        { label: t('footer.lBedrijfsfeesten'), href: `${base}#services` },
+        { label: t('footer.lPrivateDining'), href: `${base}#services` },
+        { label: t('footer.lEvenementen'), href: `${base}#services` },
+      ],
+    },
+    {
+      title: t('footer.inspirationTitle'),
+      links: [
+        { label: t('footer.lMenu'), href: `${base}#menu-builder` },
+        { label: t('footer.lGerechten'), href: `${base}#gallery` },
+        { label: t('footer.lSfeer'), href: `${base}#gallery` },
+        { label: t('footer.lProces'), href: `${base}#about` },
+      ],
+    },
+  ];
+
+  const socials = [
+    {
+      label: 'Instagram',
+      href: 'https://www.instagram.com/lilacatering/',
+      path: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z',
+    },
+    {
+      label: 'Facebook',
+      href: 'https://www.facebook.com/lilacatering/',
+      path: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z',
+    },
+    {
+      label: 'TikTok',
+      href: 'https://www.tiktok.com/@lilacatering',
+      path: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z',
+    },
+  ];
+
+  const legal = [
+    { label: t('footer.legalPrivacy'), href: '#' },
+    { label: t('footer.legalTerms'), href: '#' },
+    { label: t('footer.legalCookies'), href: '#' },
+  ];
+
+  const linkCls = 'text-[#6c655b] hover:text-[#C19A5B] transition-colors duration-200';
 
   return (
-    <footer className="bg-[#f0e8dc] border-t border-[#dcd3c5] text-[#1f1f1f]">
-      <div className="max-w-6xl mx-auto px-6 lg:px-10 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Brand */}
-          <div>
-            <h3 className="text-2xl font-serif font-light text-[#1f1f1f] mb-3 uppercase tracking-[0.08em]">
-              {t('footer.brand')}
-            </h3>
-            <p className="text-[#4a4742] mb-4">
-              {t('footer.tagline')}
-            </p>
-          </div>
+    <footer className="relative overflow-hidden bg-gradient-to-b from-[#f6f0e4] to-[#efe7d8] text-[#1f1f1f] border-t border-[#e3d9c6]">
+      {/* ambient zellige texture */}
+      <div className="pointer-events-none absolute inset-0 moroccan-pattern opacity-[0.04]" />
+      {/* keyhole arch on the left */}
+      <svg
+        className="pointer-events-none absolute -left-16 top-0 h-full w-[260px] text-[#C19A5B]/[0.07]"
+        viewBox="0 0 200 400"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        aria-hidden="true"
+      >
+        <path d="M40 400 V150 a60 60 0 0 1 120 0 V400" />
+        <path d="M60 400 V155 a40 40 0 0 1 80 0 V400" />
+      </svg>
+      {/* hanging lantern on the right */}
+      <svg
+        className="pointer-events-none absolute right-10 -top-2 h-44 w-auto text-[#C19A5B]/[0.16] hidden lg:block"
+        viewBox="0 0 80 200"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        aria-hidden="true"
+      >
+        <line x1="40" y1="0" x2="40" y2="34" />
+        <path d="M26 44 Q40 30 54 44 L58 70 Q58 76 52 78 H28 Q22 76 22 70 Z" />
+        <path d="M22 78 H58 L54 140 Q40 152 26 140 Z" />
+        <line x1="40" y1="150" x2="40" y2="168" />
+        <circle cx="40" cy="172" r="4" />
+        <path d="M33 92 L40 86 L47 92 L47 120 L40 126 L33 120 Z" />
+      </svg>
 
-          {/* Quick Links */}
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-16">
+        {/* Wordmark */}
+        <div className="mb-12">
+          <p className="font-serif text-3xl sm:text-4xl tracking-[0.12em] text-[#1f1f1f]">LILA</p>
+          <p className="text-[11px] tracking-[0.5em] text-[#a8824a] mt-1 ml-1">CATERING</p>
+        </div>
+
+        {/* Columns */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+          {columns.map((col, i) => (
+            <div key={col.title}>
+              <Ornament i={i} />
+              <h3 className="font-serif text-lg text-[#1f1f1f] mb-4">{col.title}</h3>
+              <ul className="space-y-2.5 text-sm">
+                {col.links.map((l) => (
+                  <li key={l.label}>
+                    <a href={l.href} className={linkCls}>
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* Contact column */}
           <div>
-            <h4 className="text-lg font-serif text-[#1f1f1f] mb-3 uppercase tracking-[0.08em]">{t('footer.quickLinks')}</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href={basePath} className="text-[#4a4742] hover:text-[#1f1f1f] transition-colors">
-                  {t('footer.home')}
-                </Link>
+            <Ornament i={3} />
+            <h3 className="font-serif text-lg text-[#1f1f1f] mb-4">{t('footer.contactTitle')}</h3>
+            <ul className="space-y-3 text-sm text-[#6c655b]">
+              <li className="flex items-center gap-2.5">
+                <MapPin className="w-4 h-4 text-[#C19A5B] shrink-0" strokeWidth={1.75} />
+                Amsterdam
               </li>
               <li>
-                <a href={`${basePath}#about`} className="text-[#4a4742] hover:text-[#1f1f1f] transition-colors">
-                  {t('footer.aboutUs')}
+                <a href="mailto:info@lilacatering.nl" className={`flex items-center gap-2.5 ${linkCls}`}>
+                  <Mail className="w-4 h-4 text-[#C19A5B] shrink-0" strokeWidth={1.75} />
+                  info@lilacatering.nl
                 </a>
               </li>
               <li>
-                <a href={`${basePath}#gallery`} className="text-[#4a4742] hover:text-[#1f1f1f] transition-colors">
-                  {t('footer.gallery')}
+                <a href="tel:+31203635478" className={`flex items-center gap-2.5 ${linkCls}`}>
+                  <Phone className="w-4 h-4 text-[#C19A5B] shrink-0" strokeWidth={1.75} />
+                  020 363 5478
                 </a>
               </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="text-lg font-serif text-[#1f1f1f] mb-3 uppercase tracking-[0.08em]">{t('footer.contact')}</h4>
-            <ul className="space-y-2 text-[#4a4742]">
-              <li>{t('footer.email')}: info@lilacatering.com</li>
-              <li>{t('footer.phone')}: 020 363 5478</li>
-              <li>{t('footer.location')}:  De Dollard 11, 1454 AT Watergang</li>
             </ul>
           </div>
         </div>
 
-        {/* Social Media */}
-        <div className="border-t border-[#dcd3c5] mt-8 pt-8">
-          <div className="flex justify-center items-center gap-6 mb-6">
-            <a
-              href="https://www.instagram.com/lilacatering/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#4a4742] hover:text-[#C19A5B] transition-colors"
-              aria-label="Instagram"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-              </svg>
-            </a>
-            <a
-              href="https://www.facebook.com/lilacatering/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#4a4742] hover:text-[#C19A5B] transition-colors"
-              aria-label="Facebook"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-            </a>
-            <a
-              href="https://www.tiktok.com/@lilacatering"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#4a4742] hover:text-[#C19A5B] transition-colors"
-              aria-label="TikTok"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-              </svg>
-            </a>
+        {/* Gold divider with centre flower */}
+        <div className="flex items-center gap-4 my-12">
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#C19A5B]/40" />
+          <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#C19A5B] shrink-0" fill="currentColor" aria-hidden="true">
+            <path d="M12 2c1 3 2.5 4.5 5.5 5.5C14.5 8.5 13 10 12 13c-1-3-2.5-4.5-5.5-5.5C9.5 6.5 11 5 12 2zM12 11c1 3 2.5 4.5 5.5 5.5C14.5 17.5 13 19 12 22c-1-3-2.5-4.5-5.5-5.5C9.5 15.5 11 14 12 11z" />
+          </svg>
+          <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#C19A5B]/40" />
+        </div>
+
+        {/* Bottom bar */}
+        <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-4 sm:justify-between text-center sm:text-left">
+          {/* socials */}
+          <div className="flex items-center gap-3">
+            {socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="flex items-center justify-center w-9 h-9 rounded-full border border-[#d8cbb2] text-[#6c655b] hover:border-[#C19A5B] hover:text-[#C19A5B] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d={s.path} />
+                </svg>
+              </a>
+            ))}
           </div>
-          <p className="text-center text-[#6c655b] text-sm">&copy; {currentYear} Lila Catering. {t('footer.copyright')}</p>
+
+          {/* copyright */}
+          <p className="text-xs text-[#8a8275] order-last sm:order-none">
+            &copy; {year} Lila Catering. {t('footer.copyright')}
+          </p>
+
+          {/* legal */}
+          <div className="flex items-center gap-4 text-xs text-[#8a8275]">
+            {legal.map((l) => (
+              <a key={l.label} href={l.href} className="hover:text-[#C19A5B] transition-colors">
+                {l.label}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
   );
 }
-

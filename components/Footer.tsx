@@ -114,37 +114,31 @@ export default function Footer() {
   const linkCls = 'text-[#6c655b] hover:text-[#C19A5B] transition-colors duration-200';
 
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-[#f6f0e4] to-[#efe7d8] text-[#1f1f1f] border-t border-[#e3d9c6]">
-      {/* ambient zellige texture */}
-      <div className="pointer-events-none absolute inset-0 moroccan-pattern opacity-[0.04]" />
-      {/* keyhole arch on the left */}
-      <svg
-        className="pointer-events-none absolute -left-16 top-0 h-full w-[260px] text-[#C19A5B]/[0.07]"
-        viewBox="0 0 200 400"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
+    <footer className="relative overflow-hidden bg-[#ece1d5] text-[#1f1f1f]">
+      {/* Carved zellige arch (left) and hanging lantern with olive branches (right) —
+          cropped from the design reference and masked to melt into the cream. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/footer/arch.jpg"
+        alt=""
         aria-hidden="true"
-      >
-        <path d="M40 400 V150 a60 60 0 0 1 120 0 V400" />
-        <path d="M60 400 V155 a40 40 0 0 1 80 0 V400" />
-      </svg>
-      {/* hanging lantern on the right */}
-      <svg
-        className="pointer-events-none absolute right-10 -top-2 h-44 w-auto text-[#C19A5B]/[0.16] hidden lg:block"
-        viewBox="0 0 80 200"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
+        className="pointer-events-none select-none absolute left-0 top-0 h-full w-auto"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to right, #000 50%, transparent)',
+          maskImage: 'linear-gradient(to right, #000 50%, transparent)',
+        }}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/footer/lantern.jpg"
+        alt=""
         aria-hidden="true"
-      >
-        <line x1="40" y1="0" x2="40" y2="34" />
-        <path d="M26 44 Q40 30 54 44 L58 70 Q58 76 52 78 H28 Q22 76 22 70 Z" />
-        <path d="M22 78 H58 L54 140 Q40 152 26 140 Z" />
-        <line x1="40" y1="150" x2="40" y2="168" />
-        <circle cx="40" cy="172" r="4" />
-        <path d="M33 92 L40 86 L47 92 L47 120 L40 126 L33 120 Z" />
-      </svg>
+        className="pointer-events-none select-none absolute right-0 top-0 h-full w-auto hidden sm:block"
+        style={{
+          WebkitMaskImage: 'linear-gradient(to left, #000 62%, transparent)',
+          maskImage: 'linear-gradient(to left, #000 62%, transparent)',
+        }}
+      />
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-16">
         {/* Wordmark */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from './LanguageProvider';
 import type { Slot } from '@/lib/booking';
 
@@ -20,6 +20,19 @@ export default function AppointmentScheduler({ offerteSummary }: Props) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle');
+
+  // On mobile the time/contact sections render below the fold; auto-scroll them
+  // into view so people don't miss the next step after picking a day/time.
+  const timeRef = useRef<HTMLDivElement>(null);
+  const contactRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedDate) timeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (selected) contactRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [selected]);
 
   useEffect(() => {
     let active = true;
@@ -121,7 +134,7 @@ export default function AppointmentScheduler({ offerteSummary }: Props) {
 
       {/* Time picker */}
       {selectedDate && (
-        <div>
+        <div ref={timeRef} className="scroll-mt-24">
           <p className="text-[11px] tracking-[0.28em] text-[#a8824a] uppercase mb-3 text-center">
             {t('menuBuilder.booking.scheduler.pickTime')}
           </p>
@@ -145,7 +158,7 @@ export default function AppointmentScheduler({ offerteSummary }: Props) {
 
       {/* Contact + confirm */}
       {selected && (
-        <div className="max-w-md mx-auto space-y-3 pt-2">
+        <div ref={contactRef} className="max-w-md mx-auto space-y-3 pt-2 scroll-mt-24">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}

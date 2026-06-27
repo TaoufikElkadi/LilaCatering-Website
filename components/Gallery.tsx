@@ -9,7 +9,7 @@ const BLUR_DATA_URL =
   'data:image/jpeg;base64,/9j/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAAKAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwChARN//9k=';
 
 // All gallery photos live in /public/gallery as g-01.jpg … g-NN.jpg.
-const GALLERY_COUNT = 53;
+const GALLERY_COUNT = 47;
 
 // Build the grid items with a repeating pattern of accent tiles (a large
 // feature + occasional tall ones) for a masonry rhythm; the rest are uniform.

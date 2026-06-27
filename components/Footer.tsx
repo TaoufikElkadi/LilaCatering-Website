@@ -114,31 +114,53 @@ export default function Footer() {
   const linkCls = 'text-[#6c655b] hover:text-[#C19A5B] transition-colors duration-200';
 
   return (
-    <footer className="relative overflow-hidden bg-[#ece1d5] text-[#1f1f1f]">
+    <footer className="relative overflow-hidden text-[#1f1f1f]">
+      {/* Cream background that fades IN from the section above (no hard seam). */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'linear-gradient(to bottom, rgba(236,225,213,0) 0, #ece1d5 130px)' }}
+      />
       {/* Carved zellige arch (left) and hanging lantern with olive branches (right) —
-          cropped from the design reference and masked to melt into the cream. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/footer/arch.jpg"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none select-none absolute left-0 top-0 h-full w-auto"
+          cropped from the design reference. Each wrapper fades the image top so the
+          arch/plants melt in; the inner image fades on its inner side. */}
+      <div
+        className="pointer-events-none absolute left-0 top-0 h-full"
         style={{
-          WebkitMaskImage: 'linear-gradient(to right, #000 50%, transparent)',
-          maskImage: 'linear-gradient(to right, #000 50%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
+          maskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
         }}
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/footer/lantern.jpg"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none select-none absolute right-0 top-0 h-full w-auto hidden sm:block"
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/footer/arch.jpg"
+          alt=""
+          aria-hidden="true"
+          className="block h-full w-auto select-none"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to right, #000 50%, transparent)',
+            maskImage: 'linear-gradient(to right, #000 50%, transparent)',
+          }}
+        />
+      </div>
+      <div
+        className="pointer-events-none absolute right-0 top-0 h-full hidden sm:block"
         style={{
-          WebkitMaskImage: 'linear-gradient(to left, #000 62%, transparent)',
-          maskImage: 'linear-gradient(to left, #000 62%, transparent)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
+          maskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
         }}
-      />
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/footer/lantern.jpg"
+          alt=""
+          aria-hidden="true"
+          className="block h-full w-auto select-none"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to left, #000 62%, transparent)',
+            maskImage: 'linear-gradient(to left, #000 62%, transparent)',
+          }}
+        />
+      </div>
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-16">
         {/* Wordmark */}

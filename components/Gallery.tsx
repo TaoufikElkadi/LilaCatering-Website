@@ -8,64 +8,29 @@ import { useLanguage } from './LanguageProvider';
 const BLUR_DATA_URL =
   'data:image/jpeg;base64,/9j/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAAKAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwChARN//9k=';
 
-const galleryItems = [
-  {
-    id: 1,
-    image: '/g1.jpg',
-    alt: 'Culinary craft detail',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-1'
-  },
-  {
-    id: 2,
-    image: '/g2.jpg',
-    alt: 'Moroccan spices',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-2'
-  },
-  {
-    id: 3,
-    image: '/g3.jpg',
-    alt: 'Traditional cooking',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-1'
-  },
-  {
-    id: 4,
-    image: '/g4.jpg',
-    alt: 'Plated dish',
-    mobileSpan: 'col-span-2',
-    desktopSpan: 'md:col-span-2 md:row-span-1'
-  },
-  {
-    id: 5,
-    image: '/g5.jpg',
-    alt: 'Heritage kitchen',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-1'
-  },
-  {
-    id: 6,
-    image: '/g6.jpg',
-    alt: 'Artisan detail',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-1'
-  },
-  {
-    id: 7,
-    image: '/g7.jpg',
-    alt: 'Traditional tagine',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-2'
-  },
-  {
-    id: 8,
-    image: '/g8.jpg',
-    alt: 'Cultural authenticity',
-    mobileSpan: 'col-span-1',
-    desktopSpan: 'md:col-span-1 md:row-span-1'
-  }
-];
+// All gallery photos live in /public/gallery as g-01.jpg … g-NN.jpg.
+const GALLERY_COUNT = 53;
+
+// Build the grid items with a repeating pattern of accent tiles (a large
+// feature + occasional tall ones) for a masonry rhythm; the rest are uniform.
+const galleryItems = Array.from({ length: GALLERY_COUNT }, (_, idx) => {
+  const id = idx + 1;
+  const m = idx % 8;
+  const desktopSpan =
+    m === 0
+      ? 'md:col-span-2 md:row-span-2'
+      : m === 3 || m === 6
+        ? 'md:col-span-1 md:row-span-2'
+        : 'md:col-span-1 md:row-span-1';
+  const mobileSpan = m === 0 ? 'col-span-2 row-span-2' : 'col-span-1';
+  return {
+    id,
+    image: `/gallery/g-${String(id).padStart(2, '0')}.jpg`,
+    alt: 'Lila Catering',
+    mobileSpan,
+    desktopSpan,
+  };
+});
 
 const StarIcon = () => (
   <svg 
@@ -106,7 +71,7 @@ export default function Gallery() {
         </motion.div>
 
         {/* Gallery Grid - smaller on mobile */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[140px] sm:auto-rows-[200px] md:auto-rows-[280px] gap-2 sm:gap-4">
+        <div className="grid grid-flow-dense grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[140px] sm:auto-rows-[200px] md:auto-rows-[280px] gap-2 sm:gap-4">
           {galleryItems.map((item, index) => (
             <motion.div
               key={item.id}

@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
     const name = String(m.name ?? '');
     const email = String(m.email ?? '');
     const phone = String(m.phone ?? '');
+    const address = String(m.address ?? '');
+    const postcode = String(m.postcode ?? '');
+    const city = String(m.city ?? '');
     const eventType = String(m.eventType ?? '');
     const guestCount = Number(m.guestCount ?? 0);
     const totalPrice = Number(m.totalPrice ?? 0);
@@ -43,6 +46,7 @@ export async function POST(request: NextRequest) {
       const description = [
         `GERESERVEERD via website (aanbetaling betaald).`,
         `Klant: ${name}`,
+        (address || postcode || city) ? `Adres: ${[address, [postcode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}` : '',
         `E-mail: ${email}`,
         `Telefoon: ${phone || '-'}`,
         `Type: ${eventType || '-'}`,

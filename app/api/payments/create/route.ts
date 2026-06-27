@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       eventEnd?: string;
       foodTime?: string;
       discountCode?: string;
-      customer?: { name?: string; firstName?: string; lastName?: string; email?: string; phone?: string };
+      customer?: { name?: string; firstName?: string; lastName?: string; email?: string; phone?: string; address?: string; postcode?: string; city?: string };
       summary?: string;
       lang?: string;
     };
@@ -82,6 +82,9 @@ export async function POST(request: NextRequest) {
         lastName: (customer?.lastName ?? '').trim(),
         email,
         phone,
+        address: (customer?.address ?? '').trim(),
+        postcode: (customer?.postcode ?? '').trim(),
+        city: (customer?.city ?? '').trim(),
         summary: (summary ?? '').slice(0, 600),
       },
     });

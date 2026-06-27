@@ -37,6 +37,9 @@ export default function BookingActions({
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [postcode, setPostcode] = useState('');
+  const [city, setCity] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'error' | 'unavailable'>('idle');
 
   // Discount code (validated again server-side before charging).
@@ -58,9 +61,15 @@ export default function BookingActions({
     }
   };
 
-  // All three contact details are required; the email must be well-formed.
+  // Contact + address details are required; the email must be well-formed.
   const emailValid = EMAIL_RE.test(email.trim());
-  const canSubmit = firstName.trim() !== '' && phone.trim() !== '' && emailValid;
+  const canSubmit =
+    firstName.trim() !== '' &&
+    phone.trim() !== '' &&
+    emailValid &&
+    address.trim() !== '' &&
+    postcode.trim() !== '' &&
+    city.trim() !== '';
 
   const startPayment = async () => {
     if (!canSubmit) return;
@@ -79,7 +88,16 @@ export default function BookingActions({
           eventEnd,
           foodTime,
           discountCode: applied?.code,
-          customer: { name: fullName, firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), phone: phone.trim() },
+          customer: {
+            name: fullName,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            address: address.trim(),
+            postcode: postcode.trim(),
+            city: city.trim(),
+          },
           summary: offerteSummary,
           lang,
         }),
@@ -168,6 +186,14 @@ export default function BookingActions({
           )}
           <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={`${t('menuBuilder.booking.form.phone')} *`} autoComplete="tel"
             className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
+          <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={`${t('menuBuilder.booking.form.address')} *`} autoComplete="street-address"
+            className="w-full border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
+          <div className="flex gap-2">
+            <input value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder={`${t('menuBuilder.booking.form.postcode')} *`} autoComplete="postal-code"
+              className="w-1/3 border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
+            <input value={city} onChange={(e) => setCity(e.target.value)} placeholder={`${t('menuBuilder.booking.form.city')} *`} autoComplete="address-level2"
+              className="flex-1 border-[1.5px] border-[#e0d3b8] bg-white/60 px-4 py-3 text-sm outline-none focus:border-[#C19A5B] rounded-[2px]" />
+          </div>
 
           {/* Discount code */}
           <div className="flex gap-2">

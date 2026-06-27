@@ -15,7 +15,7 @@ export const OFFICE_SCHEDULE: Record<number, { startHour: number; endHour: numbe
 };
 export const APPOINTMENT_DURATION_MIN = 60;
 /** Reservation deposit = this fraction of the estimated total. */
-export const DEPOSIT_RATE = 0.2;
+export const DEPOSIT_RATE = 0.1;
 /** How far ahead appointments can be booked. */
 export const BOOKING_WINDOW_DAYS = 56;
 /** Earliest an appointment may start, measured from "now". */
@@ -37,9 +37,13 @@ export interface BusyRange {
   end: number; // epoch ms
 }
 
-/** Deposit amount (rounded to cents) for a given estimated total. */
+/** Minimum reservation deposit (floor), regardless of the percentage. */
+export const DEPOSIT_MINIMUM = 1000;
+
+/** Deposit amount (rounded to cents): DEPOSIT_RATE of the total, min €1000. */
 export function getDepositAmount(totalPrice: number): number {
-  return Math.round(totalPrice * DEPOSIT_RATE * 100) / 100;
+  const pct = Math.round(totalPrice * DEPOSIT_RATE * 100) / 100;
+  return Math.max(DEPOSIT_MINIMUM, pct);
 }
 
 /** Timezone offset (minutes) for a given instant in a given IANA zone. */

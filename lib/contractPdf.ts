@@ -264,15 +264,42 @@ export async function generateContractPdf(b: ContractBooking): Promise<Uint8Arra
   w.pageBreak();
   w.heading('BIJLAGE I', { top: 0 });
   w.subheading('Decoratie');
-  w.para('Onderstaande decoratie-onderdelen zijn door u gekozen:');
-  w.spacer(2);
+  w.para('Onderstaande decoratie is door u samengesteld. Per onderdeel is de gekozen uitvoering en de bijbehorende invulling weergegeven.');
+  w.spacer(4);
+
+  // Detailed per-component breakdown. PLACEHOLDER values ("nader te bepalen")
+  // until the office provides the real items per tier (basic/premium/luxury).
+  // TODO: replace placeholders with real per-tier item values.
+  const DECOR_DETAILS: Record<'tafeldecoratie' | 'servies' | 'sfeeraankleding', [string, string][]> = {
+    tafeldecoratie: [
+      ['Tafelkleed', 'nader te bepalen'],
+      ['Kaarsen', 'nader te bepalen'],
+      ['Servetten', 'nader te bepalen'],
+      ['Centrepieces', 'nader te bepalen'],
+    ],
+    servies: [
+      ['Servies', 'nader te bepalen'],
+      ['Onderborden', 'nader te bepalen'],
+      ['Bestek', 'nader te bepalen'],
+      ['Glazen', 'nader te bepalen'],
+    ],
+    sfeeraankleding: [
+      ['Collectie', 'nader te bepalen'],
+      ['Entreetafel', 'nader te bepalen'],
+      ['Bruidstaarttafel', 'nader te bepalen'],
+      ['Zaalaankleding', 'nader te bepalen'],
+    ],
+  };
+
   (['tafeldecoratie', 'servies', 'sfeeraankleding'] as const).forEach((id) => {
     const tier = b.decoration[id];
-    w.row(`${DECOR_LABEL[id]}:`, tier ? TIER_LABEL[tier] : '—');
+    w.subheading(`${DECOR_LABEL[id]} - ${tier ? TIER_LABEL[tier] : '—'}`);
+    DECOR_DETAILS[id].forEach(([label, val]) => w.row(`${label}:`, val));
+    w.spacer(4);
   });
-  w.spacer(6);
+
   w.para(
-    'De entreetafel en bruidstaarttafel worden door ons gedecoreerd. Tafelkleed, servies, bestek, glazen, kaarsen, servetten en centrepieces worden afgestemd op de gekozen uitvoering.'
+    'De entreetafel en bruidstaarttafel worden door ons gedecoreerd. Bovenstaande invulling wordt definitief afgestemd op de gekozen uitvoering.'
   );
 
   // ---- PAGE 4 — OVEREENKOMST -------------------------------------------

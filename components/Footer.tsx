@@ -115,10 +115,12 @@ export default function Footer() {
 
   return (
     <footer className="relative overflow-hidden text-[#1f1f1f]">
-      {/* Cream background that fades IN from the section above (no hard seam). */}
+      {/* Background starts at the gallery's exact colour (#ebe6dc) and drifts into
+          the footer cream over a tall zone — an opaque cross-fade, so no seam can
+          appear no matter what sits behind the footer. */}
       <div
         className="absolute inset-0"
-        style={{ background: 'linear-gradient(to bottom, rgba(236,225,213,0) 0, #ece1d5 130px)' }}
+        style={{ background: 'linear-gradient(to bottom, #ebe6dc 0px, #ece1d5 340px)' }}
       />
       {/* Carved zellige arch (left) and hanging lantern with olive branches (right) —
           cropped from the design reference. Each wrapper fades the image top so the
@@ -126,8 +128,10 @@ export default function Footer() {
       <div
         className="pointer-events-none absolute left-0 top-0 h-full"
         style={{
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
-          maskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 150px, rgba(0,0,0,0.75) 240px, #000 320px)',
+          maskImage:
+            'linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 150px, rgba(0,0,0,0.75) 240px, #000 320px)',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -145,8 +149,10 @@ export default function Footer() {
       <div
         className="pointer-events-none absolute right-0 top-0 h-full hidden sm:block"
         style={{
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
-          maskImage: 'linear-gradient(to bottom, transparent, #000 120px)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 150px, rgba(0,0,0,0.75) 240px, #000 320px)',
+          maskImage:
+            'linear-gradient(to bottom, transparent 0px, rgba(0,0,0,0.3) 150px, rgba(0,0,0,0.75) 240px, #000 320px)',
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

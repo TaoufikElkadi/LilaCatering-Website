@@ -7,46 +7,23 @@ import { useLanguage } from './LanguageProvider';
 
 const GOLD = '#C19A5B';
 
-// Four small Moroccan ornaments (one per column heading).
-const Ornaments = [
-  // quatrefoil
-  (
-    <g key="o1" fill="none" stroke={GOLD} strokeWidth={1.1}>
-      <circle cx="12" cy="7.2" r="3.1" />
-      <circle cx="12" cy="16.8" r="3.1" />
-      <circle cx="7.2" cy="12" r="3.1" />
-      <circle cx="16.8" cy="12" r="3.1" />
-    </g>
-  ),
-  // eight-point star (two squares)
-  (
-    <g key="o2" fill="none" stroke={GOLD} strokeWidth={1.1}>
-      <rect x="5.5" y="5.5" width="13" height="13" />
-      <rect x="5.5" y="5.5" width="13" height="13" transform="rotate(45 12 12)" />
-    </g>
-  ),
-  // interlaced diamond + ring
-  (
-    <g key="o3" fill="none" stroke={GOLD} strokeWidth={1.1}>
-      <path d="M12 3.2 L20.8 12 L12 20.8 L3.2 12 Z" />
-      <circle cx="12" cy="12" r="3.4" />
-    </g>
-  ),
-  // petal flower
-  (
-    <g key="o4" fill="none" stroke={GOLD} strokeWidth={1.1}>
-      <circle cx="12" cy="12" r="2.6" />
-      {[0, 60, 120, 180, 240, 300].map((a) => (
-        <ellipse key={a} cx="12" cy="5.4" rx="2" ry="3.4" transform={`rotate(${a} 12 12)`} />
-      ))}
-    </g>
-  ),
-];
+// Zellige rosette medallion (same for every column): an outer ring, a mosaic of
+// radiating filled petals with small gap diamonds, and an open circle centre.
+const ROSETTE_ANGLES = Array.from({ length: 12 }, (_, i) => i * 30);
 
-function Ornament({ i }: { i: number }) {
+function Ornament() {
   return (
-    <svg viewBox="0 0 24 24" className="w-9 h-9 mb-5" aria-hidden="true">
-      {Ornaments[i % Ornaments.length]}
+    <svg viewBox="0 0 48 48" className="w-10 h-10 mb-5" aria-hidden="true">
+      <circle cx="24" cy="24" r="22.3" fill="none" stroke={GOLD} strokeWidth={1.7} />
+      <circle cx="24" cy="24" r="8.6" fill="none" stroke={GOLD} strokeWidth={1.5} />
+      {ROSETTE_ANGLES.map((a) => (
+        <g key={a} fill={GOLD} transform={`rotate(${a} 24 24)`}>
+          {/* long petal reaching from the outer band toward the centre */}
+          <path d="M24 3.8 L26.9 9.6 L24 14.4 L21.1 9.6 Z" />
+          {/* small gap diamond in the outer band, offset half a step */}
+          <path d="M24 4.6 L25.9 8.2 L24 11.2 L22.1 8.2 Z" transform="rotate(15 24 24)" />
+        </g>
+      ))}
     </svg>
   );
 }
@@ -177,9 +154,9 @@ export default function Footer() {
 
         {/* Columns */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-          {columns.map((col, i) => (
+          {columns.map((col) => (
             <div key={col.title}>
-              <Ornament i={i} />
+              <Ornament />
               <h3 className="font-serif text-lg text-[#1f1f1f] mb-4">{col.title}</h3>
               <ul className="space-y-2.5 text-sm">
                 {col.links.map((l) => (
@@ -195,7 +172,7 @@ export default function Footer() {
 
           {/* Contact column */}
           <div>
-            <Ornament i={3} />
+            <Ornament />
             <h3 className="font-serif text-lg text-[#1f1f1f] mb-4">{t('footer.contactTitle')}</h3>
             <ul className="space-y-3 text-sm text-[#6c655b]">
               <li className="flex items-center gap-2.5">

@@ -133,6 +133,24 @@ export default function MenuBuilder() {
   const [selectedLocation, setSelectedLocation] = useState<PlaceResult | null>(null);
   const [locationUnknown, setLocationUnknown] = useState<boolean>(false);
 
+  // After Mollie redirects back with ?paid=1 we restore the offerte from
+  // sessionStorage and show a "date locked" confirmation + the scheduler.
+  const [paidReturn, setPaidReturn] = useState(false);
+  const [paidInfo, setPaidInfo] = useState<
+    { status?: string; deposit?: number; eventDate?: string } | null
+  >(null);
+  // Captured during the first render (before any effect can overwrite it) so a
+  // ?paid=1 return can restore the exact offerte.
+  const [bootSnapshot] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    if (new URLSearchParams(window.location.search).get('paid') !== '1') return null;
+    try {
+      return sessionStorage.getItem('lila-builder-snapshot');
+    } catch {
+      return null;
+    }
+  });
+
   const transportFee = locationUnknown || !selectedLocation ? 0 : getTransportCost(selectedLocation);
 
   // Mobile full-screen focused flow
@@ -215,8 +233,69 @@ export default function MenuBuilder() {
     { step: 13, kind: 'review' },
   ];
   const TOTAL_STEPS = STEP_DEFS.length;
+  const REVIEW_STEP = (STEP_DEFS.find((d) => d.kind === 'review')?.step ?? TOTAL_STEPS) as FlowStep;
   const currentDef = STEP_DEFS[currentStep - 1];
   const activeMenuCategory: MenuCategory | null = currentDef.kind === 'menu' ? currentDef.category! : null;
+
+  // Persist the offerte so a Mollie payment round-trip can restore it verbatim.
+  useEffect(() => {
+    if (paidReturn) return; // don't overwrite the snapshot while confirming
+    try {
+      sessionStorage.setItem(
+        'lila-builder-snapshot',
+        JSON.stringify({
+          selectedEventType, selectedDate, eventStart, eventEnd, foodTime, guestCount,
+          selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, mocktailMix,
+          decoration, selectedLocation, locationUnknown, starterTemp,
+        })
+      );
+    } catch {
+      /* storage unavailable — non-fatal */
+    }
+  }, [
+    selectedEventType, selectedDate, eventStart, eventEnd, foodTime, guestCount,
+    selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, mocktailMix,
+    decoration, selectedLocation, locationUnknown, starterTemp, paidReturn,
+  ]);
+
+  // On return from Mollie (?paid=1): restore the offerte, jump to the review in
+  // confirmation mode, verify the real status, and clean the URL.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('paid') !== '1') return;
+    try {
+      if (bootSnapshot) {
+        const s = JSON.parse(bootSnapshot);
+        if (s.selectedEventType) setSelectedEventType(s.selectedEventType);
+        if (s.selectedDate) setSelectedDate(s.selectedDate);
+        setEventStart(s.eventStart || '');
+        setEventEnd(s.eventEnd || '');
+        setFoodTime(s.foodTime || '');
+        if (typeof s.guestCount === 'number') setGuestCount(s.guestCount);
+        if (Array.isArray(s.selectedItems)) setSelectedItems(s.selectedItems);
+        setCoffeeLuxe(!!s.coffeeLuxe);
+        setCookiesLuxe(!!s.cookiesLuxe);
+        if (Array.isArray(s.tableExtras)) setTableExtras(s.tableExtras);
+        if (s.teaShow) setTeaShow(s.teaShow);
+        setMocktailMix(!!s.mocktailMix);
+        if (s.decoration) setDecoration(s.decoration);
+        setSelectedLocation(s.selectedLocation ?? null);
+        setLocationUnknown(!!s.locationUnknown);
+        setStarterTemp(s.starterTemp ?? null);
+      }
+    } catch {
+      /* ignore malformed snapshot */
+    }
+    setPaidReturn(true);
+    setCurrentStep(REVIEW_STEP);
+    if (!window.matchMedia('(min-width: 640px)').matches) setMobileOpen(true);
+    fetch('/api/payments/status')
+      .then((r) => r.json())
+      .then((d) => setPaidInfo(d))
+      .catch(() => {});
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => document.getElementById('menu-builder')?.scrollIntoView({ behavior: 'smooth' }), 120);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // For the starter course, only show the sub-categories that match the chosen
   // temperature (cold = salads, hot = pastilla + soups).
   const activeSubCategories = (() => {
@@ -932,6 +1011,7 @@ export default function MenuBuilder() {
                     foodTime={foodTime}
                     offerteSummary={offerteSummary}
                     contractData={contractData}
+                    paid={paidReturn ? { status: paidInfo?.status, deposit: paidInfo?.deposit } : null}
                   />
                 </div>
               </motion.div>

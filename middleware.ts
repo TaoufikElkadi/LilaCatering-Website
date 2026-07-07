@@ -29,16 +29,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Payment confirmation page: always reachable, even behind the gate (a paying
-  // customer must always land on their confirmation). Rendered bare (no chrome).
-  if (/\/bedankt\/?$/.test(pathname)) {
-    const lang = getLangFromPathname(pathname) ?? 'nl';
-    const bareHeaders = new Headers(request.headers);
-    bareHeaders.set('x-lang', lang);
-    bareHeaders.set('x-bare', '1');
-    return NextResponse.next({ request: { headers: bareHeaders } });
-  }
-
   // ── Under-construction gate ───────────────────────────────────────────
   if (COMING_SOON) {
     const unlocked =

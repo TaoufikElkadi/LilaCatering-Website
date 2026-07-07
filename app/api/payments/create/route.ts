@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     const payment = await mollie.payments.create({
       amount: { currency: 'EUR', value: deposit.toFixed(2) },
       description: `Aanbetaling reservering ${eventDate} — Lila Catering`,
-      redirectUrl: `${baseUrl}/${locale}/bedankt`,
+      redirectUrl: `${baseUrl}/${locale}?paid=1`,
       webhookUrl: `${baseUrl}/api/payments/webhook`,
       metadata: {
         kind: 'reservation',

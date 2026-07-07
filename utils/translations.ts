@@ -318,6 +318,18 @@ const translations: Record<Lang, TranslationTree> = {
       booking: {
         sectionTitle: 'Ready to book?',
         sectionSubtitle: 'Reserve your date with a deposit, or schedule a consultation at our office.',
+        paid: {
+          successTitle: 'Payment successful',
+          pendingTitle: 'Payment is being processed',
+          failedTitle: 'Payment not completed',
+          dateLocked: 'Your date is locked in',
+          depositReceived: 'Deposit received:',
+          body: 'You will receive a confirmation by email shortly, followed by the contract via Signhost to sign digitally.',
+          pendingBody: 'As soon as your payment is confirmed, you will automatically receive a confirmation and the contract by email.',
+          failedBody: 'Your payment was not completed, so your date is not reserved yet. You can try again below.',
+          scheduleTitle: 'Optionally, schedule a get-to-know meeting',
+          scheduleSubtitle: 'Pick a moment below to go through all the details in person.',
+        },
         back: 'Back',
         reserve: {
           title: 'Reserve your date',
@@ -1129,6 +1141,18 @@ const translations: Record<Lang, TranslationTree> = {
       booking: {
         sectionTitle: 'Prêt à réserver ?',
         sectionSubtitle: 'Réservez votre date avec un acompte, ou planifiez un rendez-vous à notre bureau.',
+        paid: {
+          successTitle: 'Paiement réussi',
+          pendingTitle: 'Le paiement est en cours de traitement',
+          failedTitle: 'Paiement non finalisé',
+          dateLocked: 'Votre date est réservée',
+          depositReceived: 'Acompte reçu :',
+          body: 'Vous recevrez une confirmation par e-mail sous peu, suivie du contrat via Signhost à signer numériquement.',
+          pendingBody: 'Dès que votre paiement sera confirmé, vous recevrez automatiquement une confirmation et le contrat par e-mail.',
+          failedBody: 'Votre paiement n’a pas abouti, votre date n’est donc pas encore réservée. Vous pouvez réessayer ci-dessous.',
+          scheduleTitle: 'Planifiez si vous le souhaitez une rencontre',
+          scheduleSubtitle: 'Choisissez un moment ci-dessous pour revoir tous les détails en personne.',
+        },
         back: 'Retour',
         reserve: {
           title: 'Réservez votre date',
@@ -1940,6 +1964,18 @@ const translations: Record<Lang, TranslationTree> = {
       booking: {
         sectionTitle: 'Klaar om te boeken?',
         sectionSubtitle: 'Reserveer uw datum met een aanbetaling, of plan een afspraak op ons kantoor.',
+        paid: {
+          successTitle: 'Betaling geslaagd',
+          pendingTitle: 'Betaling wordt verwerkt',
+          failedTitle: 'Betaling niet voltooid',
+          dateLocked: 'Je datum is vastgelegd',
+          depositReceived: 'Aanbetaling ontvangen:',
+          body: 'Je ontvangt zo een bevestiging per e-mail, gevolgd door het contract via Signhost om digitaal te ondertekenen.',
+          pendingBody: 'Zodra je betaling is verwerkt ontvang je automatisch een bevestiging en het contract per e-mail.',
+          failedBody: 'Je betaling is niet afgerond, dus je datum is nog niet gereserveerd. Je kunt het hieronder opnieuw proberen.',
+          scheduleTitle: 'Plan optioneel een kennismaking op kantoor',
+          scheduleSubtitle: 'Kies hieronder een moment om alle details persoonlijk te bespreken.',
+        },
         back: 'Terug',
         reserve: {
           title: 'Reserveer uw datum',

@@ -25,7 +25,11 @@ interface Props {
     decoration: Partial<Record<'tafeldecoratie' | 'servies' | 'sfeeraankleding', DecorTier>>;
     venue?: string;
   };
+  /** Set when the customer just returned from a successful/attempted payment. */
+  paid?: { status?: string; deposit?: number } | null;
 }
+
+const localeTag = (lang: string) => (lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,6 +43,7 @@ export default function BookingActions({
   foodTime,
   offerteSummary,
   contractData,
+  paid,
 }: Props) {
   const { t, lang } = useLanguage();
   const [mode, setMode] = useState<'choose' | 'reserve' | 'appointment'>('choose');
@@ -130,6 +135,74 @@ export default function BookingActions({
     }
   };
 
+  // Payment-return phase (Mollie redirects back for every outcome, so map it).
+  const paidPhase: 'paid' | 'pending' | 'failed' | null = !paid
+    ? null
+    : !paid.status
+      ? 'pending'
+      : paid.status === 'paid' || paid.status === 'authorized'
+        ? 'paid'
+        : paid.status === 'open' || paid.status === 'pending'
+          ? 'pending'
+          : 'failed';
+
+  const lockedDate = eventDate
+    ? new Date(`${eventDate}T00:00:00`).toLocaleDateString(localeTag(lang), {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : '';
+  const paidDeposit = paid?.deposit && paid.deposit > 0 ? paid.deposit : deposit;
+
+  // Confirmed / processing: show a locked-in banner + the appointment scheduler.
+  if (paidPhase === 'paid' || paidPhase === 'pending') {
+    const ok = paidPhase === 'paid';
+    return (
+      <div className="mt-8 sm:mt-12 border-t border-[#dcd3c5] pt-8 sm:pt-12">
+        <div className="max-w-2xl mx-auto text-center">
+          <span
+            className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full ${
+              ok ? 'bg-[#3f7d52]/12 text-[#3f7d52]' : 'bg-[#C19A5B]/12 text-[#a8824a]'
+            }`}
+          >
+            <Check className="h-7 w-7" strokeWidth={2.5} />
+          </span>
+          <h3 className="text-2xl sm:text-3xl font-serif text-[#1f1f1f] mb-3">
+            {ok ? t('menuBuilder.booking.paid.successTitle') : t('menuBuilder.booking.paid.pendingTitle')}
+          </h3>
+          {ok && lockedDate && (
+            <div className="mx-auto mb-4 inline-flex flex-col items-center gap-1 rounded-[3px] border border-[#dfd2ba] bg-[#f6f1e8] px-6 py-3">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#8a8275]">
+                {t('menuBuilder.booking.paid.dateLocked')}
+              </span>
+              <span className="text-sm font-medium text-[#1f1f1f]">{lockedDate}</span>
+              <span className="text-xs text-[#6c655b]">
+                {t('menuBuilder.booking.paid.depositReceived')} {formatEuro(paidDeposit)}
+              </span>
+            </div>
+          )}
+          <p className="text-sm text-[#6c655b] leading-relaxed max-w-lg mx-auto">
+            {ok ? t('menuBuilder.booking.paid.body') : t('menuBuilder.booking.paid.pendingBody')}
+          </p>
+        </div>
+
+        <div className="max-w-2xl mx-auto mt-10 border-t border-[#e6ddd0] pt-8">
+          <div className="text-center mb-6">
+            <h4 className="text-lg sm:text-xl font-serif text-[#1f1f1f] mb-1.5">
+              {t('menuBuilder.booking.paid.scheduleTitle')}
+            </h4>
+            <p className="text-xs sm:text-sm text-[#6c655b] max-w-md mx-auto">
+              {t('menuBuilder.booking.paid.scheduleSubtitle')}
+            </p>
+          </div>
+          <AppointmentScheduler offerteSummary={offerteSummary} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 sm:mt-12 border-t border-[#dcd3c5] pt-8 sm:pt-12">
       <div className="text-center mb-6 sm:mb-8">
@@ -140,6 +213,13 @@ export default function BookingActions({
           {t('menuBuilder.booking.sectionSubtitle')}
         </p>
       </div>
+
+      {paidPhase === 'failed' && (
+        <div className="max-w-md mx-auto mb-6 rounded-[3px] border border-[#e0b4ac] bg-[#f7e9e6] px-4 py-3 text-center">
+          <p className="text-sm font-medium text-[#b4493f]">{t('menuBuilder.booking.paid.failedTitle')}</p>
+          <p className="text-xs text-[#8a6a64] mt-1">{t('menuBuilder.booking.paid.failedBody')}</p>
+        </div>
+      )}
 
       {mode === 'choose' && (
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-5 max-w-3xl mx-auto">

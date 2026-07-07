@@ -376,9 +376,11 @@ export default function MenuBuilder() {
       setCurrentStep((s) => (s + 1) as FlowStep);
       scrollToBuilder();
     }
-    // canProceedToNextStep is recreated each render; intentionally read latest
+    // handleNextStep captures canProceedToNextStep from its creating render, so
+    // EVERY piece of state that gating reads must be a dep — otherwise the button
+    // enables (disabled= reads fresh) but the click runs a stale check and no-ops.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep, scrollToBuilder, selectedEventType, selectedItems, guestCount, selectedDate, selectedLocation, locationUnknown]);
+  }, [currentStep, scrollToBuilder, selectedEventType, selectedItems, guestCount, selectedDate, selectedLocation, locationUnknown, starterTemp, decoration]);
 
   const handlePrevStep = useCallback(() => {
     if (currentStep > 1) {

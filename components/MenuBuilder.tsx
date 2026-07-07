@@ -288,7 +288,16 @@ export default function MenuBuilder() {
     setPaidReturn(true);
     setCurrentStep(REVIEW_STEP);
     if (!window.matchMedia('(min-width: 640px)').matches) setMobileOpen(true);
-    fetch('/api/payments/status')
+    // Prefer the id we stashed in sessionStorage (survives even if the cookie
+    // was dropped on the Mollie redirect); fall back to the cookie server-side.
+    let statusUrl = '/api/payments/status';
+    try {
+      const pid = sessionStorage.getItem('lila-payment-id');
+      if (pid) statusUrl += `?id=${encodeURIComponent(pid)}`;
+    } catch {
+      /* ignore */
+    }
+    fetch(statusUrl)
       .then((r) => r.json())
       .then((d) => setPaidInfo(d))
       .catch(() => {});

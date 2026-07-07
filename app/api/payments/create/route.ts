@@ -64,6 +64,13 @@ export async function POST(request: NextRequest) {
     const deposit = getDepositAmount(chargedTotal);
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const locale = lang === 'fr' ? 'fr' : lang === 'en' ? 'en' : 'nl';
+    // While the coming-soon gate is up, the preview cookie may not survive the
+    // Mollie round-trip — so carry the preview token on the return URL. The
+    // middleware consumes it (sets a fresh cookie via a same-site redirect) and
+    // strips it, so the paying customer always lands back on the builder.
+    const gateOn = process.env.SITE_COMING_SOON !== 'false';
+    const previewToken = process.env.SITE_PREVIEW_TOKEN || '';
+    const previewSuffix = gateOn && previewToken ? `&preview=${encodeURIComponent(previewToken)}` : '';
 
     // Create the Signhost contract transaction now (generate PDF + upload), but
     // DON'T start it — the webhook starts it on payment success. Never block the
@@ -113,7 +120,7 @@ export async function POST(request: NextRequest) {
     const payment = await mollie.payments.create({
       amount: { currency: 'EUR', value: deposit.toFixed(2) },
       description: `Aanbetaling reservering ${eventDate} — Lila Catering`,
-      redirectUrl: `${baseUrl}/${locale}?paid=1`,
+      redirectUrl: `${baseUrl}/${locale}?paid=1${previewSuffix}`,
       webhookUrl: `${baseUrl}/api/payments/webhook`,
       metadata: {
         kind: 'reservation',
@@ -146,9 +153,10 @@ export async function POST(request: NextRequest) {
     if (!checkoutUrl) {
       return NextResponse.json({ error: 'no_checkout_url' }, { status: 502 });
     }
-    // Stash the payment id so the confirmation page can look up its status when
-    // Mollie redirects the customer back (it doesn't echo the id in the URL).
-    const res = NextResponse.json({ checkoutUrl });
+    // Stash the payment id so the confirmation can look up its status when Mollie
+    // redirects back (it doesn't echo the id). Returned in the body too, so the
+    // client can keep it in sessionStorage — resilient to cookies being dropped.
+    const res = NextResponse.json({ checkoutUrl, paymentId: payment.id });
     res.cookies.set('lila-payment', payment.id, {
       httpOnly: true,
       sameSite: 'lax',

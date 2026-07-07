@@ -126,6 +126,13 @@ export default function BookingActions({
       }
       const data = await res.json();
       if (data.checkoutUrl) {
+        // Keep the payment id in sessionStorage (survives the Mollie round-trip
+        // even if cookies are dropped) so the return can show the real status.
+        try {
+          if (data.paymentId) sessionStorage.setItem('lila-payment-id', data.paymentId);
+        } catch {
+          /* storage unavailable — status falls back to the cookie */
+        }
         window.location.href = data.checkoutUrl;
         return;
       }

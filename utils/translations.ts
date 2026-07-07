@@ -322,7 +322,7 @@ const translations: Record<Lang, TranslationTree> = {
         reserve: {
           title: 'Reserve your date',
           desc: 'Pay a deposit to lock in your event date right away.',
-          depositNote: '20% deposit',
+          depositNote: '10% deposit (min. €1,000)',
           payButton: 'Pay deposit',
           notConfigured: 'Online payment is coming soon — we will contact you to finalise.',
         },
@@ -405,7 +405,7 @@ const translations: Record<Lang, TranslationTree> = {
         estimatedTotal: 'Estimated Total',
         priceDisclaimer: 'Prices are subject to change based on date, availability, distance, and specific requirements.',
         footerNote1: 'This is an estimated proposal. Final pricing may vary based on specific requirements.',
-        footerNote2: 'All prices are inclusive of VAT. A deposit of 30% is required to confirm the booking.',
+        footerNote2: 'All prices are inclusive of VAT. A deposit of 10% (minimum €1,000) is required to confirm the booking.',
       },
       eventType: {
         title: 'Event Type',
@@ -1133,7 +1133,7 @@ const translations: Record<Lang, TranslationTree> = {
         reserve: {
           title: 'Réservez votre date',
           desc: 'Payez un acompte pour bloquer immédiatement la date de votre événement.',
-          depositNote: 'Acompte de 20%',
+          depositNote: 'Acompte de 10% (min. 1 000 €)',
           payButton: 'Payer l’acompte',
           notConfigured: 'Le paiement en ligne arrive bientôt — nous vous contacterons pour finaliser.',
         },
@@ -1216,7 +1216,7 @@ const translations: Record<Lang, TranslationTree> = {
         estimatedTotal: 'Total Estimé',
         priceDisclaimer: 'Les prix peuvent être modifiés en fonction de la date, de la disponibilité, de la distance et des exigences spécifiques.',
         footerNote1: 'Ceci est une proposition estimée. Le prix final peut varier selon les exigences spécifiques.',
-        footerNote2: 'Tous les prix sont TTC. Un acompte de 30% est requis pour confirmer la réservation.',
+        footerNote2: 'Tous les prix sont TTC. Un acompte de 10% (minimum 1 000 €) est requis pour confirmer la réservation.',
       },
       eventType: {
         title: "Type d'événement",
@@ -1944,7 +1944,7 @@ const translations: Record<Lang, TranslationTree> = {
         reserve: {
           title: 'Reserveer uw datum',
           desc: 'Betaal een aanbetaling om uw datum direct vast te leggen.',
-          depositNote: '20% aanbetaling',
+          depositNote: '10% aanbetaling (min. €1.000)',
           payButton: 'Betaal aanbetaling',
           notConfigured: 'Online betalen is binnenkort beschikbaar — we nemen contact met u op om af te ronden.',
         },
@@ -2027,7 +2027,7 @@ const translations: Record<Lang, TranslationTree> = {
         estimatedTotal: 'Geschatte Totaalprijs',
         priceDisclaimer: 'Prijzen kunnen worden aangepast op basis van datum, beschikbaarheid, afstand en specifieke vereisten.',
         footerNote1: 'Dit is een geschat voorstel. De uiteindelijke prijs kan variëren op basis van specifieke vereisten.',
-        footerNote2: 'Alle prijzen zijn inclusief BTW. Een aanbetaling van 30% is vereist om de boeking te bevestigen.',
+        footerNote2: 'Alle prijzen zijn inclusief BTW. Een aanbetaling van 10% (minimaal €1.000) is vereist om de boeking te bevestigen.',
       },
       eventType: {
         title: 'Type evenement',

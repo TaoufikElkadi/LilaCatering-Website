@@ -46,7 +46,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const lang = await getRequestLang();
-  const comingSoon = (await headers()).get("x-coming-soon") === "1";
+  // "bare" = no nav/footer chrome (coming-soon page, payment confirmation page).
+  const bare =
+    (await headers()).get("x-coming-soon") === "1" || (await headers()).get("x-bare") === "1";
   const site = getSiteUrl();
   const schemaOrg = {
     "@context": "https://schema.org",
@@ -80,7 +82,7 @@ export default async function RootLayout({
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />
-        {comingSoon ? (
+        {bare ? (
           children
         ) : (
           <LanguageProvider initialLang={lang}>

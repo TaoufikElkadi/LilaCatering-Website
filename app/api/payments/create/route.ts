@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     const payment = await mollie.payments.create({
       amount: { currency: 'EUR', value: deposit.toFixed(2) },
       description: `Aanbetaling reservering ${eventDate} — Lila Catering`,
-      redirectUrl: `${baseUrl}/${locale}?reservation=done`,
+      redirectUrl: `${baseUrl}/${locale}/bedankt`,
       webhookUrl: `${baseUrl}/api/payments/webhook`,
       metadata: {
         kind: 'reservation',
@@ -146,7 +146,16 @@ export async function POST(request: NextRequest) {
     if (!checkoutUrl) {
       return NextResponse.json({ error: 'no_checkout_url' }, { status: 502 });
     }
-    return NextResponse.json({ checkoutUrl });
+    // Stash the payment id so the confirmation page can look up its status when
+    // Mollie redirects the customer back (it doesn't echo the id in the URL).
+    const res = NextResponse.json({ checkoutUrl });
+    res.cookies.set('lila-payment', payment.id, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60,
+    });
+    return res;
   } catch (err) {
     console.error('[payments/create]', err);
     return NextResponse.json({ error: 'payment_create_failed' }, { status: 500 });

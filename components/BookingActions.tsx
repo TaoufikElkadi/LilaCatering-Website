@@ -143,9 +143,12 @@ export default function BookingActions({
   };
 
   // Payment-return phase (Mollie redirects back for every outcome, so map it).
+  // 'unknown' means we couldn't resolve the status — treat it as "processing",
+  // NOT failed, since the webhook is the source of truth and a real success must
+  // never be shown as a failure.
   const paidPhase: 'paid' | 'pending' | 'failed' | null = !paid
     ? null
-    : !paid.status
+    : !paid.status || paid.status === 'unknown'
       ? 'pending'
       : paid.status === 'paid' || paid.status === 'authorized'
         ? 'paid'

@@ -153,6 +153,17 @@ export async function POST(request: NextRequest) {
     if (!checkoutUrl) {
       return NextResponse.json({ error: 'no_checkout_url' }, { status: 502 });
     }
+
+    // Put the payment id IN the return URL (via update, now that we have the id)
+    // so the confirmation resolves the real status without relying on cookies or
+    // sessionStorage — both of which can be dropped on the Mollie round-trip.
+    try {
+      await mollie.payments.update(payment.id, {
+        redirectUrl: `${baseUrl}/${locale}?paid=1&pid=${payment.id}${previewSuffix}`,
+      });
+    } catch (e) {
+      console.error('[payments/create] redirectUrl update failed (non-fatal):', e);
+    }
     // Stash the payment id so the confirmation can look up its status when Mollie
     // redirects back (it doesn't echo the id). Returned in the body too, so the
     // client can keep it in sessionStorage — resilient to cookies being dropped.

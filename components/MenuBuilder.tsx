@@ -288,15 +288,17 @@ export default function MenuBuilder() {
     setPaidReturn(true);
     setCurrentStep(REVIEW_STEP);
     if (!window.matchMedia('(min-width: 640px)').matches) setMobileOpen(true);
-    // Prefer the id we stashed in sessionStorage (survives even if the cookie
-    // was dropped on the Mollie redirect); fall back to the cookie server-side.
-    let statusUrl = '/api/payments/status';
-    try {
-      const pid = sessionStorage.getItem('lila-payment-id');
-      if (pid) statusUrl += `?id=${encodeURIComponent(pid)}`;
-    } catch {
-      /* ignore */
+    // Resolve the payment id: the return URL (?pid=) is most reliable, then the
+    // sessionStorage stash, then the server-side cookie fallback.
+    let pid = new URLSearchParams(window.location.search).get('pid') || '';
+    if (!pid) {
+      try {
+        pid = sessionStorage.getItem('lila-payment-id') || '';
+      } catch {
+        /* ignore */
+      }
     }
+    const statusUrl = '/api/payments/status' + (pid ? `?id=${encodeURIComponent(pid)}` : '');
     fetch(statusUrl)
       .then((r) => r.json())
       .then((d) => setPaidInfo(d))

@@ -22,7 +22,7 @@ export async function GET() {
   try {
     const url =
       `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}` +
-      `&fields=rating,user_ratings_total,reviews&reviews_sort=newest&language=nl&key=${key}`;
+      `&fields=rating,user_ratings_total,reviews&reviews_sort=most_relevant&language=nl&key=${key}`;
     const res = await fetch(url, { next: { revalidate } });
     const d = await res.json();
     if (d.status !== 'OK') return NextResponse.json({ reviews: [], rating: null, total: null });

@@ -11,11 +11,11 @@ import { StepHeader } from './MenuDecor';
 // Recommended partner venues — shown as cards under the search bar (name +
 // location only). No service cost is shown or charged for these; that's arranged
 // separately. Service costs only apply to venues the customer searches for.
-const PARTNER_VENUES: { name: string; city: string }[] = [
-  { name: 'Rey Events', city: 'Almere' },
-  { name: 'Simplicity Zalenverhuur', city: 'Rijen' },
-  { name: 'Noor Paleis', city: 'Almere' },
-  { name: 'de Koning', city: 'Amsterdam' },
+const PARTNER_VENUES: { name: string; city: string; address: string }[] = [
+  { name: 'Rey Events', city: 'Almere', address: 'Trekweg 21, 1338 GA Almere' },
+  { name: 'Simplicity Zalenverhuur', city: 'Rijen', address: 'Rijksweg 112, 5121 RC Rijen' },
+  { name: 'Noor Paleis', city: 'Almere', address: 'Markerkant 10 136d, 1316 AL Almere' },
+  { name: 'de Koning', city: 'Amsterdam', address: 'Isolatorweg 29, 1014 AS Amsterdam' },
 ];
 
 /** Build a PlaceResult for a recommended partner venue (no transport cost). */
@@ -190,7 +190,7 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                 {t('menuBuilder.location.suggestedLabel')}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PARTNER_VENUES.map(({ name, city }) => (
+                {PARTNER_VENUES.map(({ name, city, address }) => (
                   <button
                     key={name}
                     type="button"
@@ -198,10 +198,10 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                     className="flex flex-col items-start gap-1 rounded-[3px] border border-[#dcc8a4] bg-white px-4 py-3 text-left transition-colors hover:border-[#C19A5B] hover:bg-[#f6f1e8]"
                   >
                     <span className="flex items-center gap-1.5 text-sm font-medium text-[#1f1f1f]">
-                      <MapPin className="w-3.5 h-3.5 text-[#C19A5B]" strokeWidth={2} />
+                      <MapPin className="w-3.5 h-3.5 text-[#C19A5B] shrink-0" strokeWidth={2} />
                       {name}
                     </span>
-                    <span className="text-[11px] text-[#8a8275]">{city}</span>
+                    <span className="text-[11px] text-[#8a8275] leading-snug">{address}</span>
                   </button>
                 ))}
               </div>

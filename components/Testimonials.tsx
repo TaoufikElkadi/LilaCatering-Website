@@ -127,12 +127,14 @@ export default function Testimonials() {
             text: rv.text.length > 220 ? rv.text.slice(0, 217).trimEnd() + '…' : rv.text,
           })
         );
-        const merged = [...g, ...fallbackTestimonials];
-        for (let i = merged.length - 1; i > 0; i--) {
+        // Prefer real Google reviews only; fall back to the built-ins solely
+        // when Google returns fewer than 3.
+        const base = g.length >= 3 ? g : [...g, ...fallbackTestimonials];
+        for (let i = base.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [merged[i], merged[j]] = [merged[j], merged[i]];
+          [base[i], base[j]] = [base[j], base[i]];
         }
-        if (merged.length >= 3) setTestimonials(merged);
+        if (base.length >= 3) setTestimonials(base);
       })
       .catch(() => {});
     return () => {
@@ -354,9 +356,7 @@ export default function Testimonials() {
                   <span className="text-6xl text-[#1f1f1f] font-serif font-light tracking-tight">{yearsCounter.count}</span>
                   <span className="text-[#6c655b] text-base font-light mb-1">{t('testimonials.stats.years')}</span>
                 </div>
-                <p className="text-sm text-[#4a4742] leading-relaxed">
-                  Crafting authentic <span className="font-medium text-[#1f1f1f]">Moroccan experiences</span> with dedication to tradition and innovation.
-                </p>
+                <p className="text-sm text-[#4a4742] leading-relaxed">{t('testimonials.stats.tagline')}</p>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-[#1f1f1f] uppercase tracking-wider">{t('testimonials.stats.company')}</span>
                 </div>
@@ -542,7 +542,7 @@ export default function Testimonials() {
             <div className="text-right">
               <div ref={yearsCounter.ref} className="flex items-end justify-end gap-2 mb-2">
                 <span className="text-5xl text-[#1f1f1f] font-serif font-light tracking-tight">{yearsCounter.count}</span>
-                <span className="text-[#6c655b] text-base font-light mb-1">years</span>
+                <span className="text-[#6c655b] text-base font-light mb-1">{t('testimonials.stats.years')}</span>
               </div>
               <p className="text-sm text-[#6c655b] uppercase tracking-[0.2em] font-light">{t('testimonials.stats.excellence')}</p>
             </div>

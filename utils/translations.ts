@@ -727,6 +727,17 @@ const translations: Record<Lang, TranslationTree> = {
         error: 'Please fill in your name, a valid email and your experience.',
       },
     },
+    iftar: {
+      kicker: 'Ramadan',
+      title: 'Iftar catering',
+      body: 'Break your fast in style. Our iftar catering brings the warmth of Morocco to your table — from dates, harira and msemen to rich main courses and sweet delicacies. We cater iftars for the home, the mosque or large community gatherings, with an eye for tradition, timing and hospitality.',
+      points: [
+        'Traditional iftar dishes: dates, harira, msemen & more',
+        'From intimate families to large community iftars',
+        'Served on location or delivered, right on time for maghrib',
+      ],
+      cta: 'Build your iftar menu',
+    },
     culturalAuthenticity: {
       kicker: 'Cultural Authenticity',
       title: 'From Morocco to Your Table.',
@@ -1565,6 +1576,17 @@ const translations: Record<Lang, TranslationTree> = {
         error: 'Veuillez indiquer votre nom, un e-mail valide et votre expérience.',
       },
     },
+    iftar: {
+      kicker: 'Ramadan',
+      title: 'Traiteur iftar',
+      body: 'Rompez le jeûne avec élégance. Notre service iftar apporte la chaleur du Maroc à votre table — des dattes, de la harira et des msemen aux plats copieux et douceurs sucrées. Nous organisons des iftars à domicile, à la mosquée ou pour de grands rassemblements, avec le souci de la tradition, du timing et de l\'hospitalité.',
+      points: [
+        'Plats d\'iftar traditionnels : dattes, harira, msemen et plus',
+        'Des familles intimes aux grands iftars communautaires',
+        'Servi sur place ou livré, juste à temps pour le maghreb',
+      ],
+      cta: 'Composez votre menu iftar',
+    },
     culturalAuthenticity: {
       kicker: 'Authenticité Culturelle',
       title: 'Du Maroc à Votre Table.',
@@ -2402,6 +2424,17 @@ const translations: Record<Lang, TranslationTree> = {
         thanks: 'Bedankt! We hebben uw ervaring ontvangen.',
         error: 'Vul uw naam, een geldig e-mailadres en uw ervaring in.',
       },
+    },
+    iftar: {
+      kicker: 'Ramadan',
+      title: 'Iftar catering',
+      body: 'Verbreek het vasten in stijl. Onze iftar-catering brengt de warmte van Marokko naar uw tafel — van dadels, harira en msemen tot rijke hoofdgerechten en zoete lekkernijen. Wij verzorgen iftars voor thuis, de moskee of grote gemeenschapsbijeenkomsten, met oog voor traditie, timing en gastvrijheid.',
+      points: [
+        'Traditionele iftar-gerechten: dadels, harira, msemen & meer',
+        'Van intieme families tot grote gemeenschapsiftars',
+        'Op locatie verzorgd of bezorgd, precies op tijd voor de maghreb',
+      ],
+      cta: 'Stel uw iftar-menu samen',
     },
     culturalAuthenticity: {
       kicker: 'Authentiek Marokkaans',

@@ -28,6 +28,11 @@ const Services = dynamic(() => import('@/components/Services'), {
   loading: () => <div className="h-96 bg-[#ebe6dc]" />,
 });
 
+const IftarSection = dynamic(() => import('@/components/IftarSection'), {
+  ssr: true,
+  loading: () => <div className="h-96 bg-[#f7f3ec]" />,
+});
+
 const Testimonials = dynamic(() => import('@/components/Testimonials'), {
   ssr: true,
   loading: () => <div className="h-64 bg-[#f7f3ec]" />,
@@ -73,6 +78,7 @@ export default function Home() {
       <Reveal><Craft /></Reveal>
       <Reveal><CulturalAuthenticity /></Reveal>
       <Reveal><Services /></Reveal>
+      <Reveal><IftarSection /></Reveal>
       <Reveal><Testimonials /></Reveal>
       <Reveal><MenuBuilder /></Reveal>
       <Reveal><Gallery /></Reveal>

@@ -12,7 +12,7 @@ const BLUR_DATA_URL =
 const baseServices = [
   { id: 'corporate', image: '/service1.jpg' },
   { id: 'wedding', image: '/service2.jpg' },
-  { id: 'event', image: '/service3.jpg' },
+  { id: 'event', image: '/gallery/g-20.jpg' },
 ];
 
 export default function Services() {

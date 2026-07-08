@@ -121,7 +121,7 @@ export default function MenuBuilder() {
   const [cookiesLuxe, setCookiesLuxe] = useState<boolean>(false);
   const [tableExtras, setTableExtras] = useState<TableExtraId[]>([]);
   const [teaShow, setTeaShow] = useState<TeaShowId>('standard');
-  const [mocktailMix, setMocktailMix] = useState<boolean>(false);
+  const [cookieBuffet, setCookieBuffet] = useState<boolean>(false);
   const [decoration, setDecoration] = useState<DecorationSelection>({});
   const selectDecoration = useCallback((id: DecorationComponentId, tier: DecorationTier) => {
     setDecoration((prev) => ({ ...prev, [id]: tier }));
@@ -246,7 +246,7 @@ export default function MenuBuilder() {
         'lila-builder-snapshot',
         JSON.stringify({
           selectedEventType, selectedDate, eventStart, eventEnd, foodTime, guestCount,
-          selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, mocktailMix,
+          selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, cookieBuffet,
           decoration, selectedLocation, locationUnknown, starterTemp,
         })
       );
@@ -255,7 +255,7 @@ export default function MenuBuilder() {
     }
   }, [
     selectedEventType, selectedDate, eventStart, eventEnd, foodTime, guestCount,
-    selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, mocktailMix,
+    selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, cookieBuffet,
     decoration, selectedLocation, locationUnknown, starterTemp, paidReturn,
   ]);
 
@@ -277,7 +277,7 @@ export default function MenuBuilder() {
         setCookiesLuxe(!!s.cookiesLuxe);
         if (Array.isArray(s.tableExtras)) setTableExtras(s.tableExtras);
         if (s.teaShow) setTeaShow(s.teaShow);
-        setMocktailMix(!!s.mocktailMix);
+        setCookieBuffet(!!s.cookieBuffet);
         if (s.decoration) setDecoration(s.decoration);
         setSelectedLocation(s.selectedLocation ?? null);
         setLocationUnknown(!!s.locationUnknown);
@@ -385,12 +385,12 @@ export default function MenuBuilder() {
       coffeeLuxe,
       cookiesLuxe,
       tableExtras,
-      mocktailMix,
+      cookieBuffet,
       teaShowFee: TEA_SHOW_FEES[teaShow],
       decorationFee: decorationFeeFor(decoration),
       transportFee,
     });
-  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decoration, transportFee]);
+  }, [selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, cookieBuffet, teaShow, decoration, transportFee]);
 
   // Compact, customer-facing total (rounded euros, locale-grouped).
   const localeTag = lang === 'nl' ? 'nl-NL' : lang === 'fr' ? 'fr-FR' : 'en-US';
@@ -413,7 +413,7 @@ export default function MenuBuilder() {
       coffeeLuxe,
       cookiesLuxe,
       tableExtras,
-      mocktailMix,
+      cookieBuffet,
       teaShow,
       decoration,
       venueName: locationUnknown ? t('menuBuilder.location.unknownShort') : selectedLocation?.label,
@@ -422,7 +422,7 @@ export default function MenuBuilder() {
       totalPrice: getTotalPrice(),
       lang,
     });
-  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, mocktailMix, teaShow, decoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
+  }, [selectedDate, selectedEventType, selectedItems, guestCount, coffeeLuxe, cookiesLuxe, tableExtras, cookieBuffet, teaShow, decoration, selectedLocation, locationUnknown, transportFee, getTotalPrice, lang, t]);
 
   // Step index of the last course (Desserts) — leaving it requires ≥1 dish.
   // Last course (dessert) step — derived so it survives step reordering.
@@ -598,7 +598,7 @@ export default function MenuBuilder() {
       `${t('menuBuilder.extras.cookiesName')}: ${cookiesLuxe ? t('menuBuilder.extras.luxeName') : t('menuBuilder.extras.standardName')}`,
     ];
     tableExtras.forEach((id) => parts.push(t(`menuBuilder.extras.items.${id}`)));
-    if (mocktailMix) parts.push(t('menuBuilder.extras.mocktailMixName'));
+    if (cookieBuffet) parts.push(t('menuBuilder.extras.cookieBuffetName'));
     parts.push(`${t('menuBuilder.extras.teaShowLabel')}: ${t(`menuBuilder.extras.teaShows.${teaShow}`)}`);
     return parts.join(' · ');
   })();
@@ -822,8 +822,8 @@ export default function MenuBuilder() {
               onToggleTableExtra={(id) =>
                 setTableExtras((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
               }
-              mocktailMix={mocktailMix}
-              onMocktailMixToggle={setMocktailMix}
+              cookieBuffet={cookieBuffet}
+              onCookieBuffetToggle={setCookieBuffet}
               teaShow={teaShow}
               onTeaShowChange={setTeaShow}
             />

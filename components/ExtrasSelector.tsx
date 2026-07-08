@@ -11,7 +11,7 @@ import {
   TABLE_EXTRA_IDS,
   TEA_SHOW_FEES,
   TEA_SHOW_IDS,
-  SMOOTHIE_MIX_PER_GUEST,
+  KOEKJES_BUFFET_FEE,
   formatEuro,
   type TableExtraId,
   type TeaShowId,
@@ -25,8 +25,8 @@ interface ServiceSelectorProps {
   onCookiesLuxeToggle: (value: boolean) => void;
   tableExtras: TableExtraId[];
   onToggleTableExtra: (id: TableExtraId) => void;
-  mocktailMix: boolean;
-  onMocktailMixToggle: (value: boolean) => void;
+  cookieBuffet: boolean;
+  onCookieBuffetToggle: (value: boolean) => void;
   teaShow: TeaShowId;
   onTeaShowChange: (id: TeaShowId) => void;
 }
@@ -38,8 +38,8 @@ function ServiceSelector({
   onCookiesLuxeToggle,
   tableExtras,
   onToggleTableExtra,
-  mocktailMix,
-  onMocktailMixToggle,
+  cookieBuffet,
+  onCookieBuffetToggle,
   teaShow,
   onTeaShowChange,
 }: ServiceSelectorProps) {
@@ -196,15 +196,10 @@ function ServiceSelector({
         <SectionHeading label={t('menuBuilder.extras.extraServicesLabel')} />
         <div className="border-[1.5px] border-[#e0d3b8] bg-white/40">
           <ToggleRow
-            active={mocktailMix}
-            onClick={() => onMocktailMixToggle(!mocktailMix)}
-            label={t('menuBuilder.extras.mocktailMixName')}
-            right={
-              <>
-                +{formatEuro(SMOOTHIE_MIX_PER_GUEST)}{' '}
-                <span className="text-[#bcae96]">{t('menuBuilder.extras.perGuest')}</span>
-              </>
-            }
+            active={cookieBuffet}
+            onClick={() => onCookieBuffetToggle(!cookieBuffet)}
+            label={t('menuBuilder.extras.cookieBuffetName')}
+            right={<>+{formatEuro(KOEKJES_BUFFET_FEE)}</>}
           />
         </div>
       </div>

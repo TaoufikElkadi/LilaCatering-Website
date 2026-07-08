@@ -94,8 +94,8 @@ export interface ServiceOptions {
   tableExtras?: TableExtraId[];
   /** One-time tea-show fee (added as-is, NOT marked up by the guest multiplier). */
   teaShowFee?: number;
-  /** 4-soort mocktail & smoothie mix in glasses (per guest). */
-  mocktailMix?: boolean;
+  /** Cookie buffet (koekjesbuffet, 5 cookies p.p.) — one-time flat fee. */
+  cookieBuffet?: boolean;
   /** One-time decoration-collection fee. */
   decorationFee?: number;
   /** One-time transport fee (added as-is, NOT marked up by the guest multiplier). */
@@ -124,8 +124,8 @@ export function getTransportCost(
 export const COFFEE_LUXE_PER_GUEST = 4.5;
 export const COOKIES_LUXE_PER_GUEST = 3;
 
-/** Per-guest price for the 4-soort mocktail & smoothie mix in glasses. */
-export const SMOOTHIE_MIX_PER_GUEST = 4.5;
+/** One-time flat fee for the cookie buffet (koekjesbuffet, 5 cookies per person). */
+export const KOEKJES_BUFFET_FEE = 250;
 
 /** Per-guest surcharge for the chosen service upgrades (0 when both standard). */
 export function getServicePerGuest(service: ServiceOptions = {}): number {
@@ -136,7 +136,6 @@ export function getServicePerGuest(service: ServiceOptions = {}): number {
   return (
     (service.coffeeLuxe ? COFFEE_LUXE_PER_GUEST : 0) +
     (service.cookiesLuxe ? COOKIES_LUXE_PER_GUEST : 0) +
-    (service.mocktailMix ? SMOOTHIE_MIX_PER_GUEST : 0) +
     extras
   );
 }
@@ -166,11 +165,13 @@ export function getEstimatedTotal(
   const decorationFee = service.decorationFee ?? 0;
   const transportFee = service.transportFee ?? 0;
   const teaShowFee = service.teaShowFee ?? 0;
+  const cookieBuffetFee = service.cookieBuffet ? KOEKJES_BUFFET_FEE : 0;
 
   return (
     (menuTotal + serviceTotal + flatFees + decorationFee) * multiplier +
     transportFee +
-    teaShowFee
+    teaShowFee +
+    cookieBuffetFee
   );
 }
 

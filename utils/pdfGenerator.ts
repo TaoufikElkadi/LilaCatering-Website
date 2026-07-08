@@ -8,7 +8,7 @@ import {
   formatEuro,
   TABLE_EXTRA_PRICES,
   TEA_SHOW_FEES,
-  SMOOTHIE_MIX_PER_GUEST,
+  KOEKJES_BUFFET_FEE,
   type TableExtraId,
   type TeaShowId,
 } from '@/lib/pricing';
@@ -21,7 +21,7 @@ interface OfferteData {
   coffeeLuxe: boolean;
   cookiesLuxe: boolean;
   tableExtras?: TableExtraId[];
-  mocktailMix?: boolean;
+  cookieBuffet?: boolean;
   teaShow?: TeaShowId;
   decoration: DecorationSelection;
   venueName?: string;
@@ -445,13 +445,13 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
     ]);
   });
 
-  // 4-soort mocktail & smoothie mix — on request.
-  if (data.mocktailMix) {
+  // Cookie buffet (koekjesbuffet) — one-time flat fee.
+  if (data.cookieBuffet) {
     extrasRows.push([
-      t('menuBuilder.extras.mocktailMixName'),
+      t('menuBuilder.extras.cookieBuffetName'),
       t('menuBuilder.extras.extraServicesLabel'),
-      formatEuro(SMOOTHIE_MIX_PER_GUEST),
-      formatEuro(SMOOTHIE_MIX_PER_GUEST * data.guestCount),
+      formatEuro(KOEKJES_BUFFET_FEE),
+      formatEuro(KOEKJES_BUFFET_FEE),
     ]);
   }
 

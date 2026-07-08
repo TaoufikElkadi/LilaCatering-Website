@@ -217,18 +217,19 @@ export default function MenuBuilder() {
 
   // The flow is one step per course (Hapjes / Voorgerechten / Hoofdgerechten /
   // Desserts) plus event, guests, service, decoration and date.
+  // Times are asked AFTER service (later in the flow, once the menu is set).
   const STEP_DEFS: { step: FlowStep; kind: StepKind; category?: MenuCategory }[] = [
     { step: 1, kind: 'event' },
     { step: 2, kind: 'date' },
-    { step: 3, kind: 'time' },
-    { step: 4, kind: 'location' },
-    { step: 5, kind: 'guests' },
-    { step: 6, kind: 'menu', category: 'appetizer' },
-    { step: 7, kind: 'starterTemp' },
-    { step: 8, kind: 'menu', category: 'starter' },
-    { step: 9, kind: 'menu', category: 'main' },
-    { step: 10, kind: 'menu', category: 'dessert' },
-    { step: 11, kind: 'service' },
+    { step: 3, kind: 'location' },
+    { step: 4, kind: 'guests' },
+    { step: 5, kind: 'menu', category: 'appetizer' },
+    { step: 6, kind: 'starterTemp' },
+    { step: 7, kind: 'menu', category: 'starter' },
+    { step: 8, kind: 'menu', category: 'main' },
+    { step: 9, kind: 'menu', category: 'dessert' },
+    { step: 10, kind: 'service' },
+    { step: 11, kind: 'time' },
     { step: 12, kind: 'decor' },
     { step: 13, kind: 'review' },
   ];

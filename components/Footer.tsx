@@ -175,9 +175,13 @@ export default function Footer() {
             <Ornament />
             <h3 className="font-serif text-lg text-[#1f1f1f] mb-4">{t('footer.contactTitle')}</h3>
             <ul className="space-y-3 text-sm text-[#6c655b]">
-              <li className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-[#C19A5B] shrink-0" strokeWidth={1.75} />
-                Amsterdam
+              <li className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-[#C19A5B] shrink-0 mt-0.5" strokeWidth={1.75} />
+                <span>
+                  De Dollard 11
+                  <br />
+                  1454 AT Watergang
+                </span>
               </li>
               <li>
                 <a href="mailto:info@lilacatering.nl" className={`flex items-center gap-2.5 ${linkCls}`}>

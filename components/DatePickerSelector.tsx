@@ -148,7 +148,7 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
               {weekdays.map((w, i) => (
                 <div
                   key={i}
-                  className="text-center text-[10px] tracking-[0.12em] text-[#a8824a] uppercase py-1"
+                  className="text-center text-[11px] sm:text-xs tracking-[0.12em] text-[#a8824a] uppercase py-1"
                 >
                   {w}
                 </div>
@@ -182,7 +182,7 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
                         : undefined
                     }
                     className={[
-                      'relative aspect-square flex items-center justify-center rounded-[3px] text-sm font-serif transition-all duration-200',
+                      'relative aspect-square flex items-center justify-center rounded-[3px] text-base sm:text-lg font-serif transition-all duration-200',
                       isSelected
                         ? 'bg-[#C19A5B] text-white shadow-[0_4px_14px_-4px_rgba(193,154,91,0.7)]'
                         : disabled
@@ -215,6 +215,14 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
                 {t('menuBuilder.datePicker.fullyBooked')}
               </span>
             </div>
+
+            {/* No spot? call us — we can often still help for smaller occasions. */}
+            <p className="mt-5 text-center text-[12px] leading-relaxed text-[#6c655b]">
+              {t('menuBuilder.datePicker.fullNote')}{' '}
+              <a href="tel:+31203635478" className="font-medium text-[#a8824a] hover:text-[#C19A5B] whitespace-nowrap transition-colors">
+                020 363 5478
+              </a>
+            </p>
 
             {/* Selected date */}
             {selectedDate && (

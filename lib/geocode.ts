@@ -23,6 +23,8 @@ export interface PlaceResult {
   isAmsterdam: boolean;
   /** Estimated driving distance in km from the base. */
   distanceKm: number;
+  /** True for our recommended partner venues — no service cost is shown/charged. */
+  isPartner?: boolean;
 }
 
 function haversineKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {

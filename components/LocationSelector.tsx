@@ -8,26 +8,26 @@ import { searchPlaces, resolvePlace, Prediction, PlaceResult, BASE_COORD } from 
 import { getTransportCost, formatEuro } from '@/lib/pricing';
 import { StepHeader } from './MenuDecor';
 
-// Partner venues we recommend — shown as cards under the search bar.
-// All in Amsterdam (flat transport fee). serviceCost is the venue's own
-// service fee (informational — billed by the venue, not included in our total).
-// Edit this list to add partners. (serviceCost values are placeholders.)
-const PARTNER_VENUES: { name: string; city: string; serviceCost: number }[] = [
-  { name: 'de Diamant', city: 'Amsterdam', serviceCost: 350 },
-  { name: 'De Koning', city: 'Amsterdam', serviceCost: 300 },
-  { name: 'Royal', city: 'Amsterdam', serviceCost: 400 },
-  { name: 'Majestic', city: 'Amsterdam', serviceCost: 450 },
+// Recommended partner venues — shown as cards under the search bar (name +
+// location only). No service cost is shown or charged for these; that's arranged
+// separately. Service costs only apply to venues the customer searches for.
+const PARTNER_VENUES: { name: string; city: string }[] = [
+  { name: 'Rey Events', city: 'Almere' },
+  { name: 'Simplicity Zalenverhuur', city: 'Rijen' },
+  { name: 'Noor Paleis', city: 'Almere' },
+  { name: 'de Koning', city: 'Amsterdam' },
 ];
 
-/** Build a transport-ready PlaceResult for an Amsterdam partner venue. */
-function partnerToPlace(name: string): PlaceResult {
+/** Build a PlaceResult for a recommended partner venue (no transport cost). */
+function partnerToPlace(name: string, city: string): PlaceResult {
   return {
-    label: `${name} · Amsterdam`,
-    city: 'Amsterdam',
+    label: `${name} · ${city}`,
+    city,
     lat: BASE_COORD.lat,
     lon: BASE_COORD.lon,
-    isAmsterdam: true,
+    isAmsterdam: city.toLowerCase() === 'amsterdam',
     distanceKm: 0,
+    isPartner: true,
   };
 }
 
@@ -127,13 +127,15 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-[#a8824a] mb-1">{t('menuBuilder.location.selectedLabel')}</p>
                 <p className="text-sm text-[#1f1f1f] font-medium leading-snug">{selectedLocation.label}</p>
-                <p className="mt-3 pt-3 border-t border-[#e7ddcb] text-[11px] uppercase tracking-[0.18em] text-[#6c655b]">
-                  {t('menuBuilder.location.transport')}{' '}
-                  <span className="text-[#a8824a]">{formatEuro(transportFor(selectedLocation))}</span>
-                  {!selectedLocation.isAmsterdam && (
-                    <span className="text-[#9a8a6a] normal-case tracking-normal"> · ~{selectedLocation.distanceKm} km</span>
-                  )}
-                </p>
+                {!selectedLocation.isPartner && (
+                  <p className="mt-3 pt-3 border-t border-[#e7ddcb] text-[11px] uppercase tracking-[0.18em] text-[#6c655b]">
+                    {t('menuBuilder.location.transport')}{' '}
+                    <span className="text-[#a8824a]">{formatEuro(transportFor(selectedLocation))}</span>
+                    {!selectedLocation.isAmsterdam && (
+                      <span className="text-[#9a8a6a] normal-case tracking-normal"> · ~{selectedLocation.distanceKm} km</span>
+                    )}
+                  </p>
+                )}
               </div>
               <button onClick={clearSelection} aria-label="change" className="text-[#a39e94] hover:text-[#1f1f1f] transition-colors">
                 <X className="w-4 h-4" />
@@ -188,11 +190,11 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                 {t('menuBuilder.location.suggestedLabel')}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {PARTNER_VENUES.map(({ name, city, serviceCost }) => (
+                {PARTNER_VENUES.map(({ name, city }) => (
                   <button
                     key={name}
                     type="button"
-                    onClick={() => onLocationChange(partnerToPlace(name))}
+                    onClick={() => onLocationChange(partnerToPlace(name, city))}
                     className="flex flex-col items-start gap-1 rounded-[3px] border border-[#dcc8a4] bg-white px-4 py-3 text-left transition-colors hover:border-[#C19A5B] hover:bg-[#f6f1e8]"
                   >
                     <span className="flex items-center gap-1.5 text-sm font-medium text-[#1f1f1f]">
@@ -200,9 +202,6 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                       {name}
                     </span>
                     <span className="text-[11px] text-[#8a8275]">{city}</span>
-                    <span className="text-[11px] text-[#a8824a]">
-                      {t('menuBuilder.location.serviceCostLabel')}: {formatEuro(serviceCost)}
-                    </span>
                   </button>
                 ))}
               </div>

@@ -108,9 +108,11 @@ export const TRANSPORT_PER_KM = 3.5;
 
 /** Transport cost for a venue (Amsterdam → flat; else km × rate). */
 export function getTransportCost(
-  venue: { isAmsterdam?: boolean; distanceKm: number } | null | undefined
+  venue: { isAmsterdam?: boolean; distanceKm: number; isPartner?: boolean } | null | undefined
 ): number {
   if (!venue) return 0;
+  // Recommended partner venues: service/transport is arranged separately, not charged here.
+  if (venue.isPartner) return 0;
   if (venue.isAmsterdam) return AMSTERDAM_TRANSPORT;
   return venue.distanceKm * TRANSPORT_PER_KM;
 }

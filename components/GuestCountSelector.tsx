@@ -15,7 +15,7 @@ interface GuestCountSelectorProps {
 function GuestCountSelector({ guestCount, onGuestCountChange }: GuestCountSelectorProps) {
   const { t } = useLanguage();
 
-  const presetCounts = [40, 60, 80, 100, 150, 200, 300, 500];
+  const presetCounts = [40, 80, 100, 150, 200, 250, 300, 500];
 
   // Local text state so the field can be cleared and typed freely; we snap to a
   // valid multiple of GUEST_STEP (min MIN_GUESTS) only on blur.

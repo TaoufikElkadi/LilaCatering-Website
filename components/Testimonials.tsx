@@ -94,13 +94,73 @@ export default function Testimonials() {
   const eventsCounter = useCounter(500, 2.5, shouldAnimate);
   const satisfactionCounter = useCounter(98, 2, shouldAnimate);
 
-  const testimonials = useMemo(() => {
-    return [
+  type Card = { name: string; role: string; company: string; text: string };
+  const fallbackTestimonials = useMemo<Card[]>(
+    () => [
       t('testimonials.testimonials.0'),
       t('testimonials.testimonials.1'),
       t('testimonials.testimonials.2'),
-    ];
-  }, [t]);
+    ],
+    [t]
+  );
+
+  // Live Google reviews (positive only) merged with fallbacks and shuffled on
+  // each visit, so a different selection shows every time.
+  const [testimonials, setTestimonials] = useState<Card[]>(fallbackTestimonials);
+  const [reviewMeta, setReviewMeta] = useState<{ rating: number | null; total: number | null; url?: string }>({
+    rating: null,
+    total: null,
+  });
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/google-reviews')
+      .then((r) => r.json())
+      .then((d) => {
+        if (!active) return;
+        setReviewMeta({ rating: d.rating ?? null, total: d.total ?? null, url: d.url });
+        const g: Card[] = (d.reviews ?? []).map(
+          (rv: { author: string; when: string; text: string }) => ({
+            name: rv.author,
+            role: 'Google',
+            company: [rv.when, 'via Google'].filter(Boolean).join(' · '),
+            text: rv.text.length > 220 ? rv.text.slice(0, 217).trimEnd() + '…' : rv.text,
+          })
+        );
+        const merged = [...g, ...fallbackTestimonials];
+        for (let i = merged.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [merged[i], merged[j]] = [merged[j], merged[i]];
+        }
+        if (merged.length >= 3) setTestimonials(merged);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [fallbackTestimonials]);
+
+  // Share-an-experience form.
+  const [shareOpen, setShareOpen] = useState(false);
+  const [share, setShare] = useState({ name: '', email: '', rating: 5, text: '' });
+  const [shareStatus, setShareStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
+  const submitShare = async () => {
+    if (!share.name.trim() || !share.text.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(share.email)) {
+      setShareStatus('error');
+      return;
+    }
+    setShareStatus('sending');
+    try {
+      const res = await fetch('/api/share-experience', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(share),
+      });
+      setShareStatus(res.ok ? 'done' : 'error');
+    } catch {
+      setShareStatus('error');
+    }
+  };
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -487,6 +547,101 @@ export default function Testimonials() {
               <p className="text-sm text-[#6c655b] uppercase tracking-[0.2em] font-light">{t('testimonials.stats.excellence')}</p>
             </div>
           </motion.div>
+        </div>
+
+        {/* Google rating badge + share your experience */}
+        <div className="mt-10 sm:mt-14 pt-8 border-t border-[#dcd3c5] text-center">
+          {reviewMeta.rating && (
+            <a
+              href={reviewMeta.url || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mb-5 text-sm text-[#4a4742] hover:text-[#1f1f1f] transition-colors"
+            >
+              <span className="flex items-center gap-0.5 text-[#C19A5B]">
+                {[...Array(5)].map((_, i) => (
+                  <StarIcon key={i} size="xs" />
+                ))}
+              </span>
+              <span className="font-medium">{reviewMeta.rating.toFixed(1)}</span>
+              <span className="text-[#6c655b]">
+                · {reviewMeta.total} {t('testimonials.share.googleReviews')}
+              </span>
+            </a>
+          )}
+
+          {shareStatus === 'done' ? (
+            <p className="text-sm text-[#3f7d52]">{t('testimonials.share.thanks')}</p>
+          ) : !shareOpen ? (
+            <div>
+              <button
+                onClick={() => setShareOpen(true)}
+                className="inline-flex items-center justify-center min-h-[44px] px-8 border border-[#1f1f1f] text-[#1f1f1f] text-xs uppercase tracking-[0.2em] hover:bg-[#1f1f1f] hover:text-white transition-colors"
+              >
+                {t('testimonials.share.cta')}
+              </button>
+            </div>
+          ) : (
+            <div className="max-w-md mx-auto mt-2 space-y-3 text-left">
+              <p className="text-sm text-[#6c655b] text-center">{t('testimonials.share.subtitle')}</p>
+              <input
+                value={share.name}
+                onChange={(e) => setShare((s) => ({ ...s, name: e.target.value }))}
+                placeholder={t('testimonials.share.namePh')}
+                className="w-full border border-[#dcc8a4] bg-white px-4 py-3 text-sm outline-none focus:border-[#C19A5B]"
+              />
+              <input
+                type="email"
+                value={share.email}
+                onChange={(e) => setShare((s) => ({ ...s, email: e.target.value }))}
+                placeholder={t('testimonials.share.emailPh')}
+                className="w-full border border-[#dcc8a4] bg-white px-4 py-3 text-sm outline-none focus:border-[#C19A5B]"
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#6c655b]">{t('testimonials.share.ratingLabel')}</span>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setShare((s) => ({ ...s, rating: n }))}
+                      className={n <= share.rating ? 'text-[#C19A5B]' : 'text-[#d8cbb2]'}
+                      aria-label={`${n}`}
+                    >
+                      <StarIcon />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                value={share.text}
+                onChange={(e) => setShare((s) => ({ ...s, text: e.target.value }))}
+                rows={4}
+                placeholder={t('testimonials.share.textPh')}
+                className="w-full border border-[#dcc8a4] bg-white px-4 py-3 text-sm outline-none focus:border-[#C19A5B] resize-none"
+              />
+              {shareStatus === 'error' && (
+                <p className="text-xs text-[#b4493f]">{t('testimonials.share.error')}</p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShareOpen(false)}
+                  className="flex-1 min-h-[44px] border border-[#dcc8a4] text-[#6c655b] text-xs uppercase tracking-[0.16em]"
+                >
+                  {t('testimonials.share.cancel')}
+                </button>
+                <button
+                  onClick={submitShare}
+                  disabled={shareStatus === 'sending'}
+                  className="flex-1 min-h-[44px] bg-[#1f1f1f] text-white text-xs uppercase tracking-[0.16em] disabled:opacity-50"
+                >
+                  {shareStatus === 'sending'
+                    ? t('testimonials.share.sending')
+                    : t('testimonials.share.submit')}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

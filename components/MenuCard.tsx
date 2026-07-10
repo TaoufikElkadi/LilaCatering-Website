@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MenuItem } from '@/data/menuData';
 import Image from 'next/image';
 import DietaryIcons from './DietaryIcons';
-import { ChevronDown, ChevronUp, AlertCircle, Users, Info, Leaf, Plus, Check } from 'lucide-react';
+import { ArrowRight, AlertCircle, Users, Info, Leaf, Plus, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { formatEuro } from '@/lib/pricing';
 
@@ -83,10 +83,10 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
         />
 
         {/* Layout wrapper: stacked by default, info | image (desktop) for appetizers */}
-        <div className={horizontal ? 'flex flex-1 flex-col sm:grid sm:grid-cols-[1fr_54%] sm:min-h-[280px]' : 'flex flex-1 flex-col'}>
+        <div className={horizontal ? 'flex flex-1 flex-col sm:grid sm:grid-cols-2' : 'flex flex-1 flex-col'}>
 
-        {/* Image — clean (no gradient over the dish) */}
-        <div className={horizontal ? 'relative h-56 sm:h-full sm:order-2 overflow-hidden' : 'relative aspect-[4/3] w-full overflow-hidden'}>
+        {/* Image — a clean square (drives the card height on desktop) */}
+        <div className={horizontal ? 'relative h-56 sm:h-auto sm:aspect-square sm:order-2 overflow-hidden' : 'relative aspect-[4/3] w-full overflow-hidden'}>
           <Image
             src={item.image}
             alt={item.name}
@@ -99,19 +99,22 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
             blurDataURL={BLUR_DATA_URL}
           />
 
-          {/* Price chip (solid, legible without any scrim) */}
-          <div className="absolute top-3.5 left-3.5 z-10">
-            {item.included ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-[#3a2e1c] bg-[#f6ecd6] border border-[#C19A5B]/50 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.25)]">
-                <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
-                {priceDisplay}
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-3.5 py-1.5 text-sm font-serif tracking-wide text-[#1f1f1f] bg-[#C19A5B] shadow-[0_3px_12px_-3px_rgba(0,0,0,0.5)]">
-                {priceDisplay}
-              </span>
-            )}
-          </div>
+          {/* Price chip — hidden for included appetizers (clean square photo);
+              paid items still show their surcharge. */}
+          {(!horizontal || !item.included) && (
+            <div className="absolute top-3.5 left-3.5 z-10">
+              {item.included ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-[0.22em] text-[#3a2e1c] bg-[#f6ecd6] border border-[#C19A5B]/50 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.25)]">
+                  <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
+                  {priceDisplay}
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-3.5 py-1.5 text-sm font-serif tracking-wide text-[#1f1f1f] bg-[#C19A5B] shadow-[0_3px_12px_-3px_rgba(0,0,0,0.5)]">
+                  {priceDisplay}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Selection seal */}
           <AnimatePresence>
@@ -150,16 +153,16 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
             />
           </div>
 
-          {/* Description + dietary — flow directly under the name */}
+          {/* Dietary tags, then description — flow directly under the name */}
           <div className="space-y-3.5 mt-3.5">
-            {item.description && (
-              <p className="text-xs sm:text-[13px] text-[#6c655b] leading-relaxed font-light line-clamp-2">
-                {item.description}
-              </p>
-            )}
             <div className="flex items-center gap-2">
               <DietaryIcons subCategory={item.subCategory} dietaryTags={item.dietaryTags} size="sm" />
             </div>
+            {item.description && (
+              <p className="text-xs sm:text-[13px] text-[#6c655b] leading-relaxed font-light line-clamp-3">
+                {item.description}
+              </p>
+            )}
           </div>
 
           {/* Bottom Section — pinned to the card base for even alignment */}
@@ -188,8 +191,8 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
                     isExpanded ? 'text-[#C19A5B]' : 'text-[#a39e94] hover:text-[#C19A5B]'
                   }`}
                 >
-                  {isExpanded ? t('menuCard.hideDetails') : t('menuCard.viewDetails')}
-                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  {t('menuCard.details')}
+                  <ArrowRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
                 </button>
               </div>
             </div>

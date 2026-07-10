@@ -218,7 +218,7 @@ export const menuItems: MenuItem[] = [
   {
     id: 'app-warm-21',
     name: 'Mini Kip Snack',
-    description: '',
+    description: 'Krokante filodeegrolletjes gevuld met malse kip en oosterse kruiden.',
     surcharge: 0,
     included: true,
     image: '/images/dishes/lila-mini-kip-snack.jpg',
@@ -229,7 +229,7 @@ export const menuItems: MenuItem[] = [
   {
     id: 'app-warm-22',
     name: 'Mini Bastilla Zalm',
-    description: '',
+    description: 'Krokant bladerdeeg gevuld met verfijnde zalm, roomkaas en verse kruiden.',
     surcharge: 0,
     included: true,
     image: '/images/dishes/lila-mini-bastilla-zalm.jpg',
@@ -241,7 +241,7 @@ export const menuItems: MenuItem[] = [
   {
     id: 'app-warm-23',
     name: 'Mini Rfissa',
-    description: '',
+    description: 'Traditionele Marokkaanse rfissa met malse kip, linzen, kruiden en msemen.',
     surcharge: 0,
     included: true,
     image: '/images/dishes/lila-mini-rfissa.jpg',
@@ -252,7 +252,7 @@ export const menuItems: MenuItem[] = [
   {
     id: 'app-warm-24',
     name: 'Mini Pastilla Lham',
-    description: '',
+    description: 'Zoete-savoury pasteitje gevuld met gekruide lamsvlees, amandelen en kaneel.',
     surcharge: 0,
     included: true,
     image: '/images/dishes/lila-mini-pastilla-lham.jpg',

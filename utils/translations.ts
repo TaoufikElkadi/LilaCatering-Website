@@ -621,6 +621,7 @@ const translations: Record<Lang, TranslationTree> = {
     menuCard: {
       viewDetails: 'View Details',
       hideDetails: 'Hide Details',
+      details: 'Details',
       culturalAuthenticity: 'Cultural Authenticity',
       ingredients: 'Ingredients',
       allergens: 'Allergen Warning',
@@ -1471,6 +1472,7 @@ const translations: Record<Lang, TranslationTree> = {
     menuCard: {
       viewDetails: 'Voir les Détails',
       hideDetails: 'Masquer les Détails',
+      details: 'Détails',
       culturalAuthenticity: 'Authenticité Culturelle',
       ingredients: 'Ingrédients',
       allergens: 'Avertissement Allergènes',
@@ -2321,6 +2323,7 @@ const translations: Record<Lang, TranslationTree> = {
     menuCard: {
       viewDetails: 'Details Bekijken',
       hideDetails: 'Details Verbergen',
+      details: 'Details',
       culturalAuthenticity: 'Culturele Authenticiteit',
       ingredients: 'Ingrediënten',
       allergens: 'Allergenen Waarschuwing',

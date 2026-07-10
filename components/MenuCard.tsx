@@ -83,7 +83,7 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
         />
 
         {/* Layout wrapper: stacked by default, info | image (desktop) for appetizers */}
-        <div className={horizontal ? 'flex flex-1 flex-col sm:grid sm:grid-cols-[1fr_42%] sm:min-h-[230px]' : 'flex flex-1 flex-col'}>
+        <div className={horizontal ? 'flex flex-1 flex-col sm:grid sm:grid-cols-[1fr_54%] sm:min-h-[280px]' : 'flex flex-1 flex-col'}>
 
         {/* Image — clean (no gradient over the dish) */}
         <div className={horizontal ? 'relative h-56 sm:h-full sm:order-2 overflow-hidden' : 'relative aspect-[4/3] w-full overflow-hidden'}>

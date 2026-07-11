@@ -481,6 +481,9 @@ const translations: Record<Lang, TranslationTree> = {
         suggestedLabel: 'Suggested venues',
         serviceCostLabel: 'Service costs',
         kitchenCostDisclaimer: 'Please note: at external venues, the hall’s own service and kitchen costs may be charged separately and are not included in this amount.',
+        unknownHelp: 'We are happy to help you find the perfect location.',
+        noteLabel: 'Please note',
+        noteText: 'At external venues, the hall’s own service and kitchen costs may be charged separately and are not included.',
       },
       extras: {
         title: 'Service & sweets',
@@ -1363,6 +1366,9 @@ const translations: Record<Lang, TranslationTree> = {
         suggestedLabel: 'Salles suggérées',
         serviceCostLabel: 'Frais de service',
         kitchenCostDisclaimer: 'Remarque : dans les lieux externes, les frais de service et de cuisine de la salle peuvent être facturés séparément et ne sont pas inclus dans ce montant.',
+        unknownHelp: 'Nous vous aidons volontiers à trouver le lieu parfait.',
+        noteLabel: 'À noter',
+        noteText: 'Dans les lieux externes, les frais de service et de cuisine de la salle peuvent être facturés séparément et ne sont pas inclus.',
       },
       extras: {
         title: 'Service & douceurs',
@@ -2245,6 +2251,9 @@ const translations: Record<Lang, TranslationTree> = {
         suggestedLabel: 'Voorgestelde zalen',
         serviceCostLabel: 'Servicekosten',
         kitchenCostDisclaimer: 'Let op: bij externe locaties kunnen service- en keukenkosten van de zaal apart in rekening worden gebracht en zijn deze niet inbegrepen in dit bedrag.',
+        unknownHelp: 'Wij helpen u graag met het vinden van de perfecte locatie.',
+        noteLabel: 'Let op',
+        noteText: 'Bij externe locaties kunnen service- en keukenkosten van de zaal apart in rekening worden gebracht en zijn deze niet inbegrepen.',
       },
       extras: {
         title: 'Service & zoetigheden',

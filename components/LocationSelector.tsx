@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Search, X, Loader2, Check } from 'lucide-react';
+import { MapPin, Search, X, Loader2, Check, ChevronRight, Info } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { searchPlaces, resolvePlace, Prediction, PlaceResult, BASE_COORD } from '@/lib/geocode';
 import { getTransportCost, formatEuro } from '@/lib/pricing';
@@ -112,13 +112,13 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
     <div className="space-y-10">
       <StepHeader title={t('menuBuilder.location.title')} subtitle={t('menuBuilder.location.subtitle')} />
 
-      <div className="max-w-xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Selected location card */}
         {selectedLocation && !unknown ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[3px] border border-[#C19A5B] bg-gradient-to-br from-[#fdfbf7] to-[#f5efe3] p-5 sm:p-6 shadow-[0_16px_44px_-22px_rgba(80,60,30,0.34)]"
+            className="relative overflow-hidden border border-[#C19A5B] bg-gradient-to-br from-[#fdfbf7] to-[#f5efe3] p-5 sm:p-6 shadow-[0_16px_44px_-22px_rgba(80,60,30,0.34)]"
           >
             <div className="relative flex items-start gap-3">
               <span className="mt-0.5 flex items-center justify-center w-8 h-8 rounded-full bg-[#C19A5B] text-white shrink-0">
@@ -145,15 +145,15 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
         ) : (
           /* Search input */
           <div ref={boxRef} className={`relative ${unknown ? 'opacity-40 pointer-events-none' : ''}`}>
-            <div className="relative flex items-center gap-3 bg-white border border-[#dcc8a4] focus-within:border-[#C19A5B] focus-within:ring-2 focus-within:ring-[#C19A5B]/20 rounded-[3px] px-4 py-3.5 transition-all duration-300">
-              <Search className="w-4 h-4 shrink-0 text-[#C19A5B]" strokeWidth={1.75} />
+            <div className="relative flex items-center gap-3.5 bg-white border border-[#e2d8c5] focus-within:border-[#C19A5B] focus-within:ring-2 focus-within:ring-[#C19A5B]/15 px-6 py-4 shadow-[0_12px_34px_-22px_rgba(60,45,25,0.35)] transition-all duration-300">
+              <Search className="w-5 h-5 shrink-0 text-[#C19A5B]" strokeWidth={1.75} />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => results.length && setOpen(true)}
                 placeholder={t('menuBuilder.location.placeholder')}
-                className="flex-1 min-w-0 bg-transparent text-sm text-[#1f1f1f] outline-none placeholder:text-[#b3a892]"
+                className="flex-1 min-w-0 bg-transparent text-base text-[#1f1f1f] outline-none placeholder:text-[#b3a892]"
               />
               {(loading || resolving) && <Loader2 className="w-4 h-4 text-[#C19A5B] animate-spin shrink-0" />}
             </div>
@@ -164,7 +164,7 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
-                  className="relative z-30 mt-2 w-full bg-white border border-[#e3d7c1] rounded-[3px] shadow-[0_24px_50px_-20px_rgba(80,60,30,0.4)] overflow-hidden"
+                  className="absolute z-30 mt-2 w-full bg-white border border-[#e3d7c1] shadow-[0_24px_50px_-20px_rgba(80,60,30,0.4)] overflow-hidden"
                 >
                   {results.map((r, i) => (
                     <li key={`${r.placeId}-${i}`}>
@@ -184,24 +184,31 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
               )}
             </AnimatePresence>
 
-            {/* Suggested partner venues — cards with name, location, service cost */}
-            <div className="mt-5">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-[#a8824a] mb-3">
-                {t('menuBuilder.location.suggestedLabel')}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Suggested partner venues */}
+            <div className="mt-8">
+              <div className="flex items-center gap-4 mb-5">
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#C19A5B]/40" />
+                <span className="text-[11px] uppercase tracking-[0.28em] text-[#a8824a] whitespace-nowrap">
+                  {t('menuBuilder.location.suggestedLabel')}
+                </span>
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#C19A5B]/40" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {PARTNER_VENUES.map(({ name, city, address }) => (
                   <button
                     key={name}
                     type="button"
                     onClick={() => onLocationChange(partnerToPlace(name, city))}
-                    className="flex flex-col items-start gap-1 rounded-[3px] border border-[#dcc8a4] bg-white px-4 py-3 text-left transition-colors hover:border-[#C19A5B] hover:bg-[#f6f1e8]"
+                    className="group flex items-center gap-4 border border-[#e2d8c5] bg-[#faf6ee] px-5 py-4 text-left transition-colors duration-300 hover:border-[#C19A5B] hover:bg-[#f6efe1]"
                   >
-                    <span className="flex items-center gap-1.5 text-sm font-medium text-[#1f1f1f]">
-                      <MapPin className="w-3.5 h-3.5 text-[#C19A5B] shrink-0" strokeWidth={2} />
-                      {name}
+                    <span className="flex items-center justify-center w-11 h-11 rounded-full bg-[#f0e7d4] text-[#C19A5B] shrink-0">
+                      <MapPin className="w-5 h-5" strokeWidth={1.75} />
                     </span>
-                    <span className="text-[11px] text-[#8a8275] leading-snug">{address}</span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-base font-serif text-[#1f1f1f] leading-snug">{name}</span>
+                      <span className="block text-[12px] text-[#8a8275] mt-0.5">{address}</span>
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-[#b39256] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </button>
                 ))}
               </div>
@@ -209,31 +216,41 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
           </div>
         )}
 
-        {/* No-venue checkbox */}
-        <label className="mt-6 flex items-center gap-3 cursor-pointer select-none">
-          <span
-            className={`flex items-center justify-center w-5 h-5 rounded-[3px] border transition-colors duration-200 ${
-              unknown ? 'bg-[#C19A5B] border-[#C19A5B] text-white' : 'border-[#dcc8a4] bg-white text-transparent'
-            }`}
-          >
-            <Check className="w-3.5 h-3.5" strokeWidth={3} />
-          </span>
-          <input
-            type="checkbox"
-            checked={unknown}
-            onChange={(e) => {
-              onUnknownChange(e.target.checked);
-              if (e.target.checked) clearSelection();
-            }}
-            className="sr-only"
-          />
-          <span className="text-sm text-[#4a4742] font-light">{t('menuBuilder.location.unknownCheckbox')}</span>
-        </label>
+        {/* Bottom row: no-location checkbox + external-venue note */}
+        <div className="grid sm:grid-cols-2 gap-6 sm:gap-10 border-t border-[#e7ddcb] pt-7">
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <span
+              className={`mt-0.5 flex items-center justify-center w-5 h-5 border transition-colors duration-200 ${
+                unknown ? 'bg-[#C19A5B] border-[#C19A5B] text-white' : 'border-[#c9b78f] bg-white text-transparent'
+              }`}
+            >
+              <Check className="w-3.5 h-3.5" strokeWidth={3} />
+            </span>
+            <input
+              type="checkbox"
+              checked={unknown}
+              onChange={(e) => {
+                onUnknownChange(e.target.checked);
+                if (e.target.checked) clearSelection();
+              }}
+              className="sr-only"
+            />
+            <span>
+              <span className="block text-base font-serif text-[#1f1f1f] leading-snug">{t('menuBuilder.location.unknownCheckbox')}</span>
+              <span className="block mt-1 text-[12px] text-[#9a8a6a] font-light leading-relaxed">{t('menuBuilder.location.unknownHelp')}</span>
+            </span>
+          </label>
 
-        {/* Service / kitchen cost disclaimer */}
-        <p className="mt-6 text-[11px] leading-relaxed text-[#9a8a6a] border-t border-[#e7ddcb] pt-4">
-          {t('menuBuilder.location.kitchenCostDisclaimer')}
-        </p>
+          <div className="flex items-start gap-3 sm:border-l sm:border-[#e7ddcb] sm:pl-10">
+            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[#f0e7d4] text-[#C19A5B] shrink-0">
+              <Info className="w-[18px] h-[18px]" strokeWidth={1.75} />
+            </span>
+            <span>
+              <span className="block text-[11px] uppercase tracking-[0.24em] text-[#a8824a]">{t('menuBuilder.location.noteLabel')}</span>
+              <span className="block mt-1 text-[12px] text-[#9a8a6a] font-light leading-relaxed">{t('menuBuilder.location.noteText')}</span>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

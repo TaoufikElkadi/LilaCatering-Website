@@ -182,7 +182,7 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
                         : undefined
                     }
                     className={[
-                      'relative aspect-square flex items-center justify-center rounded-[3px] text-base sm:text-lg font-serif transition-all duration-200',
+                      'relative aspect-square flex items-center justify-center rounded-[3px] text-xl sm:text-2xl font-serif transition-all duration-200',
                       isSelected
                         ? 'bg-[#C19A5B] text-white shadow-[0_4px_14px_-4px_rgba(193,154,91,0.7)]'
                         : disabled

@@ -38,6 +38,10 @@ function EventTypeSelector({ selectedEventType, onEventTypeChange }: EventTypeSe
     <div className="space-y-12">
       <StepHeader title={t('menuBuilder.eventType.title')} subtitle={t('menuBuilder.eventType.subtitle')} />
 
+      {/* Break out wider than the builder's max-w-6xl so the cards read as
+          landscape (near-square photo + panel), matching the design. */}
+      <div className="relative left-1/2 -translate-x-1/2 w-[min(94vw,1440px)] space-y-12">
+
       {/* Event Type Cards — image left + ivory panel right; 3 on top, 2 centered */}
       <div className="flex flex-wrap justify-center gap-5 sm:gap-6">
         {eventTypeIds.map((id, index) => {
@@ -56,7 +60,7 @@ function EventTypeSelector({ selectedEventType, onEventTypeChange }: EventTypeSe
               }`}
             >
               <div
-                className={`grid grid-cols-[42%_1fr] h-full bg-[#faf6ee] transition-shadow duration-500 ${
+                className={`grid grid-cols-[46%_1fr] h-full bg-[#faf6ee] transition-shadow duration-500 ${
                   isSelected
                     ? 'shadow-[0_24px_60px_-26px_rgba(120,90,40,0.55)]'
                     : 'border border-[#e2d8c5] shadow-[0_12px_32px_-22px_rgba(60,45,25,0.3)] group-hover:border-[#d0bd94] group-hover:shadow-[0_22px_54px_-26px_rgba(80,60,30,0.4)]'
@@ -141,6 +145,7 @@ function EventTypeSelector({ selectedEventType, onEventTypeChange }: EventTypeSe
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

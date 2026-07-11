@@ -2,7 +2,7 @@
 
 import { memo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Users, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { MIN_GUESTS, GUEST_STEP, normalizeGuestCount } from '@/lib/pricing';
 import { StepHeader, StarSeal } from './MenuDecor';
@@ -47,7 +47,14 @@ function GuestCountSelector({ guestCount, onGuestCountChange }: GuestCountSelect
     <div className="space-y-10">
       <StepHeader title={t('menuBuilder.guestCount.title')} subtitle={t('menuBuilder.guestCount.subtitle')} />
 
-      {/* Preset Guest Counts */}
+      {/* Choose-preset label */}
+      <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.28em] text-[#a8824a] uppercase">
+        <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
+        {t('menuBuilder.guestCount.chooseLabel')}
+        <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
+      </div>
+
+      {/* Preset Guest Counts — sharp-edged cards with icon + gold check when active */}
       <div className="grid grid-cols-4 md:grid-cols-8 gap-3 sm:gap-4">
         {presetCounts.map((count) => {
           const isActive = guestCount === count;
@@ -58,64 +65,70 @@ function GuestCountSelector({ guestCount, onGuestCountChange }: GuestCountSelect
               whileTap={{ scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 320, damping: 24 }}
               onClick={() => onGuestCountChange(count)}
-              className={`group relative aspect-square overflow-hidden rounded-[3px] bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] flex items-center justify-center transition-[box-shadow,border-color] duration-500 ${
+              className={`group relative aspect-square bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] flex flex-col items-center justify-center gap-2 transition-[box-shadow,border-color] duration-500 ${
                 isActive
-                  ? 'border border-[#C19A5B] shadow-[0_16px_40px_-20px_rgba(120,90,40,0.5)]'
+                  ? 'border-2 border-[#C19A5B] shadow-[0_16px_40px_-20px_rgba(120,90,40,0.5)]'
                   : 'border border-[#e7ddcb] shadow-[0_8px_22px_-16px_rgba(60,45,25,0.25)] hover:border-[#d6c39d]'
               }`}
             >
-              {/* inset gold hairline */}
-              <span
-                className={`pointer-events-none absolute inset-[5px] rounded-[2px] border transition-opacity duration-500 ${
-                  isActive ? 'border-[#C19A5B]/55 opacity-100' : 'border-[#C19A5B]/0 opacity-0 group-hover:border-[#C19A5B]/30 group-hover:opacity-100'
-                }`}
-              />
-              <StarSeal className="pointer-events-none absolute -top-2 -right-2 w-10 h-10 text-[#C19A5B]/[0.06]" />
-              <div className="relative text-center">
-                <p className={`text-xl md:text-2xl font-serif font-light leading-none ${isActive ? 'text-[#1f1f1f]' : 'text-[#3a352c]'}`}>
-                  {count}
-                </p>
-                <p className="text-[9px] tracking-[0.25em] text-[#9a8a6a] uppercase mt-1.5">
-                  {t('menuBuilder.guestCount.guests')}
-                </p>
-              </div>
+              {/* Gold check disc — top-right corner, overlapping the border */}
+              {isActive && (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 380, damping: 18 }}
+                  className="absolute -top-2.5 -right-2.5 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-[#C19A5B] shadow-[0_3px_8px_-2px_rgba(120,90,40,0.6)]"
+                >
+                  <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                </motion.span>
+              )}
+              <Users className={`w-5 h-5 md:w-6 md:h-6 ${isActive ? 'text-[#C19A5B]' : 'text-[#b39256]'}`} strokeWidth={1.6} />
+              <p className={`text-2xl md:text-[1.7rem] font-serif font-light leading-none ${isActive ? 'text-[#1f1f1f]' : 'text-[#3a352c]'}`}>
+                {count}
+              </p>
+              <p className="text-[9px] tracking-[0.25em] text-[#a8824a] uppercase">
+                {t('menuBuilder.guestCount.guests')}
+              </p>
             </motion.button>
           );
         })}
       </div>
 
-      {/* Custom Guest Count Input — stepper enforces multiples of 10 */}
-      <div className="flex flex-col items-center gap-4 pt-10">
-        <span className="flex items-center gap-3 text-[11px] tracking-[0.28em] text-[#a8824a] uppercase">
-          <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
-          {t('menuBuilder.guestCount.customLabel')}
-          <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
-        </span>
-        <div className="flex items-stretch gap-3">
+      {/* Custom Guest Count — divider label + connected stepper bar */}
+      <div className="flex flex-col items-center gap-6 pt-6">
+        <div className="flex items-center gap-4 w-full max-w-md">
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#C19A5B]/50" />
+          <span className="text-[11px] tracking-[0.28em] text-[#a8824a] uppercase whitespace-nowrap">
+            {t('menuBuilder.guestCount.customLabel')}
+          </span>
+          <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#C19A5B]/50" />
+        </div>
+
+        <div className="flex items-stretch border border-[#dcc8a4] bg-white/70 shadow-[0_10px_28px_-20px_rgba(60,45,25,0.3)]">
           <motion.button
             type="button"
             whileTap={{ scale: 0.94 }}
             onClick={() => step(-GUEST_STEP)}
             disabled={guestCount <= MIN_GUESTS}
             aria-label={`-${GUEST_STEP}`}
-            className="flex items-center justify-center w-14 bg-white/70 border border-[#dcc8a4] text-[#a8824a] rounded-[3px] transition-colors duration-300 enabled:hover:border-[#C19A5B] enabled:hover:text-[#1f1f1f] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center w-16 text-[#a8824a] transition-colors duration-300 enabled:hover:bg-[#C19A5B]/10 enabled:hover:text-[#1f1f1f] disabled:opacity-40 disabled:cursor-not-allowed border-r border-[#e2d3b4]"
           >
             <Minus className="w-4 h-4" strokeWidth={2} />
           </motion.button>
 
-          <div className="relative">
+          <div className="flex flex-col items-center justify-center px-6 py-3 min-w-[9rem]">
             <input
               type="text"
               inputMode="numeric"
               value={inputValue}
               onChange={(e) => handleCustomInput(e.target.value)}
               onBlur={handleCustomBlur}
-              className="w-40 bg-white/70 border border-[#dcc8a4] focus:border-[#C19A5B] focus:ring-2 focus:ring-[#C19A5B]/20 text-center text-3xl font-serif text-[#1f1f1f] py-4 px-4 outline-none rounded-[3px] transition-all duration-300"
+              className="w-full bg-transparent text-center text-3xl font-serif text-[#1f1f1f] outline-none"
               placeholder={String(MIN_GUESTS)}
             />
-            <div className="absolute -bottom-6 left-0 right-0 text-center">
-              <span className="text-[10px] tracking-[0.25em] text-[#9a8a6a] uppercase">{t('menuBuilder.guestCount.guests')}</span>
-            </div>
+            <span className="text-[10px] tracking-[0.25em] text-[#a8824a] uppercase mt-1">
+              {t('menuBuilder.guestCount.guests')}
+            </span>
           </div>
 
           <motion.button
@@ -123,12 +136,13 @@ function GuestCountSelector({ guestCount, onGuestCountChange }: GuestCountSelect
             whileTap={{ scale: 0.94 }}
             onClick={() => step(GUEST_STEP)}
             aria-label={`+${GUEST_STEP}`}
-            className="flex items-center justify-center w-14 bg-white/70 border border-[#dcc8a4] text-[#a8824a] rounded-[3px] transition-colors duration-300 hover:border-[#C19A5B] hover:text-[#1f1f1f]"
+            className="flex items-center justify-center w-16 text-[#a8824a] transition-colors duration-300 hover:bg-[#C19A5B]/10 hover:text-[#1f1f1f] border-l border-[#e2d3b4]"
           >
             <Plus className="w-4 h-4" strokeWidth={2} />
           </motion.button>
         </div>
-        <p className="text-[10px] tracking-[0.25em] text-[#9a8a6a] uppercase pt-4">{t('menuBuilder.guestCount.stepHint')}</p>
+
+        <p className="text-[10px] tracking-[0.25em] text-[#9a8a6a] uppercase">{t('menuBuilder.guestCount.stepHint')}</p>
       </div>
     </div>
   );

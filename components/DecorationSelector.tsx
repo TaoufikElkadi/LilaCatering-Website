@@ -2,46 +2,98 @@
 
 import { motion } from 'framer-motion';
 import { memo } from 'react';
+import Image from 'next/image';
+import {
+  Check,
+  ArrowRight,
+  Palette,
+  Flower2,
+  Leaf,
+  Flame,
+  UtensilsCrossed,
+  Wine,
+  Lightbulb,
+  Sparkles,
+  type LucideIcon,
+} from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
-import { StepHeader, cardShell, CheckSeal } from './MenuDecor';
-import { formatEuro } from '@/lib/pricing';
+import { StepHeader, StarSeal } from './MenuDecor';
 
-export type DecorationComponentId = 'tafeldecoratie' | 'servies' | 'sfeeraankleding';
-export type DecorationTier = 'basic' | 'premium' | 'luxury';
+export type DecorationStyleId = 'classic' | 'luxury' | 'natural' | 'moroccan';
 
-export const DECORATION_TIERS: DecorationTier[] = ['basic', 'premium', 'luxury'];
+// One selected style (or none yet).
+export type DecorationSelection = DecorationStyleId | null;
 
-// Each component must be chosen at one of three tiers.
-// NOTE: placeholder prices — adjust here.
-export const DECORATION_COMPONENTS: { id: DecorationComponentId; tiers: Record<DecorationTier, number> }[] = [
-  { id: 'tafeldecoratie', tiers: { basic: 100, premium: 175, luxury: 275 } }, // placeholder prices
-  { id: 'servies', tiers: { basic: 125, premium: 225, luxury: 350 } }, // placeholder prices
-  { id: 'sfeeraankleding', tiers: { basic: 150, premium: 275, luxury: 425 } }, // placeholder prices
+type FeatureId =
+  | 'witGoud'
+  | 'diepeTinten'
+  | 'lichtGroen'
+  | 'warmeTinten'
+  | 'verseBloemen'
+  | 'rijkeBloemen'
+  | 'natuurlijk'
+  | 'kaarslicht'
+  | 'luxeServies'
+  | 'kristalglaswerk'
+  | 'lantaarns'
+  | 'traditioneel';
+
+const FEATURE_ICONS: Record<FeatureId, LucideIcon> = {
+  witGoud: Palette,
+  diepeTinten: Palette,
+  lichtGroen: Palette,
+  warmeTinten: Palette,
+  verseBloemen: Flower2,
+  rijkeBloemen: Flower2,
+  natuurlijk: Leaf,
+  kaarslicht: Flame,
+  luxeServies: UtensilsCrossed,
+  kristalglaswerk: Wine,
+  lantaarns: Lightbulb,
+  traditioneel: Sparkles,
+};
+
+// Predefined decoration styles. Images are grey placeholders for now.
+export const DECORATION_STYLES: {
+  id: DecorationStyleId;
+  image: string;
+  features: FeatureId[];
+}[] = [
+  {
+    id: 'classic',
+    image: '',
+    features: ['witGoud', 'verseBloemen', 'kaarslicht', 'luxeServies', 'kristalglaswerk'],
+  },
+  {
+    id: 'luxury',
+    image: '',
+    features: ['diepeTinten', 'rijkeBloemen', 'luxeServies', 'kristalglaswerk'],
+  },
+  {
+    id: 'natural',
+    image: '',
+    features: ['lichtGroen', 'natuurlijk', 'luxeServies', 'kristalglaswerk'],
+  },
+  {
+    id: 'moroccan',
+    image: '',
+    features: ['warmeTinten', 'lantaarns', 'traditioneel', 'kristalglaswerk'],
+  },
 ];
 
-export type DecorationSelection = Partial<Record<DecorationComponentId, DecorationTier>>;
-
-/** Price of one component at the given tier. */
-export function decorationPrice(id: DecorationComponentId, tier: DecorationTier): number {
-  return DECORATION_COMPONENTS.find((c) => c.id === id)?.tiers[tier] ?? 0;
+/** Decoration carries no separate line-item price for now. */
+export function decorationFeeFor(_selection: DecorationSelection): number {
+  return 0;
 }
 
-/** One-time decoration fee = sum of the chosen tier price per component. */
-export function decorationFeeFor(selection: DecorationSelection): number {
-  return DECORATION_COMPONENTS.reduce((sum, c) => {
-    const tier = selection[c.id];
-    return sum + (tier ? c.tiers[tier] : 0);
-  }, 0);
-}
-
-/** Every component must have a tier chosen before proceeding. */
+/** A style must be chosen before proceeding. */
 export function isDecorationComplete(selection: DecorationSelection): boolean {
-  return DECORATION_COMPONENTS.every((c) => Boolean(selection[c.id]));
+  return selection != null;
 }
 
 interface DecorationSelectorProps {
   selection: DecorationSelection;
-  onSelect: (id: DecorationComponentId, tier: DecorationTier) => void;
+  onSelect: (id: DecorationStyleId) => void;
 }
 
 function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
@@ -49,54 +101,93 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
   const complete = isDecorationComplete(selection);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       <StepHeader title={t('menuBuilder.decoration.title')} subtitle={t('menuBuilder.decoration.subtitle')} />
 
-      <div className="max-w-4xl mx-auto space-y-8">
-        {DECORATION_COMPONENTS.map(({ id, tiers }, index) => {
-          const chosen = selection[id];
+      <div className="max-w-5xl mx-auto space-y-6">
+        {DECORATION_STYLES.map(({ id, image, features }, index) => {
+          const isActive = selection === id;
           return (
-            <motion.div
+            <motion.button
               key={id}
+              type="button"
+              onClick={() => onSelect(id)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
+              transition={{ duration: 0.5, delay: index * 0.06 }}
+              className={`group block w-full text-left transition-[padding] duration-300 ${
+                isActive ? 'p-1.5 bg-[#C19A5B]' : 'p-0'
+              }`}
             >
-              <div className="text-center sm:text-left mb-3">
-                <h4 className="text-sm font-serif font-light tracking-[0.05em] text-[#1f1f1f]">
-                  {t(`menuBuilder.decoration.components.${id}.name`)}
-                </h4>
-                <p className="text-[11px] text-[#6c655b] leading-relaxed font-light mt-1">
-                  {t(`menuBuilder.decoration.components.${id}.description`)}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {DECORATION_TIERS.map((tier) => {
-                  const isActive = chosen === tier;
-                  return (
-                    <button
-                      key={tier}
-                      type="button"
-                      onClick={() => onSelect(id, tier)}
-                      className={`${cardShell(isActive)} relative p-4 text-center transition-transform hover:-translate-y-0.5`}
+              <div
+                className={`grid grid-cols-1 lg:grid-cols-[52%_1fr] bg-[#faf6ee] transition-shadow duration-500 ${
+                  isActive
+                    ? 'shadow-[0_24px_60px_-26px_rgba(120,90,40,0.55)]'
+                    : 'border border-[#e2d8c5] shadow-[0_12px_32px_-22px_rgba(60,45,25,0.3)] group-hover:border-[#d0bd94] group-hover:shadow-[0_22px_54px_-26px_rgba(80,60,30,0.4)]'
+                }`}
+              >
+                {/* Image (grey placeholder until photos are added) */}
+                <div className="relative h-52 sm:h-64 lg:h-auto lg:min-h-[300px] overflow-hidden bg-[#d8d2c6]">
+                  {image ? (
+                    <Image src={image} alt="" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 52vw" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#dcd6ca] to-[#cfc8ba]">
+                      <StarSeal className="w-10 h-10 text-[#b3aa88]" />
+                    </div>
+                  )}
+                  {isActive && (
+                    <motion.span
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute top-4 left-4 inline-flex items-center gap-2 bg-[#C19A5B] text-white text-[11px] font-medium uppercase tracking-[0.22em] px-4 py-2"
                     >
-                      <CheckSeal show={isActive} className="absolute top-2 right-2 z-10" />
-                      <span
-                        className={`block text-[11px] uppercase tracking-[0.18em] ${isActive ? 'text-[#1f1f1f]' : 'text-[#3a352c]'}`}
-                      >
-                        {t(`menuBuilder.decoration.tiers.${tier}`)}
-                      </span>
-                      <span
-                        className={`block mt-1.5 text-sm font-serif tracking-[0.1em] ${isActive ? 'text-[#a8824a]' : 'text-[#6c655b]'}`}
-                      >
-                        {formatEuro(tiers[tier])}
-                      </span>
-                    </button>
-                  );
-                })}
+                      <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                      {t('menuBuilder.decoration.chosen')}
+                    </motion.span>
+                  )}
+                </div>
+
+                {/* Detail panel */}
+                <div className="flex flex-col justify-center px-6 sm:px-9 py-7 sm:py-8">
+                  <h4 className="text-xl sm:text-2xl font-serif font-light tracking-[0.12em] text-[#1f1f1f] uppercase">
+                    {t(`menuBuilder.decoration.styles.${id}.name`)}
+                  </h4>
+
+                  <div className="flex items-center gap-3 mt-3 mb-4">
+                    <span className="h-px w-8 bg-gradient-to-r from-[#C19A5B]/70 to-transparent" />
+                    <StarSeal className="w-2.5 h-2.5 text-[#C19A5B]" />
+                    <span className="h-px w-8 bg-gradient-to-l from-[#C19A5B]/70 to-transparent" />
+                  </div>
+
+                  <p className="text-[13px] sm:text-sm text-[#5f584d] leading-relaxed font-light">
+                    {t(`menuBuilder.decoration.styles.${id}.description`)}
+                  </p>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-5 gap-y-3 mt-6">
+                    {features.map((f) => {
+                      const Icon = FEATURE_ICONS[f];
+                      return (
+                        <span key={f} className="flex items-center gap-2 text-[11px] sm:text-xs text-[#4a443b] font-light tracking-[0.04em]">
+                          <Icon className="w-4 h-4 text-[#C19A5B] shrink-0" strokeWidth={1.6} />
+                          {t(`menuBuilder.decoration.features.${f}`)}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  <span
+                    className={`mt-7 inline-flex items-center justify-center gap-2 w-full border py-3 text-[11px] uppercase tracking-[0.24em] transition-colors duration-300 ${
+                      isActive
+                        ? 'border-[#C19A5B] bg-[#C19A5B]/10 text-[#a8824a]'
+                        : 'border-[#d8c9a6] text-[#a8824a] group-hover:border-[#C19A5B] group-hover:bg-[#C19A5B]/[0.06]'
+                    }`}
+                  >
+                    {t('menuBuilder.decoration.viewStyle')}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
               </div>
-            </motion.div>
+            </motion.button>
           );
         })}
       </div>
@@ -106,7 +197,7 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="text-center pt-6 border-t border-[#e7ddcb] space-y-1"
+        className="text-center pt-6 border-t border-[#e7ddcb] space-y-1 max-w-5xl mx-auto"
       >
         <p className="text-[11px] text-[#8a8275] tracking-[0.22em] font-light uppercase">
           {t('menuBuilder.decoration.setupInfo')}

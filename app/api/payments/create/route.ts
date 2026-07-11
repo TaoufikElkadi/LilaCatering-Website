@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
           guestCount: guestCount ?? 0,
           venue: contract.venue,
           menu: contract.menu ?? { hapjes: [], voorgerecht: [], hoofdgerecht: [], nagerecht: [] },
-          decoration: contract.decoration ?? {},
+          decoration: contract.decoration ?? null,
           total: chargedTotal,
           deposit,
           todayISO: todayInZone(OFFICE_TIMEZONE),

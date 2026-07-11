@@ -24,12 +24,9 @@ import GuestCountSelector from './GuestCountSelector';
 import LocationSelector from './LocationSelector';
 import ServiceSelector from './ExtrasSelector';
 import DecorationSelector, {
-  DecorationComponentId,
-  DecorationTier,
+  DecorationStyleId,
   DecorationSelection,
-  DECORATION_COMPONENTS,
   decorationFeeFor,
-  decorationPrice,
   isDecorationComplete,
 } from './DecorationSelector';
 import DatePickerSelector from './DatePickerSelector';
@@ -123,9 +120,9 @@ export default function MenuBuilder() {
   const [tableExtras, setTableExtras] = useState<TableExtraId[]>([]);
   const [teaShow, setTeaShow] = useState<TeaShowId>('standard');
   const [cookieBuffet, setCookieBuffet] = useState<boolean>(false);
-  const [decoration, setDecoration] = useState<DecorationSelection>({});
-  const selectDecoration = useCallback((id: DecorationComponentId, tier: DecorationTier) => {
-    setDecoration((prev) => ({ ...prev, [id]: tier }));
+  const [decoration, setDecoration] = useState<DecorationSelection>(null);
+  const selectDecoration = useCallback((id: DecorationStyleId) => {
+    setDecoration(id);
   }, []);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [eventStart, setEventStart] = useState<string>('');
@@ -613,12 +610,10 @@ export default function MenuBuilder() {
     return parts.join(' · ');
   })();
 
-  // Chosen decoration, formatted as "Name: Tier (€price)" per component.
-  const decorationLines = DECORATION_COMPONENTS.map(({ id }) => {
-    const tier = decoration[id];
-    if (!tier) return null;
-    return `${t(`menuBuilder.decoration.components.${id}.name`)}: ${t(`menuBuilder.decoration.tiers.${tier}`)} (${formatEuro(decorationPrice(id, tier))})`;
-  }).filter(Boolean) as string[];
+  // Chosen decoration style (single selection), shown in the review/offerte.
+  const decorationLines = decoration
+    ? [t(`menuBuilder.decoration.styles.${decoration}.name`)]
+    : [];
 
   // Compact text offerte used in booking emails / calendar invites.
   const offerteSummary = (() => {

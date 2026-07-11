@@ -20,7 +20,7 @@ const MUTED = rgb(0.42, 0.4, 0.36);
 const A4 = { w: 595.28, h: 841.89 };
 const MARGIN = 56;
 
-export type DecorTier = 'basic' | 'premium' | 'luxury';
+export type DecorationStyle = 'classic' | 'luxury' | 'natural' | 'moroccan';
 
 export interface ContractBooking {
   customer: {
@@ -41,7 +41,7 @@ export interface ContractBooking {
   venue?: string; // location label
   /** Selected dishes per course (already translated names). */
   menu: { hapjes: string[]; voorgerecht: string[]; hoofdgerecht: string[]; nagerecht: string[] };
-  decoration: Partial<Record<'tafeldecoratie' | 'servies' | 'sfeeraankleding', DecorTier>>;
+  decoration: DecorationStyle | null;
   total: number; // estimated total (see BTW TODO)
   deposit: number; // 10% of total (see deposit TODO)
   reservationNumber: string;
@@ -55,11 +55,17 @@ export function buildReservationNumber(eventDateISO: string, seq = 1): string {
   return `${digits}-${seq}-ID`;
 }
 
-const TIER_LABEL: Record<DecorTier, string> = { basic: 'Basic', premium: 'Premium', luxury: 'Luxury' };
-const DECOR_LABEL: Record<string, string> = {
-  tafeldecoratie: 'Tafeldecoratie',
-  servies: 'Servies',
-  sfeeraankleding: 'Sfeeraankleding',
+const STYLE_LABEL: Record<DecorationStyle, string> = {
+  classic: 'Classic Elegance',
+  luxury: 'Luxury Ambiance',
+  natural: 'Natural Chic',
+  moroccan: 'Moroccan Touch',
+};
+const STYLE_DESCRIPTION: Record<DecorationStyle, string> = {
+  classic: 'Tijdloos en verfijnd met zachte tinten, gouden accenten en romantische bloemen.',
+  luxury: 'Diepe kleuren, rijke bloemen en kaarslicht voor een luxueuze en intieme sfeer.',
+  natural: 'Licht, natuurlijk en stijlvol met veel groen, witte tinten en subtiele accenten.',
+  moroccan: 'Oosterse elegantie met warme kleuren, lantaarns en traditionele details.',
 };
 
 // pdf-lib StandardFonts use WinAnsi — map smart punctuation to safe equivalents.
@@ -264,42 +270,46 @@ export async function generateContractPdf(b: ContractBooking): Promise<Uint8Arra
   w.pageBreak();
   w.heading('BIJLAGE I', { top: 0 });
   w.subheading('Decoratie');
-  w.para('Onderstaande decoratie is door u samengesteld. Per onderdeel is de gekozen uitvoering en de bijbehorende invulling weergegeven.');
+  w.para('Onderstaande decoratiestijl is door u gekozen. De concrete invulling (tafeldecoratie, servies en sfeeraankleding) wordt binnen deze stijl definitief met u afgestemd.');
   w.spacer(4);
 
-  // Detailed per-component breakdown. PLACEHOLDER values ("nader te bepalen")
-  // until the office provides the real items per tier (basic/premium/luxury).
-  // TODO: replace placeholders with real per-tier item values.
-  const DECOR_DETAILS: Record<'tafeldecoratie' | 'servies' | 'sfeeraankleding', [string, string][]> = {
-    tafeldecoratie: [
+  if (b.decoration) {
+    w.subheading(STYLE_LABEL[b.decoration]);
+    w.para(STYLE_DESCRIPTION[b.decoration]);
+    w.spacer(4);
+  }
+
+  // Generic breakdown within the chosen style. PLACEHOLDER values
+  // ("nader te bepalen") until the office confirms items per style.
+  const DECOR_DETAILS: [string, [string, string][]][] = [
+    ['Tafeldecoratie', [
       ['Tafelkleed', 'nader te bepalen'],
       ['Kaarsen', 'nader te bepalen'],
       ['Servetten', 'nader te bepalen'],
       ['Centrepieces', 'nader te bepalen'],
-    ],
-    servies: [
+    ]],
+    ['Servies', [
       ['Servies', 'nader te bepalen'],
       ['Onderborden', 'nader te bepalen'],
       ['Bestek', 'nader te bepalen'],
       ['Glazen', 'nader te bepalen'],
-    ],
-    sfeeraankleding: [
+    ]],
+    ['Sfeeraankleding', [
       ['Collectie', 'nader te bepalen'],
       ['Entreetafel', 'nader te bepalen'],
       ['Bruidstaarttafel', 'nader te bepalen'],
       ['Zaalaankleding', 'nader te bepalen'],
-    ],
-  };
+    ]],
+  ];
 
-  (['tafeldecoratie', 'servies', 'sfeeraankleding'] as const).forEach((id) => {
-    const tier = b.decoration[id];
-    w.subheading(`${DECOR_LABEL[id]} - ${tier ? TIER_LABEL[tier] : '—'}`);
-    DECOR_DETAILS[id].forEach(([label, val]) => w.row(`${label}:`, val));
+  DECOR_DETAILS.forEach(([label, rows]) => {
+    w.subheading(label);
+    rows.forEach(([k, val]) => w.row(`${k}:`, val));
     w.spacer(4);
   });
 
   w.para(
-    'De entreetafel en bruidstaarttafel worden door ons gedecoreerd. Bovenstaande invulling wordt definitief afgestemd op de gekozen uitvoering.'
+    'De entreetafel en bruidstaarttafel worden door ons gedecoreerd. Bovenstaande invulling wordt definitief afgestemd op de gekozen stijl.'
   );
 
   // ---- PAGE 4 — OVEREENKOMST -------------------------------------------
@@ -464,7 +474,7 @@ export function sampleBooking(): ContractBooking {
       hoofdgerecht: ["Lila's Gold Dal'a"],
       nagerecht: ['Grand Lila Dessert'],
     },
-    decoration: { tafeldecoratie: 'premium', servies: 'luxury', sfeeraankleding: 'premium' },
+    decoration: 'classic',
     total,
     deposit: Math.max(1000, Math.round(total * 0.1 * 100) / 100),
     reservationNumber: buildReservationNumber('2026-04-30', 1),

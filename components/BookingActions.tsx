@@ -8,7 +8,7 @@ import { getDepositAmount } from '@/lib/booking';
 import { applyDiscount, type AppliedDiscount } from '@/lib/discount';
 import AppointmentScheduler from './AppointmentScheduler';
 
-type DecorTier = 'basic' | 'premium' | 'luxury';
+type DecorationStyle = 'classic' | 'luxury' | 'natural' | 'moroccan';
 
 interface Props {
   totalPrice: number;
@@ -22,7 +22,7 @@ interface Props {
   /** Structured booking used to generate the Signhost contract. */
   contractData?: {
     menu: { hapjes: string[]; voorgerecht: string[]; hoofdgerecht: string[]; nagerecht: string[] };
-    decoration: Partial<Record<'tafeldecoratie' | 'servies' | 'sfeeraankleding', DecorTier>>;
+    decoration: DecorationStyle | null;
     venue?: string;
   };
   /** Set when the customer just returned from a successful/attempted payment. */

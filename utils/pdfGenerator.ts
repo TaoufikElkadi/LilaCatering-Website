@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { MenuItem } from '@/data/menuData';
 import { EventType } from '@/components/EventTypeSelector';
-import { DecorationSelection, DECORATION_COMPONENTS, decorationPrice } from '@/components/DecorationSelector';
+import { DecorationSelection } from '@/components/DecorationSelector';
 import { getTranslation, Lang } from './translations';
 import {
   formatEuro,
@@ -467,17 +467,15 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
     ]);
   }
 
-  // Modular decoration — one row per component, showing the chosen tier.
-  DECORATION_COMPONENTS.forEach(({ id }) => {
-    const tier = data.decoration[id];
-    if (!tier) return;
+  // Decoration — chosen style (no separate line-item price for now).
+  if (data.decoration) {
     extrasRows.push([
-      `${t(`menuBuilder.decoration.components.${id}.name`)} — ${t(`menuBuilder.decoration.tiers.${tier}`)}`,
+      t(`menuBuilder.decoration.styles.${data.decoration}.name`),
       t('menuBuilder.pdf.extras.decoration'),
       '-',
-      formatEuro(decorationPrice(id, tier)),
+      t('menuBuilder.pdf.included'),
     ]);
-  });
+  }
 
   // Transport — venue-based; one-time, not multiplied.
   if (data.venueName) {

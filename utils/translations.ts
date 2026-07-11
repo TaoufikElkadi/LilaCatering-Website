@@ -523,6 +523,9 @@ const translations: Record<Lang, TranslationTree> = {
         chooseAllHint: 'Choose a collection to continue.',
         chosen: 'Chosen',
         viewCollection: 'View this collection',
+        perTable: 'per table',
+        priceIncluded: 'Included',
+        priceOnRequest: 'Price on request',
         categories: {
           klassiek: 'Classic & Elegant',
           royal: 'Royal & Gold',
@@ -1395,6 +1398,9 @@ const translations: Record<Lang, TranslationTree> = {
         chooseAllHint: 'Choisissez une collection pour continuer.',
         chosen: 'Choisi',
         viewCollection: 'Voir cette collection',
+        perTable: 'par table',
+        priceIncluded: 'Inclus',
+        priceOnRequest: 'Prix sur demande',
         categories: {
           klassiek: 'Classique & Élégant',
           royal: 'Royal & Or',
@@ -2267,6 +2273,9 @@ const translations: Record<Lang, TranslationTree> = {
         chooseAllHint: 'Kies een collectie om door te gaan.',
         chosen: 'Gekozen',
         viewCollection: 'Bekijk deze collectie',
+        perTable: 'per tafel',
+        priceIncluded: 'Inbegrepen',
+        priceOnRequest: 'Prijs op aanvraag',
         categories: {
           klassiek: 'Klassiek & Elegant',
           royal: 'Royal & Goud',

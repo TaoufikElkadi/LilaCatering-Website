@@ -35,7 +35,42 @@ const CATEGORY_OF: Record<DecorationCollectionId, DecorationCategoryId> = DECORA
   {} as Record<DecorationCollectionId, DecorationCategoryId>
 );
 
-/** Decoration carries no separate line-item price for now. */
+// Price per table. A number is euros per table; 'included' = no extra charge;
+// 'onrequest' = day price / quoted by the office.
+export type DecorationPrice = number | 'included' | 'onrequest';
+export const DECORATION_PRICING: Record<DecorationCollectionId, DecorationPrice> = {
+  // Klassiek & Elegant
+  classic: 'included',
+  basic: 'included',
+  grace: 'included',
+  flower: 65,
+  bohemian: 45,
+  hermes: 95,
+  // Royal & Goud
+  royal: 'onrequest',
+  beldi: 55,
+  ballroom: 25,
+  gisprkuid: 45,
+  mosaic: 45,
+  lghrib: 85,
+  // Kleurrijk
+  red: 'included',
+  royalblue: 25,
+  royalgreen: 'included',
+  blue: 25,
+  pink: 'included',
+  black: 'onrequest',
+};
+
+/** Localized price label for a collection, e.g. "€65 per tafel" / "Inbegrepen". */
+export function decorationPriceLabel(id: DecorationCollectionId, t: (k: string) => string): string {
+  const price = DECORATION_PRICING[id];
+  if (price === 'included') return t('menuBuilder.decoration.priceIncluded');
+  if (price === 'onrequest') return t('menuBuilder.decoration.priceOnRequest');
+  return `€${price} ${t('menuBuilder.decoration.perTable')}`;
+}
+
+/** Decoration is priced per table and finalized by the office, so no line-item total here. */
 export function decorationFeeFor(_selection: DecorationSelection): number {
   return 0;
 }
@@ -141,6 +176,10 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
                           {t('menuBuilder.decoration.chosen')}
                         </motion.span>
                       )}
+                      {/* Price per table */}
+                      <span className="absolute bottom-0 right-0 bg-[#1f1f1f]/85 text-white text-[11px] sm:text-xs font-light tracking-[0.06em] px-3.5 py-2">
+                        {decorationPriceLabel(id, t)}
+                      </span>
                     </div>
 
                     {/* Detail panel */}

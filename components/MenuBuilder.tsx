@@ -27,6 +27,7 @@ import DecorationSelector, {
   DecorationCollectionId,
   DecorationSelection,
   decorationFeeFor,
+  decorationPriceLabel,
   isDecorationComplete,
 } from './DecorationSelector';
 import DatePickerSelector from './DatePickerSelector';
@@ -619,9 +620,10 @@ export default function MenuBuilder() {
     return parts.join(' · ');
   })();
 
-  // Chosen decoration collection (single selection), shown in the review/offerte.
+  // Chosen decoration collection (single selection), shown in the review/offerte
+  // with its per-table price.
   const decorationLines = decoration
-    ? [t(`menuBuilder.decoration.collections.${decoration}.name`)]
+    ? [`${t(`menuBuilder.decoration.collections.${decoration}.name`)} (${decorationPriceLabel(decoration, t)})`]
     : [];
 
   // Compact text offerte used in booking emails / calendar invites.

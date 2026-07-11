@@ -526,7 +526,7 @@ export const menuItems: MenuItem[] = [
     description: '',
     surcharge: 3.5,
     included: false,
-    image: '/images/placeholder.jpg',
+    image: '/images/dishes/lila-mini-pastilla-kip.jpg',
     category: 'starter',
     subCategory: 'pastilla',
     allergens: ['gluten', 'nuts', 'eggs'],

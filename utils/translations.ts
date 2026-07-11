@@ -251,8 +251,9 @@ const translations: Record<Lang, TranslationTree> = {
       starterTemp: {
         title: 'Hot or cold starter?',
         subtitle: 'Choose how you’d like your starter served',
-        hot: { name: 'Hot', description: 'Pastilla & soups' },
-        cold: { name: 'Cold', description: 'Fresh salads' },
+        hot: { name: 'Hot', description: 'Delicious pastillas and traditional soups, freshly made and served warm.' },
+        cold: { name: 'Cold', description: 'Fresh salads and refined combinations, perfect to begin with.' },
+        choose: 'Choose',
       },
       mainCategories: {
         fish: 'Fish',
@@ -1102,8 +1103,9 @@ const translations: Record<Lang, TranslationTree> = {
       starterTemp: {
         title: 'Entrée chaude ou froide ?',
         subtitle: 'Choisissez la température de votre entrée',
-        hot: { name: 'Chaud', description: 'Pastilla & soupes' },
-        cold: { name: 'Froid', description: 'Salades fraîches' },
+        hot: { name: 'Chaud', description: 'De délicieuses pastillas et des soupes traditionnelles, fraîchement préparées et servies chaudes.' },
+        cold: { name: 'Froid', description: 'Des salades fraîches et des combinaisons raffinées, parfaites pour commencer.' },
+        choose: 'Choisir',
       },
       mainCategories: {
         fish: 'Poisson',
@@ -1953,8 +1955,9 @@ const translations: Record<Lang, TranslationTree> = {
       starterTemp: {
         title: 'Warm of koud voorgerecht?',
         subtitle: 'Kies hoe u uw voorgerecht geserveerd wilt',
-        hot: { name: 'Warm', description: 'Pastilla & soepen' },
-        cold: { name: 'Koud', description: 'Verse salades' },
+        hot: { name: 'Warm', description: "Heerlijke pastilla's en traditionele soepen, vers bereid en warm geserveerd." },
+        cold: { name: 'Koud', description: 'Frisse salades en verfijnde combinaties, perfect om mee te beginnen.' },
+        choose: 'Kiezen',
       },
       mainCategories: {
         fish: 'Vis',

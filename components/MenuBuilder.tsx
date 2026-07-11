@@ -4,7 +4,8 @@ import { useState, useEffect, useMemo, useCallback, useRef, Fragment } from 'rea
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookingActions from './BookingActions';
-import { X, Flame, Snowflake } from 'lucide-react';
+import { X, Soup, Snowflake, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import { menuItems, MenuItem, MenuCategory, MenuSubCategory } from '@/data/menuData';
 import {
   MIN_GUESTS,
@@ -664,50 +665,67 @@ export default function MenuBuilder() {
       {/* Step: Starter temperature — warm of koud */}
       {currentDef.kind === 'starterTemp' && (
         <motion.div key="step-startertemp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div className="space-y-10 sm:space-y-12 py-2 sm:py-6">
-            <div className="text-center space-y-3">
+          <div className="space-y-8 sm:space-y-12 py-2 sm:py-6">
+            <div className="text-center space-y-4">
               <h3 className="text-2xl md:text-3xl font-serif font-light tracking-[0.08em] text-[#1f1f1f] uppercase">
                 {t('menuBuilder.starterTemp.title')}
               </h3>
+              <StarDivider />
               <p className="text-xs text-[#6c655b] tracking-[0.25em] font-light uppercase">
                 {t('menuBuilder.starterTemp.subtitle')}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 max-w-5xl mx-auto">
               {([
-                { temp: 'hot' as StarterTemp, Icon: Flame },
-                { temp: 'cold' as StarterTemp, Icon: Snowflake },
-              ]).map(({ temp, Icon }) => {
+                { temp: 'hot' as StarterTemp, Icon: Soup, image: '/images/dishes/lila-hermitage-kippastilla.jpg' },
+                { temp: 'cold' as StarterTemp, Icon: Snowflake, image: '/images/dishes/lila-luxe-saladismo.jpg' },
+              ]).map(({ temp, Icon, image }) => {
                 const isSelected = starterTemp === temp;
                 return (
                   <motion.button
                     key={temp}
                     type="button"
-                    whileHover={{ y: -5 }}
-                    whileTap={{ scale: 0.99 }}
+                    whileHover={{ y: -4 }}
+                    whileTap={{ scale: 0.995 }}
                     onClick={() => handleStarterTempSelect(temp)}
-                    className={`group relative overflow-hidden rounded-[3px] bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] p-8 sm:p-10 text-center transition-[box-shadow,border-color] duration-500 ${
+                    className={`group relative overflow-hidden bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] text-left transition-[box-shadow,border-color] duration-500 ${
                       isSelected
                         ? 'border border-[#C19A5B] shadow-[0_22px_56px_-22px_rgba(120,90,40,0.5)]'
                         : 'border border-[#e7ddcb] shadow-[0_10px_30px_-18px_rgba(60,45,25,0.28)] hover:border-[#d6c39d] hover:shadow-[0_24px_58px_-24px_rgba(80,60,30,0.38)]'
                     }`}
                   >
-                    <span
-                      className={`pointer-events-none absolute inset-[6px] rounded-[2px] border transition-opacity duration-500 ${
-                        isSelected ? 'border-[#C19A5B]/55 opacity-100' : 'border-[#C19A5B]/0 opacity-0 group-hover:border-[#C19A5B]/30 group-hover:opacity-100'
-                      }`}
-                    />
-                    <div className="relative flex flex-col items-center gap-4">
-                      <span className={`flex items-center justify-center w-14 h-14 rounded-full transition-colors ${isSelected ? 'bg-[#C19A5B] text-white' : 'bg-[#f0e7d4] text-[#a8824a] group-hover:text-[#1f1f1f]'}`}>
-                        <Icon className="w-6 h-6" strokeWidth={1.75} />
-                      </span>
-                      <h4 className="text-xl font-serif font-light tracking-[0.05em] text-[#1f1f1f]">
-                        {t(`menuBuilder.starterTemp.${temp}.name`)}
-                      </h4>
-                      <p className="text-[13px] text-[#6c655b] leading-relaxed font-light">
-                        {t(`menuBuilder.starterTemp.${temp}.description`)}
-                      </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-[44%_1fr] sm:min-h-[320px]">
+                      {/* Dish photo (warm = soup, cold = salad) */}
+                      <div className="relative h-48 sm:h-full overflow-hidden bg-[#1a1a1a]">
+                        <Image
+                          src={image}
+                          alt=""
+                          aria-hidden="true"
+                          fill
+                          className="object-cover transition-transform duration-[1300ms] ease-out group-hover:scale-[1.05]"
+                          sizes="(max-width: 1024px) 100vw, 24vw"
+                          quality={82}
+                        />
+                      </div>
+
+                      {/* Content panel */}
+                      <div className="relative flex flex-col items-center justify-center text-center gap-3.5 p-6 sm:p-8">
+                        <span className={`flex items-center justify-center w-16 h-16 rounded-full transition-colors ${isSelected ? 'bg-[#C19A5B] text-white' : 'bg-[#f0e7d4] text-[#a8824a] group-hover:text-[#1f1f1f]'}`}>
+                          <Icon className="w-7 h-7" strokeWidth={1.75} />
+                        </span>
+                        <h4 className="text-2xl font-serif font-light tracking-[0.1em] text-[#1f1f1f] uppercase">
+                          {t(`menuBuilder.starterTemp.${temp}.name`)}
+                        </h4>
+                        <span className={`h-px bg-gradient-to-r from-transparent via-[#C19A5B] to-transparent transition-all duration-500 ${isSelected ? 'w-16' : 'w-10 group-hover:w-16'}`} />
+                        <p className="text-[13px] text-[#6c655b] leading-relaxed font-light max-w-[17rem]">
+                          {t(`menuBuilder.starterTemp.${temp}.description`)}
+                        </p>
+                        <span className={`mt-2 inline-flex items-center justify-between gap-10 min-w-[190px] px-6 py-3 text-[11px] uppercase tracking-[0.24em] border transition-colors ${isSelected ? 'border-[#C19A5B] bg-[#C19A5B] text-[#1f1f1f]' : 'border-[#d6c39d] text-[#a8824a] group-hover:border-[#C19A5B] group-hover:text-[#1f1f1f]'}`}>
+                          {t('menuBuilder.starterTemp.choose')}
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
                     </div>
                   </motion.button>
                 );

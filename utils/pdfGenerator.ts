@@ -470,7 +470,7 @@ export const generateOffertePDF = (data: OfferteData): jsPDF => {
   // Decoration — chosen style (no separate line-item price for now).
   if (data.decoration) {
     extrasRows.push([
-      t(`menuBuilder.decoration.styles.${data.decoration}.name`),
+      t(`menuBuilder.decoration.collections.${data.decoration}.name`),
       t('menuBuilder.pdf.extras.decoration'),
       '-',
       t('menuBuilder.pdf.included'),

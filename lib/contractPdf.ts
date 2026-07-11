@@ -20,7 +20,10 @@ const MUTED = rgb(0.42, 0.4, 0.36);
 const A4 = { w: 595.28, h: 841.89 };
 const MARGIN = 56;
 
-export type DecorationStyle = 'classic' | 'luxury' | 'natural' | 'moroccan';
+export type DecorationStyle =
+  | 'classic' | 'basic' | 'grace' | 'flower' | 'bohemian' | 'hermes'
+  | 'royal' | 'beldi' | 'ballroom' | 'gisprkuid' | 'mosaic' | 'lghrib'
+  | 'red' | 'royalblue' | 'royalgreen' | 'blue' | 'pink' | 'black';
 
 export interface ContractBooking {
   customer: {
@@ -56,16 +59,44 @@ export function buildReservationNumber(eventDateISO: string, seq = 1): string {
 }
 
 const STYLE_LABEL: Record<DecorationStyle, string> = {
-  classic: 'Classic Elegance',
-  luxury: 'Luxury Ambiance',
-  natural: 'Natural Chic',
-  moroccan: 'Moroccan Touch',
+  classic: 'Classic Collection',
+  basic: 'Basic Collection',
+  grace: 'Grace Collection',
+  flower: 'Flower Collection',
+  bohemian: 'Bohemian Collection',
+  hermes: 'Hermès Collection',
+  royal: 'Royal Collection',
+  beldi: 'Beldi Collection',
+  ballroom: 'Ballroom Collection',
+  gisprkuid: 'Gisprkuid Collection',
+  mosaic: 'Mosaic Collection',
+  lghrib: 'Lghrib Collection',
+  red: 'Red Collection',
+  royalblue: 'Royal Blue Collection',
+  royalgreen: 'Royal Green Collection',
+  blue: 'Blue Collection',
+  pink: 'Pink Collection',
+  black: 'Black Collection',
 };
 const STYLE_DESCRIPTION: Record<DecorationStyle, string> = {
-  classic: 'Tijdloos en verfijnd met zachte tinten, gouden accenten en romantische bloemen.',
-  luxury: 'Diepe kleuren, rijke bloemen en kaarslicht voor een luxueuze en intieme sfeer.',
-  natural: 'Licht, natuurlijk en stijlvol met veel groen, witte tinten en subtiele accenten.',
-  moroccan: 'Oosterse elegantie met warme kleuren, lantaarns en traditionele details.',
+  classic: 'Tijdloos wit met zachte roze accenten, bloemen en fijne zilveren details.',
+  basic: 'Strak wit tafellinnen met goud servies en subtiele bloemen — verfijnd en clean.',
+  grace: 'Witte bloemen, goud omrande borden en warm kaarslicht voor een gracieuze sfeer.',
+  flower: 'Weelderige bloemstukken in wit en blush met slanke kaarsen en goud accenten.',
+  bohemian: 'Natuurlijke, warme aankleding met pampas, rotan en witte bloemen.',
+  hermes: 'Zacht nude linnen met verfijnd servies, goud bestek en sfeerlampjes.',
+  royal: 'Champagne en rosé-goud onder een kristallen kroonluchter — puur koninklijk.',
+  beldi: 'Gouden beldi-linnen met traditioneel patroon, goud servies en kristal.',
+  ballroom: 'Grootse zaalaankleding met bloementrappen, drapering en kristallen kroonluchters.',
+  gisprkuid: 'Hoge witte bloemstukken, zilver-goud borden en fonkelend kristal.',
+  mosaic: 'Handbeschilderd mozaïekservies in blauwtinten op warm zand linnen.',
+  lghrib: 'Traditionele Marokkaanse aankleding met authentieke details en warme tinten.',
+  red: 'Diep rood tafellinnen met goud en kristal — warm en vol karakter.',
+  royalblue: 'Diep koningsblauw satijn met authentiek blauw-wit servies en goud bestek.',
+  royalgreen: 'Smaragdgroen satijn, goud servies en orchideeën voor een rijke uitstraling.',
+  blue: 'Zacht lichtblauw met witte bloemen, goud onderborden en kaarslicht.',
+  pink: 'Roze tinten met gouden lijsten, bloemen en ballonnen — feestelijk en zacht.',
+  black: 'Zwart met goud — strak, elegant en dramatisch onder kristallen licht.',
 };
 
 // pdf-lib StandardFonts use WinAnsi — map smart punctuation to safe equivalents.

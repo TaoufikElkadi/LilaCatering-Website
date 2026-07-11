@@ -8,7 +8,10 @@ import { getDepositAmount } from '@/lib/booking';
 import { applyDiscount, type AppliedDiscount } from '@/lib/discount';
 import AppointmentScheduler from './AppointmentScheduler';
 
-type DecorationStyle = 'classic' | 'luxury' | 'natural' | 'moroccan';
+type DecorationStyle =
+  | 'classic' | 'basic' | 'grace' | 'flower' | 'bohemian' | 'hermes'
+  | 'royal' | 'beldi' | 'ballroom' | 'gisprkuid' | 'mosaic' | 'lghrib'
+  | 'red' | 'royalblue' | 'royalgreen' | 'blue' | 'pink' | 'black';
 
 interface Props {
   totalPrice: number;

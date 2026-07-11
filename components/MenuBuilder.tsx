@@ -24,7 +24,7 @@ import GuestCountSelector from './GuestCountSelector';
 import LocationSelector from './LocationSelector';
 import ServiceSelector from './ExtrasSelector';
 import DecorationSelector, {
-  DecorationStyleId,
+  DecorationCollectionId,
   DecorationSelection,
   decorationFeeFor,
   isDecorationComplete,
@@ -121,7 +121,7 @@ export default function MenuBuilder() {
   const [teaShow, setTeaShow] = useState<TeaShowId>('standard');
   const [cookieBuffet, setCookieBuffet] = useState<boolean>(false);
   const [decoration, setDecoration] = useState<DecorationSelection>(null);
-  const selectDecoration = useCallback((id: DecorationStyleId) => {
+  const selectDecoration = useCallback((id: DecorationCollectionId) => {
     setDecoration(id);
   }, []);
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -610,9 +610,9 @@ export default function MenuBuilder() {
     return parts.join(' · ');
   })();
 
-  // Chosen decoration style (single selection), shown in the review/offerte.
+  // Chosen decoration collection (single selection), shown in the review/offerte.
   const decorationLines = decoration
-    ? [t(`menuBuilder.decoration.styles.${decoration}.name`)]
+    ? [t(`menuBuilder.decoration.collections.${decoration}.name`)]
     : [];
 
   // Compact text offerte used in booking emails / calendar invites.

@@ -452,6 +452,12 @@ const translations: Record<Lang, TranslationTree> = {
             requirements: 'Flexible menu selection',
           },
         },
+        features: {
+          advies: { title: 'Personal advice', text: 'We are happy to help you make the perfect choice.' },
+          compleet: { title: 'Stylish & complete', text: 'From table setting to decoration, everything taken care of.' },
+          opmaat: { title: 'Made to measure', text: 'Every event is unique, we think along with you.' },
+          zorgeloos: { title: 'Carefree enjoyment', text: 'We arrange everything so you can enjoy worry-free.' },
+        },
       },
       guestCount: {
         title: 'Guest Count',
@@ -1328,6 +1334,12 @@ const translations: Record<Lang, TranslationTree> = {
             requirements: 'Sélection de menu flexible',
           },
         },
+        features: {
+          advies: { title: 'Conseil personnalisé', text: 'Nous vous aidons à faire le choix parfait.' },
+          compleet: { title: 'Élégant & complet', text: 'De la table à la décoration, tout est soigné.' },
+          opmaat: { title: 'Sur mesure', text: 'Chaque événement est unique, nous vous accompagnons.' },
+          zorgeloos: { title: 'Profitez sans souci', text: 'Nous nous occupons de tout, pour que vous profitiez pleinement.' },
+        },
       },
       guestCount: {
         title: "Nombre d'invités",
@@ -2203,6 +2215,12 @@ const translations: Record<Lang, TranslationTree> = {
             description: 'Catering op maat voor uw wensen',
             requirements: 'Flexibele menukeuze',
           },
+        },
+        features: {
+          advies: { title: 'Persoonlijk advies', text: 'Wij helpen u graag bij de perfecte keuze.' },
+          compleet: { title: 'Stijlvol & compleet', text: 'Van tafelschikking tot decoratie, alles tot in de puntjes verzorgd.' },
+          opmaat: { title: 'Op maat gemaakt', text: 'Elk evenement is uniek, wij denken met u mee.' },
+          zorgeloos: { title: 'Zorgeloos genieten', text: 'Wij regelen alles, zodat u onbezorgd kunt genieten.' },
         },
       },
       guestCount: {

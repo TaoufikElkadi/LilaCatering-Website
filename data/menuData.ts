@@ -672,6 +672,18 @@ export const menuItems: MenuItem[] = [
     dietaryTags: ['halal'],
   },
   {
+    id: 'main-chicken-6',
+    name: 'Gold Chicken with Seffa',
+    description: '',
+    surcharge: 3.5,
+    included: false,
+    image: '/images/placeholder.jpg',
+    category: 'main',
+    subCategory: 'chicken',
+    allergens: ['gluten'],
+    dietaryTags: ['halal'],
+  },
+  {
     id: 'main-chicken-4',
     name: 'Djaj Gold',
     description: '',

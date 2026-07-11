@@ -325,7 +325,8 @@ export default function MenuBuilder() {
 
   const filteredItems = useMemo(() => {
     if (!activeMenuCategory) return [];
-    return translatedMenuItems.filter((item) => {
+    const subOrder = subCategoryMap[activeMenuCategory];
+    const items = translatedMenuItems.filter((item) => {
       if (item.category !== activeMenuCategory) return false;
       // Starters are gated by the chosen temperature first.
       if (activeMenuCategory === 'starter' && starterTemp) {
@@ -336,6 +337,14 @@ export default function MenuBuilder() {
       }
       return true;
     });
+    // Group by sub-category order (e.g. warm hapjes first, then luxe extras),
+    // keeping the original order within each group (stable sort).
+    return items.sort(
+      (a, b) =>
+        subOrder.indexOf(a.subCategory as MenuSubCategory) -
+        subOrder.indexOf(b.subCategory as MenuSubCategory)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [translatedMenuItems, activeMenuCategory, selectedSubCategory, starterTemp]);
 
   // Hapjes (appetizers) are capped at 2 selections — 2 basic hapjes are included.

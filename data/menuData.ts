@@ -124,7 +124,7 @@ export const menuItems: MenuItem[] = [
     id: 'app-warm-7',
     name: 'Mini Fish Pastilla',
     description: '',
-    surcharge: 2.0,
+    surcharge: 2.5,
     included: false,
     image: '/images/dishes/lila-mini-vis-pastilla.jpg',
     category: 'appetizer',

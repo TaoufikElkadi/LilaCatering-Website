@@ -11,8 +11,8 @@ export type EventType = 'wedding' | 'engagement' | 'henna' | 'birth' | 'other';
 
 const EVENT_IMAGES: Record<EventType, string> = {
   wedding: '/images/decorations/grace.jpg',
-  engagement: '/images/decorations/red.jpg',
-  henna: '/images/decorations/lghrib.jpg',
+  engagement: '/images/decorations/beldi.jpg',
+  henna: '/images/decorations/royal.jpg',
   birth: '/images/decorations/classic.jpg',
   other: '/images/decorations/royalgreen.jpg',
 };

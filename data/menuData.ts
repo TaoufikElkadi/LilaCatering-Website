@@ -715,7 +715,7 @@ export const menuItems: MenuItem[] = [
     description: 'Grilled sea bass garnished with giant shrimp, langoustines, grilled salmon and lobster',
     surcharge: 6.5,
     included: false,
-    image: '/images/dishes/lila-zeebaars-visplateau.jpg',
+    image: '/images/dishes/lila-hermitage-visplateau.jpg',
     category: 'main',
     subCategory: 'fish',
     allergens: ['fish', 'shellfish'],

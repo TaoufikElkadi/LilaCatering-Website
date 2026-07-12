@@ -755,7 +755,7 @@ export const menuItems: MenuItem[] = [
     description: "Grilled chickens, L'ham Barkouk and seffa",
     surcharge: 8.5,
     included: false,
-    image: '/images/dishes/lila-prestige-varity.jpg',
+    image: '/images/dishes/lila-prestige-variety-trays.jpg',
     category: 'main',
     subCategory: 'buffet',
     allergens: ['gluten', 'nuts'],

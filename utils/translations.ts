@@ -774,13 +774,16 @@ const translations: Record<Lang, TranslationTree> = {
     iftar: {
       kicker: 'Ramadan',
       title: 'Iftar catering',
+      sideLabel: 'Tradition · Flavor · Togetherness',
       body: 'Break your fast in style. Our iftar catering brings the warmth of Morocco to your table — from dates, harira and msemen to rich main courses and sweet delicacies. We cater iftars for the home, the mosque or large community gatherings, with an eye for tradition, timing and hospitality.',
-      points: [
-        'Traditional iftar dishes: dates, harira, msemen & more',
-        'From intimate families to large community iftars',
-        'Served on location or delivered, right on time for maghrib',
+      features: [
+        { title: 'Authentic Moroccan flavor', text: 'Traditional dishes: dates, harira, msemen & more.' },
+        { title: 'For every occasion', text: 'From intimate families to large community iftars.' },
+        { title: 'Served on location', text: 'Delivered, right on time for the maghrib.' },
       ],
       cta: 'Build your iftar menu',
+      noteTitle: 'Right on time',
+      noteText: 'We make sure everything is fresh, warm and ready exactly on time for the maghrib.',
     },
     culturalAuthenticity: {
       kicker: 'Cultural Authenticity',
@@ -1667,13 +1670,16 @@ const translations: Record<Lang, TranslationTree> = {
     iftar: {
       kicker: 'Ramadan',
       title: 'Traiteur iftar',
+      sideLabel: 'Tradition · Saveur · Convivialité',
       body: 'Rompez le jeûne avec élégance. Notre service iftar apporte la chaleur du Maroc à votre table — des dattes, de la harira et des msemen aux plats copieux et douceurs sucrées. Nous organisons des iftars à domicile, à la mosquée ou pour de grands rassemblements, avec le souci de la tradition, du timing et de l\'hospitalité.',
-      points: [
-        'Plats d\'iftar traditionnels : dattes, harira, msemen et plus',
-        'Des familles intimes aux grands iftars communautaires',
-        'Servi sur place ou livré, juste à temps pour le maghreb',
+      features: [
+        { title: 'Saveur marocaine authentique', text: 'Plats traditionnels : dattes, harira, msemen & plus.' },
+        { title: 'Pour chaque moment', text: 'Des familles intimes aux grands iftars communautaires.' },
+        { title: 'Servi sur place', text: 'Livré, juste à temps pour le maghreb.' },
       ],
       cta: 'Composez votre menu iftar',
+      noteTitle: 'Ponctuel',
+      noteText: 'Nous veillons à ce que tout soit frais, chaud et prêt juste à temps pour le maghreb.',
     },
     culturalAuthenticity: {
       kicker: 'Authenticité Culturelle',
@@ -2560,13 +2566,16 @@ const translations: Record<Lang, TranslationTree> = {
     iftar: {
       kicker: 'Ramadan',
       title: 'Iftar catering',
+      sideLabel: 'Traditie · Smaak · Samenkomen',
       body: 'Verbreek het vasten in stijl. Onze iftar-catering brengt de warmte van Marokko naar uw tafel — van dadels, harira en msemen tot rijke hoofdgerechten en zoete lekkernijen. Wij verzorgen iftars voor thuis, de moskee of grote gemeenschapsbijeenkomsten, met oog voor traditie, timing en gastvrijheid.',
-      points: [
-        'Traditionele iftar-gerechten: dadels, harira, msemen & meer',
-        'Van intieme families tot grote gemeenschapsiftars',
-        'Op locatie verzorgd of bezorgd, precies op tijd voor de maghreb',
+      features: [
+        { title: 'Authentieke Marokkaanse smaak', text: 'Traditionele gerechten: dadels, harira, msemen & meer.' },
+        { title: 'Voor elk moment', text: 'Van intieme families tot grote gemeenschapsiftars.' },
+        { title: 'Op locatie verzorgd', text: 'Bezorgd, precies op tijd voor de maghreb.' },
       ],
       cta: 'Stel uw iftar-menu samen',
+      noteTitle: 'Stipt op tijd',
+      noteText: 'Wij zorgen dat alles vers, warm en precies op tijd klaarstaat voor de maghreb.',
     },
     culturalAuthenticity: {
       kicker: 'Authentiek Marokkaans',

@@ -116,6 +116,23 @@ export default function MenuBuilder() {
   // Flow state
   const [currentStep, setCurrentStep] = useState<FlowStep>(1);
   const [guestCount, setGuestCount] = useState<number>(MIN_GUESTS);
+  // Women/men split (total = women + men, kept in sync with guestCount).
+  const [womenCount, setWomenCount] = useState<number>(Math.round(MIN_GUESTS / 2));
+  const [menCount, setMenCount] = useState<number>(MIN_GUESTS - Math.round(MIN_GUESTS / 2));
+  const handleGuestPreset = useCallback((total: number) => {
+    const w = Math.round(total / 2);
+    setWomenCount(w);
+    setMenCount(total - w);
+    setGuestCount(total);
+  }, []);
+  const handleWomenChange = useCallback((w: number) => {
+    setWomenCount(w);
+    setGuestCount(w + menCount);
+  }, [menCount]);
+  const handleMenChange = useCallback((m: number) => {
+    setMenCount(m);
+    setGuestCount(womenCount + m);
+  }, [womenCount]);
   const [coffeeLuxe, setCoffeeLuxe] = useState<boolean>(false);
   const [cookiesLuxe, setCookiesLuxe] = useState<boolean>(false);
   const [tableExtras, setTableExtras] = useState<TableExtraId[]>([]);
@@ -245,6 +262,7 @@ export default function MenuBuilder() {
         'lila-builder-snapshot',
         JSON.stringify({
           selectedEventType, selectedDate, eventStart, eventEnd, foodTime, guestCount,
+          womenCount, menCount,
           selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, cookieBuffet,
           decoration, selectedLocation, locationUnknown, starterTemp,
         })
@@ -254,6 +272,7 @@ export default function MenuBuilder() {
     }
   }, [
     selectedEventType, selectedDate, eventStart, eventEnd, foodTime, guestCount,
+    womenCount, menCount,
     selectedItems, coffeeLuxe, cookiesLuxe, tableExtras, teaShow, cookieBuffet,
     decoration, selectedLocation, locationUnknown, starterTemp, paidReturn,
   ]);
@@ -271,6 +290,8 @@ export default function MenuBuilder() {
         setEventEnd(s.eventEnd || '');
         setFoodTime(s.foodTime || '');
         if (typeof s.guestCount === 'number') setGuestCount(s.guestCount);
+        if (typeof s.womenCount === 'number') setWomenCount(s.womenCount);
+        if (typeof s.menCount === 'number') setMenCount(s.menCount);
         if (Array.isArray(s.selectedItems)) setSelectedItems(s.selectedItems);
         setCoffeeLuxe(!!s.coffeeLuxe);
         setCookiesLuxe(!!s.cookiesLuxe);
@@ -631,7 +652,7 @@ export default function MenuBuilder() {
     const eventName = selectedEventType ? t(`menuBuilder.eventType.types.${selectedEventType}.name`) : '';
     const dishes = selectedItems.map((i) => i.name).join(', ');
     return [
-      `${eventName} · ${guestCount} ${t('menuBuilder.guestCount.guests')} · ${selectedDate}`,
+      `${eventName} · ${guestCount} ${t('menuBuilder.guestCount.guests')} (${womenCount} ${t('menuBuilder.guestCount.womenWord')} / ${menCount} ${t('menuBuilder.guestCount.menWord')}) · ${selectedDate}`,
       timesSummary ? `${t('menuBuilder.eventTime.title')}: ${timesSummary}` : '',
       dishes ? `Menu: ${dishes}` : '',
       serviceSummary,
@@ -828,7 +849,14 @@ export default function MenuBuilder() {
       {currentDef.kind === 'guests' && (
         <motion.div key="step-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div className="py-2 sm:py-6">
-            <GuestCountSelector guestCount={guestCount} onGuestCountChange={setGuestCount} />
+            <GuestCountSelector
+              guestCount={guestCount}
+              onGuestCountChange={handleGuestPreset}
+              women={womenCount}
+              men={menCount}
+              onWomenChange={handleWomenChange}
+              onMenChange={handleMenChange}
+            />
           </div>
         </motion.div>
       )}
@@ -928,7 +956,7 @@ export default function MenuBuilder() {
                       </div>
                       <div>
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-[#8a8275] mb-1">{t('menuBuilder.review.guestsLabel')}</p>
-                        <p className="text-sm text-[#1f1f1f] font-medium">{guestCount}</p>
+                        <p className="text-sm text-[#1f1f1f] font-medium">{guestCount} <span className="text-[#8a8275] font-normal">({womenCount} {t('menuBuilder.guestCount.womenWord')} / {menCount} {t('menuBuilder.guestCount.menWord')})</span></p>
                       </div>
                     </div>
 

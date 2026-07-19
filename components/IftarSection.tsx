@@ -12,8 +12,10 @@ const BLUR_DATA_URL =
 const MAIN_IMG = '/images/iftar/iftar-main.jpg';
 const SIDE_IMG = '/images/iftar/iftar-side.jpg';
 
-// Clean Moorish pointed (lancet) arch — two arcs meeting at a gentle point.
-const ARCH_PATH = 'M0,1 L0,0.44 A0.66,0.66 0 0 1 0.5,0 A0.66,0.66 0 0 1 1,0.44 L1,1 Z';
+// Moorish onion / ogee arch: sharp finial point, onion belly, waist cusp,
+// near-straight body (objectBoundingBox units, y:0 top → 1 bottom).
+const ARCH_PATH =
+  'M0.5,0 C0.46,0.08 0.16,0.14 0.09,0.26 C0.05,0.32 0.09,0.37 0.16,0.40 C0.13,0.58 0.12,0.78 0.12,1 L0.88,1 C0.88,0.78 0.87,0.58 0.84,0.40 C0.91,0.37 0.95,0.32 0.91,0.26 C0.84,0.14 0.54,0.08 0.5,0 Z';
 
 type IconProps = { className?: string };
 
@@ -27,6 +29,15 @@ function KhatamMark({ className = '' }: IconProps) {
       </g>
       <circle cx="20" cy="20" r="5" fill="#f3ede1" />
       <circle cx="20" cy="20" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Faint outline of the arch shape — decorative background element. */
+function ArchOutline({ className = '' }: IconProps) {
+  return (
+    <svg viewBox="0 0 1 1" preserveAspectRatio="none" fill="none" className={className} aria-hidden="true">
+      <path d={ARCH_PATH} stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
@@ -182,8 +193,9 @@ export default function IftarSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="order-1 lg:order-2 relative w-full max-w-lg mx-auto lg:max-w-none aspect-[4/5] sm:aspect-[5/5] lg:aspect-[7/8]"
           >
-            {/* Decorative faint circle + mandala */}
-            <svg className="absolute left-[-6%] top-[26%] w-[52%] h-[62%] text-[#cbb083]/45" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            {/* Decorative faint arch outline + circle + mandala */}
+            <ArchOutline className="absolute left-[-5%] top-[0%] w-[68%] h-[96%] text-[#cbb083]/55" />
+            <svg className="absolute left-[-8%] top-[30%] w-[46%] h-[56%] text-[#cbb083]/40" viewBox="0 0 100 100" fill="none" aria-hidden="true">
               <circle cx="50" cy="50" r="48" stroke="currentColor" strokeWidth="0.5" />
             </svg>
             <Mandala className="absolute right-[7%] top-[4%] w-20 h-20 text-[#cbb083]/45" />

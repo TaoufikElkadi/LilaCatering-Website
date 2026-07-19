@@ -4,20 +4,49 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Clock, ArrowRight } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
-import { StarSeal } from './MenuDecor';
 
 const BLUR_DATA_URL =
   'data:image/jpeg;base64,/9j/2wBDABQODxIPDRQSEBIXFRQYHjIhHhwcHj0sLiQySUBMS0dARkVQWnNiUFVtVkVGZIhlbXd7gYKBTmCNl4x9lnN+gXz/2wBDARUXFx4aHjshITt8U0ZTfHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHz/wAARCAAKAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgP/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwChARN//9k=';
 
 // Photos are warm placeholders — swap for the generated iftar shots.
-const MAIN_IMG = '/images/iftar/iftar-dish.jpg';
-const SIDE_IMG = '/images/iftar/iftar-table.jpg';
+const MAIN_IMG = '/images/iftar/iftar-main.jpg';
+const SIDE_IMG = '/images/iftar/iftar-side.jpg';
 
-// Moorish onion / ogee arch (objectBoundingBox units).
-const ARCH_PATH =
-  'M0,1 L0,0.52 C0,0.33 0.15,0.28 0.29,0.33 C0.42,0.37 0.46,0.16 0.5,0 C0.54,0.16 0.58,0.37 0.71,0.33 C0.85,0.28 1,0.33 1,0.52 L1,1 Z';
+// Clean Moorish pointed (lancet) arch — two arcs meeting at a gentle point.
+const ARCH_PATH = 'M0,1 L0,0.44 A0.66,0.66 0 0 1 0.5,0 A0.66,0.66 0 0 1 1,0.44 L1,1 Z';
 
 type IconProps = { className?: string };
+
+/** Ornate rub-el-hizb (khatam) medallion — two overlapping squares + centre. */
+function KhatamMark({ className = '' }: IconProps) {
+  return (
+    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
+      <g fill="currentColor">
+        <rect x="8.5" y="8.5" width="23" height="23" rx="1.5" />
+        <rect x="8.5" y="8.5" width="23" height="23" rx="1.5" transform="rotate(45 20 20)" />
+      </g>
+      <circle cx="20" cy="20" r="5" fill="#f3ede1" />
+      <circle cx="20" cy="20" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Delicate outline mandala rosette — decorative accent. */
+function Mandala({ className = '' }: IconProps) {
+  const petals = Array.from({ length: 12 }, (_, i) => {
+    const a = (i * 30 * Math.PI) / 180;
+    const x = 24 + Math.cos(a) * 20;
+    const y = 24 + Math.sin(a) * 20;
+    return <ellipse key={i} cx={x} cy={y} rx="2.6" ry="1.2" transform={`rotate(${i * 30} ${x} ${y})`} />;
+  });
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="0.6" className={className} aria-hidden="true">
+      <circle cx="24" cy="24" r="11" />
+      <circle cx="24" cy="24" r="15" />
+      <g>{petals}</g>
+    </svg>
+  );
+}
 
 /** Tagine silhouette. */
 function TagineIcon({ className = '' }: IconProps) {
@@ -94,7 +123,7 @@ export default function IftarSection() {
             className="order-2 lg:order-1"
           >
             <div className="flex items-center gap-3.5 mb-6">
-              <StarSeal className="w-6 h-6 text-[#b8905a]" />
+              <KhatamMark className="w-6 h-6 text-[#b8905a]" />
               <span className="text-[12px] uppercase tracking-[0.42em] text-[#a8824a]">{t('iftar.kicker')}</span>
             </div>
 
@@ -131,15 +160,15 @@ export default function IftarSection() {
               })}
             </ul>
 
-            {/* Gold plaque CTA with arrow */}
+            {/* Sharp white plaque CTA with gold border, text and arrow */}
             <a
               href="#menu-builder"
-              className="group relative mt-9 inline-flex items-center w-[24rem] max-w-full h-[62px] rounded-[16px] bg-gradient-to-b from-[#c6a361] via-[#b8905a] to-[#a67e46] shadow-[0_16px_38px_-16px_rgba(150,110,55,0.85)] hover:shadow-[0_20px_46px_-16px_rgba(150,110,55,1)] transition-shadow"
+              className="group relative mt-9 inline-flex items-center w-[24rem] max-w-full h-[62px] bg-white border border-[#b8905a] text-[#b8905a] shadow-[0_16px_38px_-20px_rgba(150,110,55,0.6)] hover:bg-[#faf6ee] transition-colors"
             >
-              <span className="relative flex-1 text-center pl-6 pr-14 text-[13px] uppercase tracking-[0.2em] text-[#fdf6e6]">
+              <span className="relative flex-1 text-center pl-6 pr-14 text-[13px] uppercase tracking-[0.2em]">
                 {t('iftar.cta')}
               </span>
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full border border-white/50 text-[#fdf6e6]">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full border border-[#b8905a]">
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" strokeWidth={1.8} />
               </span>
             </a>
@@ -153,11 +182,11 @@ export default function IftarSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="order-1 lg:order-2 relative w-full max-w-lg mx-auto lg:max-w-none aspect-[4/5] sm:aspect-[5/5] lg:aspect-[7/8]"
           >
-            {/* Decorative faint circle + mandala star */}
+            {/* Decorative faint circle + mandala */}
             <svg className="absolute left-[-6%] top-[26%] w-[52%] h-[62%] text-[#cbb083]/45" viewBox="0 0 100 100" fill="none" aria-hidden="true">
               <circle cx="50" cy="50" r="48" stroke="currentColor" strokeWidth="0.5" />
             </svg>
-            <StarSeal className="absolute right-[8%] top-[6%] w-16 h-16 text-[#cbb083]/35" />
+            <Mandala className="absolute right-[7%] top-[4%] w-20 h-20 text-[#cbb083]/45" />
 
             {/* Main arch */}
             <div

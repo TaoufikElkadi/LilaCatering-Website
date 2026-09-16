@@ -262,3 +262,29 @@ body.menu-flow-open .scroll-to-top-btn {
   opacity: 0;
   cursor: pointer;
 }
+
+/* iOS Safari zooms the whole page when a focused field is smaller than 16px.
+   Below the sm breakpoint every control is bumped to 16px; the component-level
+   sizes still apply from sm up, so the desktop design is untouched. */
+@media (max-width: 639px) {
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    /* !important: this has to beat Tailwind's text-sm / text-xs utilities,
+       which are single classes and would otherwise win on specificity. */
+    font-size: 16px !important;
+  }
+}
+
+/* Honour the OS "reduce motion" setting: transitions and scroll-animations
+   collapse to near-instant rather than running full length. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -128,15 +128,19 @@ export default function About() {
             src="/h1.jpg"
             alt="Restaurant interior"
             fill
-            className="object-cover"
+            sizes="100vw"
+            quality={78}
             priority
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary-black/50 to-transparent" />
         </motion.div>
       </section>
 
       {/* Section I - Our Journey */}
-      <section className="py-20 md:py-32 px-4 bg-primary-black relative">
+      {/* overflow-x-clip: the two columns reveal from x: ±30, which on a phone
+          would push the page wider than the viewport before they settle. */}
+      <section className="py-20 md:py-32 px-4 bg-primary-black relative overflow-x-clip">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -185,6 +189,8 @@ export default function About() {
                 src="/h2.jpg"
                 alt="Moroccan door"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                quality={78}
                 className="object-cover relative z-10"
               />
             </motion.div>
@@ -229,6 +235,8 @@ export default function About() {
             src="/h3.jpg"
             alt="Restaurant seating"
             fill
+            sizes="100vw"
+            quality={78}
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-primary-black/30 via-transparent to-primary-black/30" />
@@ -276,6 +284,8 @@ export default function About() {
             src="/h4.jpg"
             alt="Restaurant details"
             fill
+            sizes="100vw"
+            quality={78}
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-primary-black/50 to-primary-black/50" />
@@ -369,6 +379,8 @@ export default function About() {
               src="/h5.jpg"
               alt="Team at work"
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              quality={78}
               className="object-cover relative z-10"
             />
           </motion.div>

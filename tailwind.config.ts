@@ -19,6 +19,7 @@ const config: Config = {
       fontFamily: {
         serif: ['Cormorant Garamond', 'serif'],
         sans: ['Inter', 'sans-serif'],
+        display: ['var(--font-playfair)', 'Playfair Display', 'serif'],
       },
       letterSpacing: {
         'wide': '0.05em',

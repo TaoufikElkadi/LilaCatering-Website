@@ -320,11 +320,16 @@ export default function Testimonials() {
                     scrollRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
                   }
                 }}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  activeTestimonial === index ? 'bg-[#C19A5B] w-6' : 'bg-[#C19A5B]/30'
-                }`}
+                // the dot stays 8px; the button around it is a 44px touch target
+                className="grid h-11 w-11 place-items-center"
                 aria-label={`Go to testimonial ${index + 1}`}
-              />
+              >
+                <span
+                  className={`block h-2 rounded-full transition-all duration-300 ${
+                    activeTestimonial === index ? 'w-6 bg-[#C19A5B]' : 'w-2 bg-[#C19A5B]/30'
+                  }`}
+                />
+              </button>
             ))}
           </div>
 
@@ -556,7 +561,7 @@ export default function Testimonials() {
               href={reviewMeta.url || '#'}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 mb-5 text-sm text-[#4a4742] hover:text-[#1f1f1f] transition-colors"
+              className="inline-flex items-center gap-2 mb-3 py-2 text-sm text-[#4a4742] hover:text-[#1f1f1f] transition-colors"
             >
               <span className="flex items-center gap-0.5 text-[#C19A5B]">
                 {[...Array(5)].map((_, i) => (

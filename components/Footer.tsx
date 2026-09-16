@@ -88,7 +88,9 @@ export default function Footer() {
     { label: t('footer.legalCookies'), href: '#' },
   ];
 
-  const linkCls = 'text-[#6c655b] hover:text-[#C19A5B] transition-colors duration-200';
+  // inline-block + py-1 lifts every footer link to a >=24px touch target
+  // (WCAG 2.2 SC 2.5.8) without changing how the lists look.
+  const linkCls = 'inline-block py-1 text-[#6c655b] hover:text-[#C19A5B] transition-colors duration-200';
 
   return (
     <footer className="relative overflow-hidden text-[#1f1f1f]">
@@ -236,7 +238,7 @@ export default function Footer() {
           {/* legal */}
           <div className="flex items-center gap-4 text-xs text-[#8a8275]">
             {legal.map((l) => (
-              <a key={l.label} href={l.href} className="hover:text-[#C19A5B] transition-colors">
+              <a key={l.label} href={l.href} className="inline-block py-1 hover:text-[#C19A5B] transition-colors">
                 {l.label}
               </a>
             ))}

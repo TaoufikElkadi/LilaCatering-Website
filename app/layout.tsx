@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Cormorant_Garamond, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -26,6 +26,14 @@ const cormorantGaramond = Cormorant_Garamond({
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
   variable: "--font-cormorant",
+});
+
+// Editorial display serif used by the Craft section headline & feature titles.
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-playfair",
 });
 
 async function getRequestLang(): Promise<Lang> {
@@ -73,10 +81,14 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang={lang} className={`${inter.variable} ${cormorantGaramond.variable}`} suppressHydrationWarning>
+    <html lang={lang} className={`${inter.variable} ${cormorantGaramond.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
+        {/* Wallet/crypto extensions inject their own <script> as body's first
+            child before hydration, so React attribute-diffs it against this one.
+            Nothing here changes between server and client, so suppressing is safe. */}
         <script
           type="application/ld+json"
+          suppressHydrationWarning
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />

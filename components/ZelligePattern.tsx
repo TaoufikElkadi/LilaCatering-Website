@@ -50,8 +50,9 @@ const EightPointedStarBase = ({
     for (let i = 0; i < 16; i++) {
       const angle = (i * Math.PI) / 8 - Math.PI / 2;
       const radius = i % 2 === 0 ? outerRadius : innerRadius;
-      const x = center + radius * Math.cos(angle);
-      const y = center + radius * Math.sin(angle);
+      // fixed precision: keeps the server and client path strings identical
+      const x = (center + radius * Math.cos(angle)).toFixed(3);
+      const y = (center + radius * Math.sin(angle)).toFixed(3);
       points.push(`${i === 0 ? 'M' : 'L'} ${x} ${y}`);
     }
     return points.join(' ') + ' Z';

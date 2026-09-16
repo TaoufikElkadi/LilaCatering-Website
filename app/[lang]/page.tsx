@@ -18,10 +18,12 @@ const Craft = dynamic(() => import('@/components/Craft'), {
   loading: () => <div className="h-96 bg-[#f7f3ec]" />,
 });
 
-const CulturalAuthenticity = dynamic(() => import('@/components/CulturalAuthenticity'), {
-  ssr: true,
-  loading: () => <div className="h-96 bg-[#f7f3ec]" />,
-});
+// Retired: the Craft section above now carries this copy (same kicker, headline,
+// description and the same three pillars). Component kept for its dish carousel.
+// const CulturalAuthenticity = dynamic(() => import('@/components/CulturalAuthenticity'), {
+//   ssr: true,
+//   loading: () => <div className="h-96 bg-[#f7f3ec]" />,
+// });
 
 const Services = dynamic(() => import('@/components/Services'), {
   ssr: true,
@@ -76,9 +78,10 @@ export default function Home() {
       {/* Trusted-by logos hidden for now */}
       {/* <CompanyLogos /> */}
       <Reveal><Craft /></Reveal>
-      <Reveal><CulturalAuthenticity /></Reveal>
       <Reveal><Services /></Reveal>
-      <Reveal><IftarSection /></Reveal>
+      {/* z-10: the iftar fretwork bleeds past the band onto the sections
+          above and below, so this wrapper has to paint over both. */}
+      <Reveal className="relative z-10"><IftarSection /></Reveal>
       <Reveal><Testimonials /></Reveal>
       <Reveal><MenuBuilder /></Reveal>
       <Reveal><Gallery /></Reveal>

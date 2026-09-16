@@ -25,6 +25,22 @@ const L = {
   },
 } as const;
 
+const AMBIENCE_SRC = '/hero_sound_ambiance_andalus.mp3';
+
+/**
+ * True when the visitor has asked for less data, or is on a radio too slow to
+ * justify multi-megabyte decoration. Gates the hero video and the ambience.
+ */
+function prefersLightData(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const conn = (navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+  }).connection;
+  if (!conn) return false;
+  if (conn.saveData) return true;
+  return conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g' || conn.effectiveType === '3g';
+}
+
 export default function Hero() {
   const { lang } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -40,20 +56,26 @@ export default function Hero() {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = 0.45;
+    if (prefersLightData()) return;   // never spend a metered connection on ambience
 
-    const tryPlay = () => {
-      if (soundOn) audio.play().catch(() => { /* awaiting a user gesture */ });
+    // Only a genuine activation gesture attaches the source, so a visitor who
+    // just scrolls past never pays for the download. Scrolling is deliberately
+    // not in this list: it is not a user activation, so play() would reject and
+    // we would have fetched 4 MB for nothing.
+    const startAmbience = () => {
+      if (!soundOn) return;
+      if (!audio.src) audio.src = AMBIENCE_SRC;
+      audio.play().catch(() => { /* still awaiting a gesture */ });
     };
-    tryPlay();
 
-    const onInteract = () => tryPlay();
+    const onInteract = () => startAmbience();
     document.addEventListener('pointerdown', onInteract, { once: true });
     document.addEventListener('touchstart', onInteract, { once: true });
     document.addEventListener('keydown', onInteract, { once: true });
-    document.addEventListener('scroll', onInteract, { once: true, passive: true });
 
     const onVisibility = () => {
-      if (document.visibilityState === 'visible') tryPlay();
+      if (!audio.src) return;                       // nothing loaded yet, leave it that way
+      if (document.visibilityState === 'visible') startAmbience();
       else audio.pause();
     };
     document.addEventListener('visibilitychange', onVisibility);
@@ -62,7 +84,6 @@ export default function Hero() {
       document.removeEventListener('pointerdown', onInteract);
       document.removeEventListener('touchstart', onInteract);
       document.removeEventListener('keydown', onInteract);
-      document.removeEventListener('scroll', onInteract);
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [soundOn]);
@@ -72,8 +93,12 @@ export default function Hero() {
     setSoundOn((prev) => {
       const next = !prev;
       if (audio) {
-        if (next) audio.play().catch(() => {});
-        else audio.pause();
+        if (next) {
+          if (!audio.src) audio.src = AMBIENCE_SRC;
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
       }
       return next;
     });
@@ -84,6 +109,9 @@ export default function Hero() {
         window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
+    // The loop is ~2.5 MB. On Save-Data or a slow radio the poster alone is the
+    // better hero, so the video simply never starts downloading.
+    if (prefersLightData()) return;
     const start = () => setEnableVideo(true);
     const ric = (window as unknown as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
@@ -168,8 +196,11 @@ export default function Hero() {
 
   return (
     <section className="relative h-[108vh] min-h-[720px] w-full overflow-hidden bg-black text-white">
-      {/* Looping hero ambience (starts on first interaction; muteable) */}
-      <audio ref={audioRef} src="/hero_sound_ambiance_andalus.mp3" loop preload="auto" />
+      {/* Looping hero ambience. No src and preload="none" on purpose: the file is
+          ~4 MB and autoplay-with-sound is blocked everywhere, so it used to be
+          4 MB of mobile data nobody could hear. The source is attached on the
+          first real user gesture, in startAmbience(). */}
+      <audio ref={audioRef} loop preload="none" />
 
       {/* Background video */}
       <div className="absolute inset-0 bg-black">

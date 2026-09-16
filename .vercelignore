@@ -16,3 +16,6 @@ data/saveweb2zip-com-savor-it
 .image-backup
 .gstack
 .next-verify
+
+# Design source packs (reference artwork + mockups) — not used by the build.
+data/design-source

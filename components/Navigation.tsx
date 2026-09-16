@@ -1,11 +1,58 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from './LanguageProvider';
+
+/* Sampled from the approved header artwork. */
+const BAR = '#E8E2D6';
+const INK = '#4A4743';        // nav links
+const INK_STRONG = '#3F3A33'; // active language
+const INK_MUTED = '#6B655C';  // inactive languages
+const RULE = '#BAAC96';       // hairline divider
+const GOLD = '#9E7F57';       // the CTA block
+const GOLD_DEEP = '#8B6E49';
+const ORNAMENT = '#CFC3AA';
+
+/* Faint khatam rosette that bleeds off each end of the bar. */
+function Rosette({ className = '', style }: { className?: string; style?: CSSProperties }) {
+  const star = (r1: number, r2: number) =>
+    Array.from({ length: 16 }, (_, i) => {
+      const a = (Math.PI / 8) * i - Math.PI / 2;
+      const r = i % 2 === 0 ? r1 : r2;
+      // fixed precision so the server and client emit the same path string
+      return `${(100 + r * Math.cos(a)).toFixed(2)},${(100 + r * Math.sin(a)).toFixed(2)}`;
+    }).join(' ');
+  return (
+    <svg viewBox="0 0 200 200" className={className} style={style} fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.1" strokeLinejoin="round">
+        <polygon points={star(97, 47)} />
+        <polygon points={star(62, 26)} />
+        {Array.from({ length: 8 }).map((_, i) => (
+          <g key={i} transform={`rotate(${i * 45} 100 100)`}>
+            <path d="M100 38 L100 4" />
+            <path d="M100 62 C92 74 92 88 100 100 C108 88 108 74 100 62 Z" />
+          </g>
+        ))}
+        <circle cx="100" cy="100" r="9" />
+      </g>
+    </svg>
+  );
+}
+
+function InstagramGlyph({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle cx="17.4" cy="6.6" r="1.15" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -54,13 +101,8 @@ export default function Navigation() {
   }, [mobileMenuOpen]);
 
   const basePath = `/${lang}`;
-  // On the homepage hero (before scroll) the big centered wordmark stands in for the
-  // brand, so the small nav brand is hidden to avoid competing with it.
-  const isHome = pathname === basePath || pathname === `${basePath}/`;
-  const hideBrand = isHome && !scrolled && !mobileMenuOpen;
   const navLinks = [
     { name: t('nav.home'), href: basePath },
-    // Ons Verhaal temporarily hidden — page still WIP.
     { name: t('nav.about'), href: `${basePath}#about` },
     { name: t('nav.gallery'), href: `${basePath}#gallery` },
   ];
@@ -70,7 +112,6 @@ export default function Navigation() {
     { name: t('footer.services'), href: `${basePath}#services` },
     { name: t('nav.gallery'), href: `${basePath}#gallery` },
     { name: t('nav.about'), href: `${basePath}#about` },
-    // Ons Verhaal temporarily hidden — page still WIP.
   ];
 
   const languages: { code: 'en' | 'fr' | 'nl'; label: string }[] = [
@@ -102,134 +143,139 @@ export default function Navigation() {
   return (
     <>
       <nav
-        className={`fixed w-full z-50 transition-[transform,opacity,background-color,backdrop-filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`fixed w-full z-50 transition-[transform,opacity,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           hidden && !mobileMenuOpen
             ? '-translate-y-full opacity-0 pointer-events-none'
             : 'translate-y-0 opacity-100'
-        } ${
-          scrolled
-            ? 'backdrop-blur-xl bg-black/60 shadow-lg shadow-black/10'
-            : mobileMenuOpen
-            ? 'backdrop-blur-xl bg-black/60'
-            : isHome
-            ? 'bg-transparent'
-            : 'bg-gradient-to-b from-black/50 to-transparent'
-        }`}
+        } ${scrolled ? 'shadow-[0_1px_24px_-12px_rgba(63,58,51,0.45)]' : ''}`}
+        style={{ backgroundColor: BAR }}
       >
-        {/* Decorative top border on scroll */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: scrolled ? 1 : 0 }}
-          className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#C19A5B] to-transparent origin-center"
-        />
+        {/* Rosettes bleeding off both ends, as in the artwork. */}
+        <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" style={{ color: ORNAMENT }}>
+          <Rosette className="absolute -left-[196px] top-1/2 h-[300px] w-[300px] -translate-y-1/2 opacity-75" />
+          <Rosette className="absolute -right-[196px] top-1/2 h-[300px] w-[300px] -translate-y-1/2 opacity-75" />
+        </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10">
-          <div className="relative flex items-center justify-between h-14 sm:h-16 lg:h-20 text-white">
-            {/* Mobile: Hamburger button */}
+        <div className="relative mx-auto w-full max-w-[1920px] px-4 sm:px-8 lg:px-[8.3%]">
+          <div className="relative flex h-16 items-center justify-between sm:h-[72px] lg:h-[124px]">
+            {/* Mobile: hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden flex items-center justify-center w-10 h-10 -ml-1 rounded-full active:bg-white/10 transition-colors"
+              className="-ml-1 flex h-11 w-11 items-center justify-center rounded-full transition-colors active:bg-black/5 lg:hidden"
               aria-label="Toggle menu"
+              style={{ color: INK }}
             >
-              <div className="w-5 h-4 flex flex-col justify-between">
+              <div className="flex h-4 w-5 flex-col justify-between">
                 <motion.span
                   animate={mobileMenuOpen ? { rotate: 45, y: 7, width: '100%' } : { rotate: 0, y: 0, width: '100%' }}
                   transition={{ duration: 0.2 }}
-                  className="block h-[1.5px] bg-white origin-center"
+                  className="block h-[1.5px] origin-center bg-current"
                 />
                 <motion.span
                   animate={mobileMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="block h-[1.5px] w-3/4 bg-white"
+                  className="block h-[1.5px] w-3/4 bg-current"
                 />
                 <motion.span
                   animate={mobileMenuOpen ? { rotate: -45, y: -7, width: '100%' } : { rotate: 0, y: 0, width: '50%' }}
                   transition={{ duration: 0.2 }}
-                  className="block h-[1.5px] bg-white origin-center"
+                  className="block h-[1.5px] origin-center bg-current"
                 />
               </div>
             </button>
 
-            {/* Desktop: Left - navigation links */}
-            <div className="hidden lg:flex items-center gap-7 text-[11px] tracking-[0.18em] uppercase">
+            {/* Desktop: left — navigation links */}
+            <div
+              className="hidden items-center gap-10 text-[15px] uppercase tracking-[0.27em] lg:flex xl:gap-[3.7vw]"
+              style={{ color: INK }}
+            >
               {desktopLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative text-white/75 hover:text-white transition-colors duration-300 after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-[#C19A5B] after:transition-all after:duration-300 hover:after:w-full"
+                  className="relative py-2 transition-colors duration-300 hover:text-[#1f1c19] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#9E7F57] after:transition-all after:duration-300 hover:after:w-full"
                 >
                   {item.name}
                 </Link>
               ))}
             </div>
 
-            {/* Center brand — logo mark; hidden on the homepage hero (full logo stands in) */}
+            {/* Centre brand — the calligraphic mark, alone */}
             <Link
               href={basePath}
               aria-label="Lila Catering"
-              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center group transition-opacity duration-500 ${
-                hideBrand ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
+              className="absolute left-1/2 top-1/2 flex h-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center px-4"
               onClick={closeMobileMenu}
             >
+              {/* Drawn ~32-58px wide; declaring the source's 460px made Next serve
+                  a 920px variant to phones, so the width here is the drawn size. */}
               <Image
                 src="/logo-mark.png"
                 alt="Lila Catering"
-                width={460}
-                height={828}
+                width={104}
+                height={187}
                 priority
-                className="h-9 sm:h-10 w-auto"
+                className="h-9 w-auto sm:h-10 lg:h-[82px]"
               />
             </Link>
 
-            {/* Desktop: Right rail - actions */}
-            <div className="hidden lg:flex items-center gap-3 text-[10px] tracking-[0.15em] uppercase">
-              {/* Language toggle */}
-              <div className="flex items-center gap-0.5 pr-1">
+            {/* Desktop: right rail — languages, social, CTA */}
+            <div className="hidden items-center lg:flex">
+              <div className="flex items-center gap-2">
                 {languages.map((item) => (
                   <button
                     key={item.code}
                     onClick={() => handleLanguageChange(item.code)}
-                    className={`h-8 px-2.5 flex items-center justify-center rounded-full transition-all duration-300 ${
+                    className="flex h-12 w-12 items-center justify-center rounded-full text-[15px] uppercase tracking-[0.16em] transition-colors duration-300"
+                    style={
                       lang === item.code
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/50 hover:text-white hover:bg-white/5'
-                    }`}
+                        ? { color: INK_STRONG, backgroundColor: 'rgba(63,58,51,0.07)' }
+                        : { color: INK_MUTED }
+                    }
                   >
                     {item.label}
                   </button>
                 ))}
               </div>
-              <span className="h-4 w-px bg-white/20" />
+              <span className="mx-[1.6vw] h-8 w-px" style={{ backgroundColor: RULE }} />
               <a
                 href="https://www.instagram.com/lilacatering/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="h-8 w-8 flex items-center justify-center text-white/60 hover:text-white transition-colors"
+                className="flex h-12 w-12 items-center justify-center transition-opacity duration-300 hover:opacity-70"
+                style={{ color: '#241E19' }}
                 aria-label="Instagram"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
+                <InstagramGlyph className="h-[32px] w-[32px]" />
               </a>
               <a
                 href={`${basePath}#menu-builder`}
-                className="h-9 px-5 flex items-center border border-[#C19A5B] bg-transparent text-white transition-all duration-300 font-medium hover:bg-[#C19A5B] hover:text-white"
+                className="ml-[1.9vw] flex h-[58px] items-center px-9 text-[13px] uppercase tracking-[0.34em] text-white transition-colors duration-300"
+                style={{ backgroundColor: GOLD }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = GOLD_DEEP)}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = GOLD)}
               >
                 {t('nav.quote')}
               </a>
             </div>
 
-            {/* Mobile: CTA button */}
+            {/* Mobile: CTA */}
             <a
               href={`${basePath}#menu-builder`}
               onClick={closeMobileMenu}
-              className="lg:hidden flex items-center justify-center h-8 px-4 bg-[#C19A5B] text-white text-[9px] tracking-[0.12em] uppercase font-medium"
+              className="flex h-10 items-center justify-center px-4 text-[11px] uppercase tracking-[0.18em] text-white lg:hidden"
+              style={{ backgroundColor: GOLD }}
             >
               {t('nav.quote')}
             </a>
           </div>
         </div>
+
+        {/* hairline foot, so the bar reads as a plate over the page once scrolled */}
+        <span
+          className="absolute inset-x-0 bottom-0 h-px transition-opacity duration-500"
+          style={{ backgroundColor: RULE, opacity: scrolled ? 0.55 : 0 }}
+        />
       </nav>
 
       {/* Mobile Menu Overlay */}
@@ -242,25 +288,28 @@ export default function Navigation() {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-40 lg:hidden"
           >
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+              className="absolute inset-0"
+              style={{ backgroundColor: BAR }}
               onClick={closeMobileMenu}
             />
 
-            {/* Menu Content - Full screen overlay */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="absolute inset-0 flex flex-col pt-20 pb-8 px-6"
+              className="absolute inset-0 flex flex-col px-6 pb-8 pt-20"
             >
-              {/* Navigation Links - Centered */}
-              <nav className="flex-1 flex flex-col items-center justify-center space-y-1">
+              <Rosette
+                className="pointer-events-none absolute -right-48 bottom-24 h-[320px] w-[320px] opacity-30"
+                style={{ color: ORNAMENT }}
+              />
+
+              <nav className="relative flex flex-1 flex-col items-center justify-center space-y-1">
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.href}
@@ -271,29 +320,30 @@ export default function Navigation() {
                     <Link
                       href={link.href}
                       onClick={closeMobileMenu}
-                      className="block py-3 px-6 text-white text-2xl font-serif tracking-wide text-center active:text-[#C19A5B] transition-colors"
+                      className="block px-6 py-3 text-center font-serif text-2xl tracking-wide transition-colors"
+                      style={{ color: INK_STRONG }}
                     >
                       {link.name}
                     </Link>
                   </motion.div>
                 ))}
 
-                {/* Decorative divider */}
                 <motion.div
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="w-12 h-[1px] bg-[#C19A5B]/50 my-4"
+                  className="my-4 h-px w-12"
+                  style={{ backgroundColor: RULE }}
                 />
 
-                {/* Action links */}
                 <motion.a
                   href={`${basePath}#services`}
                   onClick={closeMobileMenu}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.45 }}
-                  className="block py-2 text-white/60 text-lg tracking-wide text-center"
+                  className="block py-2 text-center text-lg tracking-wide"
+                  style={{ color: INK_MUTED }}
                 >
                   {t('footer.services')}
                 </motion.a>
@@ -303,29 +353,30 @@ export default function Navigation() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="block py-2 text-[#C19A5B] text-lg tracking-wide text-center"
+                  className="block py-2 text-center text-lg tracking-wide"
+                  style={{ color: GOLD }}
                 >
                   {t('footer.getQuote')}
                 </motion.a>
               </nav>
 
-              {/* Bottom: Language Selector & Social */}
-              <div className="border-t border-white/10 pt-6">
+              <div className="relative border-t pt-6" style={{ borderColor: RULE }}>
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.6 }}
-                  className="flex justify-center gap-4 mb-4"
+                  className="mb-4 flex justify-center gap-4"
                 >
                   {languages.map((item) => (
                     <button
                       key={item.code}
                       onClick={() => handleLanguageChange(item.code)}
-                      className={`h-10 w-14 flex items-center justify-center text-xs tracking-[0.15em] uppercase rounded-full transition-all ${
+                      className="flex h-11 w-14 items-center justify-center rounded-full text-xs uppercase tracking-[0.15em] transition-all"
+                      style={
                         lang === item.code
-                          ? 'bg-[#C19A5B] text-white'
-                          : 'text-white/50 border border-white/20'
-                      }`}
+                          ? { backgroundColor: GOLD, color: '#fff' }
+                          : { color: INK_MUTED, border: `1px solid ${RULE}` }
+                      }
                     >
                       {item.label}
                     </button>
@@ -341,12 +392,11 @@ export default function Navigation() {
                     href="https://www.instagram.com/lilacatering/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="h-10 w-10 flex items-center justify-center text-white/60 hover:text-white transition-colors rounded-full border border-white/20"
+                    className="flex h-11 w-11 items-center justify-center rounded-full border transition-opacity hover:opacity-70"
+                    style={{ color: '#241E19', borderColor: RULE }}
                     aria-label="Instagram"
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                    </svg>
+                    <InstagramGlyph className="h-5 w-5" />
                   </a>
                 </motion.div>
               </div>

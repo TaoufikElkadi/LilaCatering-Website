@@ -141,7 +141,7 @@ export default function Services() {
                   </p>
                   <a
                     href="#menu-builder"
-                    className="flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#1f1f1f] py-2"
+                    className="flex items-center justify-center gap-2 py-3 text-[11px] uppercase tracking-[0.2em] text-[#1f1f1f]"
                   >
                     <span>{t('services.cta')}</span>
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,11 +164,16 @@ export default function Services() {
                     scrollRef.current.scrollTo({ left: index * cardWidth, behavior: 'smooth' });
                   }
                 }}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  activeCard === index ? 'bg-[#C19A5B] w-6' : 'bg-[#C19A5B]/30'
-                }`}
+                // the dot stays 8px; the button around it is a 44px touch target
+                className="grid h-11 w-11 place-items-center"
                 aria-label={`Go to service ${index + 1}`}
-              />
+              >
+                <span
+                  className={`block h-2 rounded-full transition-all duration-300 ${
+                    activeCard === index ? 'w-6 bg-[#C19A5B]' : 'w-2 bg-[#C19A5B]/30'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </div>

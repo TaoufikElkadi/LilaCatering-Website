@@ -54,7 +54,7 @@ const Khatam = ({ className = '' }: { className?: string }) => (
 const SCENE = '/images/origin/origin-scene.d237a182.jpg';          // the desktop artwork
 const HERO_MOBILE = '/images/origin/origin-hero-mobile.49679954.jpg'; // stacked: the same terrace, no baked rail
 const ORNAMENT = '/images/origin/origin-ornament.c6f0745e.png';
-const CALLIGRAPHY = '/images/origin/origin-calligraphy.f631bca7.png';
+const CALLIGRAPHY = '/images/origin/origin-calligraphy.7b3db671.png';
 
 const ICONS = [
   '/images/origin/icon-spices.e332de77.png',
@@ -200,10 +200,10 @@ export default function Craft() {
                 src={CALLIGRAPHY}
                 alt=""
                 aria-hidden="true"
-                width={151}
-                height={52}
+                width={163}
+                height={77}
                 sizes="(max-width: 1023px) 70px, 1px"
-                className="h-6 w-auto shrink-0 lg:hidden"
+                className="h-8 w-auto shrink-0 lg:hidden"
               />
             </motion.div>
           )}

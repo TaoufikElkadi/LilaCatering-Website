@@ -185,7 +185,7 @@ export default function IftarSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.18, ease: EASE }}
-              className="mt-4 max-w-[18.5rem] text-[14px] font-normal leading-[1.58] sm:mt-5 sm:max-w-[34rem] sm:text-[16px] sm:leading-[1.62] xl:mt-[2.154cqw] xl:max-w-[31.7cqw] xl:text-[1.143cqw] xl:tracking-[0.0254em]"
+              className="mt-4 max-w-[18.5rem] text-[14px] font-light leading-[1.58] sm:mt-5 sm:max-w-[34rem] sm:text-[16px] sm:leading-[1.62] xl:mt-[2.154cqw] xl:max-w-[31.7cqw] xl:text-[1.143cqw] xl:tracking-[0.0254em]"
               style={{ color: BODY }}
             >
               {t('iftar.body')}

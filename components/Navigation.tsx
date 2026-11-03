@@ -150,12 +150,6 @@ export default function Navigation() {
         } ${scrolled ? 'shadow-[0_1px_24px_-12px_rgba(63,58,51,0.45)]' : ''}`}
         style={{ backgroundColor: BAR }}
       >
-        {/* Rosettes bleeding off both ends, as in the artwork. */}
-        <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" style={{ color: ORNAMENT }}>
-          <Rosette className="absolute -left-[196px] top-1/2 h-[300px] w-[300px] -translate-y-1/2 opacity-75" />
-          <Rosette className="absolute -right-[196px] top-1/2 h-[300px] w-[300px] -translate-y-1/2 opacity-75" />
-        </div>
-
         <div className="relative mx-auto w-full max-w-[1920px] px-4 sm:px-8 lg:px-[8.3%]">
           <div className="relative flex h-16 items-center justify-between sm:h-[72px] lg:h-[124px]">
             {/* Mobile: hamburger */}

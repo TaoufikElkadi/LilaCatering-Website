@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import Hero from '@/components/Hero';
-import Reveal from '@/components/Reveal';
 import { buildAlternates, pageMetadata } from '@/lib/seo';
 import { DEFAULT_LANG, isLang } from '@/lib/i18n';
 
@@ -77,14 +76,20 @@ export default function Home() {
       <Hero />
       {/* Trusted-by logos hidden for now */}
       {/* <CompanyLogos /> */}
-      <Reveal><Craft /></Reveal>
-      <Reveal><Services /></Reveal>
-      {/* z-10: the iftar fretwork bleeds past the band onto the sections
-          above and below, so this wrapper has to paint over both. */}
-      <Reveal className="relative z-10"><IftarSection /></Reveal>
-      <Reveal><Testimonials /></Reveal>
-      <Reveal><MenuBuilder /></Reveal>
-      <Reveal><Gallery /></Reveal>
+      {/* The sections below flow into one another (shared colours at every
+          seam, art that crosses the boundaries), so they are NOT wrapped in
+          <Reveal>: fading a whole section would flash a band of page
+          background at its edges. Each section animates its own content. */}
+      <Craft />
+      <Services />
+      {/* z-10: the iftar art bleeds past the band onto the sections above and
+          below, so this wrapper has to paint over both. */}
+      <div className="relative z-10"><IftarSection /></div>
+      {/* The 2px overlaps hide the hairline of page background that
+          fractional section heights leave. */}
+      <div className="-mt-[2px]"><Testimonials /></div>
+      <div className="-mt-[2px]"><MenuBuilder /></div>
+      <div className="-mt-[2px]"><Gallery /></div>
     </main>
   );
 }

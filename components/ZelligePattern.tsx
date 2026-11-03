@@ -416,7 +416,7 @@ const MilestoneMarkerBase = ({
         textAnchor="middle"
         fill="#F5F2EB"
         fontSize="10"
-        fontFamily="Cormorant Garamond, serif"
+        fontFamily="var(--font-site), Georgia, serif"
         fontWeight="600"
       >
         {index + 1}

@@ -777,7 +777,7 @@ const translations: Record<Lang, TranslationTree> = {
       body: 'Let us cater your iftar at the location of your choice. From an atmospheric table setting to a complete Moroccan menu, we take care of a carefree and memorable evening.',
       cta: 'Request a quote',
       rail: 'A remarkable iftar, anywhere you like',
-      imageAlt: 'Moroccan arch framed by green zellige mosaic in the evening light',
+      imageAlt: 'Moroccan tea set on a brass tray inside a plaster arch, olive branches in the sunlight',
     },
     culturalAuthenticity: {
       kicker: 'Cultural Authenticity',
@@ -1667,7 +1667,7 @@ const translations: Record<Lang, TranslationTree> = {
       body: 'Confiez-nous votre iftar sur le lieu de votre choix. D\'une table joliment dressée à un menu marocain complet, nous veillons à une soirée sereine et mémorable.',
       cta: 'Demandez un devis',
       rail: 'Un iftar d\'exception, partout où vous le souhaitez',
-      imageAlt: 'Arche marocaine encadrée de zellige vert dans la lumière du soir',
+      imageAlt: 'Service à thé marocain sur un plateau en laiton dans une arche en plâtre, branches d’olivier au soleil',
     },
     culturalAuthenticity: {
       kicker: 'Authenticité Culturelle',
@@ -2557,7 +2557,7 @@ const translations: Record<Lang, TranslationTree> = {
       body: 'Laat ons uw Iftar verzorgen op een locatie naar keuze. Van sfeervolle tafelaankleding tot een compleet Marokkaans menu, wij zorgen voor een zorgeloze en gedenkwaardige avond.',
       cta: 'Vraag een offerte aan',
       rail: 'Een bijzondere iftar, overal mogelijk',
-      imageAlt: 'Marokkaanse boog omlijst door groen zellige-mozaïek in het avondlicht',
+      imageAlt: 'Marokkaanse theeset op een koperen dienblad in een gestucte boog, olijftakken in het zonlicht',
     },
     culturalAuthenticity: {
       kicker: 'Authentiek Marokkaans',

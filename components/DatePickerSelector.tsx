@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
@@ -53,14 +53,18 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
   // Visible month — initialise on the selected date if any, else this month.
   const initial = selectedDate ? new Date(selectedDate + 'T12:00:00') : now;
   const [view, setView] = useState({ year: initial.getFullYear(), month: initial.getMonth() });
+  // Direction of the last month change, so the grid slides the way you navigate.
+  const [monthDir, setMonthDir] = useState(1);
 
   const atMinMonth = view.year === now.getFullYear() && view.month === now.getMonth();
   const atMaxMonth = view.year === maxDate.getFullYear() && view.month === maxDate.getMonth();
 
   const prevMonth = useCallback(() => {
+    setMonthDir(-1);
     setView((v) => (v.month === 0 ? { year: v.year - 1, month: 11 } : { ...v, month: v.month - 1 }));
   }, []);
   const nextMonth = useCallback(() => {
+    setMonthDir(1);
     setView((v) => (v.month === 11 ? { year: v.year + 1, month: 0 } : { ...v, month: v.month + 1 }));
   }, []);
 
@@ -125,21 +129,33 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
                 onClick={prevMonth}
                 disabled={atMinMonth}
                 aria-label={t('menuBuilder.datePicker.prevMonth')}
-                className="p-2 rounded-full text-[#C19A5B] hover:bg-[#C19A5B]/10 disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+                className="group/arrow p-2 rounded-full text-[#C19A5B] hover:bg-[#C19A5B]/10 enabled:active:scale-90 disabled:opacity-25 disabled:hover:bg-transparent transition-[background-color,transform] duration-200"
               >
-                <ChevronLeft className="w-5 h-5" strokeWidth={1.75} />
+                <ChevronLeft className="w-5 h-5 transition-transform duration-300 group-enabled/arrow:group-hover/arrow:-translate-x-0.5" strokeWidth={1.75} />
               </button>
-              <span className="text-base sm:text-lg font-serif text-[#1f1f1f] tracking-[0.04em] capitalize">
-                {monthLabel}
+              <span className="relative h-7 flex-1 overflow-hidden text-center">
+                <AnimatePresence initial={false} mode="popLayout" custom={monthDir}>
+                  <motion.span
+                    key={monthLabel}
+                    custom={monthDir}
+                    initial={{ opacity: 0, y: monthDir * 14 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: monthDir * -14 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-0 text-base sm:text-lg font-serif text-[#1f1f1f] tracking-[0.04em] capitalize"
+                  >
+                    {monthLabel}
+                  </motion.span>
+                </AnimatePresence>
               </span>
               <button
                 type="button"
                 onClick={nextMonth}
                 disabled={atMaxMonth}
                 aria-label={t('menuBuilder.datePicker.nextMonth')}
-                className="p-2 rounded-full text-[#C19A5B] hover:bg-[#C19A5B]/10 disabled:opacity-25 disabled:hover:bg-transparent transition-colors"
+                className="group/arrow p-2 rounded-full text-[#C19A5B] hover:bg-[#C19A5B]/10 enabled:active:scale-90 disabled:opacity-25 disabled:hover:bg-transparent transition-[background-color,transform] duration-200"
               >
-                <ChevronRight className="w-5 h-5" strokeWidth={1.75} />
+                <ChevronRight className="w-5 h-5 transition-transform duration-300 group-enabled/arrow:group-hover/arrow:translate-x-0.5" strokeWidth={1.75} />
               </button>
             </div>
 
@@ -155,8 +171,17 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
               ))}
             </div>
 
-            {/* Day grid */}
-            <div className="grid grid-cols-7 gap-1">
+            {/* Day grid — slides in the direction of navigation */}
+            <div className="relative overflow-hidden">
+            <AnimatePresence initial={false} mode="popLayout" custom={monthDir}>
+            <motion.div
+              key={`${view.year}-${view.month}`}
+              initial={{ opacity: 0, x: monthDir * 36 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: monthDir * -36 }}
+              transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+              className="grid grid-cols-7 gap-1"
+            >
               {cells.map((day, i) => {
                 if (day === null) return <div key={i} />;
                 const dateStr = toStr(view.year, view.month, day);
@@ -182,15 +207,25 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
                         : undefined
                     }
                     className={[
-                      'relative aspect-square flex items-center justify-center rounded-[3px] text-xl sm:text-2xl font-serif transition-all duration-200',
+                      'relative aspect-square flex items-center justify-center rounded-[3px] text-xl sm:text-2xl font-serif transition-[color,background-color,transform] duration-200',
                       isSelected
-                        ? 'bg-[#C19A5B] text-white shadow-[0_4px_14px_-4px_rgba(193,154,91,0.7)]'
+                        ? 'text-white'
                         : disabled
                         ? 'text-[#cdbfa6] cursor-not-allowed'
-                        : 'text-[#1f1f1f] hover:bg-[#C19A5B]/15 hover:text-[#8a6a2f] cursor-pointer',
+                        : 'text-[#1f1f1f] hover:bg-[#C19A5B]/12 hover:text-[#8a6a2f] active:scale-[0.9] cursor-pointer',
                     ].join(' ')}
                   >
-                    {day}
+                    {/* the gold marker springs to whichever day is chosen */}
+                    {isSelected && (
+                      <motion.span
+                        layoutId="date-picker-selected"
+                        initial={{ scale: 0.6, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 520, damping: 30 }}
+                        className="absolute inset-0 rounded-[3px] bg-[#9E7F57] shadow-[0_6px_16px_-6px_rgba(110,80,40,0.75)]"
+                      />
+                    )}
+                    <span className="relative">{day}</span>
                     {full && !outOfRange && !isSelected && (
                       <span className="pointer-events-none absolute inset-x-2 top-1/2 -translate-y-1/2 h-px bg-[#cdbfa6]/80" />
                     )}
@@ -200,6 +235,8 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
                   </button>
                 );
               })}
+            </motion.div>
+            </AnimatePresence>
             </div>
 
             {/* Legend */}
@@ -227,8 +264,10 @@ function DatePickerSelector({ selectedDate, onDateChange }: DatePickerSelectorPr
             {/* Selected date */}
             {selectedDate && (
               <motion.div
+                key={selectedDate}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="text-center pt-6 mt-6 border-t border-[#e7ddcb]"
               >
                 <p className="text-[11px] tracking-[0.28em] text-[#a8824a] uppercase mb-2">

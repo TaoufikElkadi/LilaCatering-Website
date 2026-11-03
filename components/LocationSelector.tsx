@@ -112,18 +112,24 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
     <div className="space-y-10">
       <StepHeader title={t('menuBuilder.location.title')} subtitle={t('menuBuilder.location.subtitle')} />
 
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* Selected location card */}
         {selectedLocation && !unknown ? (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 10, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             className="relative overflow-hidden border border-[#C19A5B] bg-gradient-to-br from-[#fdfbf7] to-[#f5efe3] p-5 sm:p-6 shadow-[0_16px_44px_-22px_rgba(80,60,30,0.34)]"
           >
             <div className="relative flex items-start gap-3">
-              <span className="mt-0.5 flex items-center justify-center w-8 h-8 rounded-full bg-[#C19A5B] text-white shrink-0">
+              <motion.span
+                initial={{ scale: 0.4, rotate: -30, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 480, damping: 22, delay: 0.08 }}
+                className="mt-0.5 flex items-center justify-center w-8 h-8 rounded-full bg-[#9E7F57] text-white shrink-0"
+              >
                 <Check className="w-4 h-4" strokeWidth={3} />
-              </span>
+              </motion.span>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.28em] text-[#a8824a] mb-1">{t('menuBuilder.location.selectedLabel')}</p>
                 <p className="text-sm text-[#1f1f1f] font-medium leading-snug">{selectedLocation.label}</p>
@@ -137,7 +143,7 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                   </p>
                 )}
               </div>
-              <button onClick={clearSelection} aria-label="change" className="text-[#a39e94] hover:text-[#1f1f1f] transition-colors">
+              <button onClick={clearSelection} aria-label="change" className="p-1 -m-1 rounded-full text-[#a39e94] hover:text-[#1f1f1f] hover:bg-[#1f1f1f]/5 hover:rotate-90 active:scale-90 transition-[color,background-color,transform] duration-300">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -167,15 +173,20 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
                   className="absolute z-30 mt-2 w-full bg-white border border-[#e3d7c1] shadow-[0_24px_50px_-20px_rgba(80,60,30,0.4)] overflow-hidden"
                 >
                   {results.map((r, i) => (
-                    <li key={`${r.placeId}-${i}`}>
+                    <motion.li
+                      key={`${r.placeId}-${i}`}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.25, delay: Math.min(i, 5) * 0.035 }}
+                    >
                       <button
                         onClick={() => pick(r)}
-                        className="w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-[#f6f1e8] transition-colors border-b border-[#f0e9da] last:border-0"
+                        className="group w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-[#f6f1e8] active:bg-[#efe5d2] transition-colors border-b border-[#f0e9da] last:border-0"
                       >
-                        <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#C19A5B]" strokeWidth={1.75} />
+                        <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-[#C19A5B] transition-transform duration-300 group-hover:-translate-y-0.5" strokeWidth={1.75} />
                         <span className="flex-1 min-w-0 text-sm text-[#1f1f1f] leading-snug">{r.label}</span>
                       </button>
-                    </li>
+                    </motion.li>
                   ))}
                   {results.length === 0 && !loading && (
                     <li className="px-4 py-3 text-xs text-[#8a8275]">{t('menuBuilder.location.noResults')}</li>
@@ -184,32 +195,41 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
               )}
             </AnimatePresence>
 
-            {/* Suggested partner venues */}
-            <div className="mt-8">
-              <div className="flex items-center gap-4 mb-5">
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#C19A5B]/40" />
-                <span className="text-[11px] uppercase tracking-[0.28em] text-[#a8824a] whitespace-nowrap">
-                  {t('menuBuilder.location.suggestedLabel')}
-                </span>
-                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#C19A5B]/40" />
+            {/* Suggested partner venues — text cards: name, address, chevron */}
+            <div className="mt-10">
+              <div className="flex flex-col items-center mb-7">
+                <div className="flex w-full items-center gap-5 sm:gap-8">
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#C19A5B]/70" />
+                  <span className="text-[12px] sm:text-[13px] uppercase tracking-[0.34em] text-[#2b2622] whitespace-nowrap">
+                    {t('menuBuilder.location.suggestedLabel')}
+                  </span>
+                  <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#C19A5B]/70" />
+                </div>
+                <span className="mt-2 h-2 w-2 rotate-45 bg-[#B4884A]" aria-hidden="true" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {PARTNER_VENUES.map(({ name, city, address }) => (
-                  <button
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-7 sm:gap-y-5">
+                {PARTNER_VENUES.map(({ name, city, address }, i) => (
+                  <motion.button
                     key={name}
                     type="button"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: 0.05 + i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                    // framer owns transform here, so the hover lift lives in whileHover
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => onLocationChange(partnerToPlace(name, city))}
-                    className="group flex items-center gap-4 border border-[#e2d8c5] bg-[#faf6ee] px-5 py-4 text-left transition-colors duration-300 hover:border-[#C19A5B] hover:bg-[#f6efe1]"
+                    className="group flex items-center gap-5 rounded-[10px] border border-[#e5d8c6] bg-[#fbf8f3] px-6 py-5 sm:px-8 sm:py-6 text-left shadow-[0_10px_26px_-22px_rgba(80,60,30,0.45)] transition-[border-color,background-color,box-shadow] duration-300 hover:border-[#C19A5B] hover:bg-[#fdfaf5] hover:shadow-[0_18px_34px_-22px_rgba(80,60,30,0.5)]"
                   >
-                    <span className="flex items-center justify-center w-11 h-11 rounded-full bg-[#f0e7d4] text-[#C19A5B] shrink-0">
-                      <MapPin className="w-5 h-5" strokeWidth={1.75} />
-                    </span>
                     <span className="flex-1 min-w-0">
-                      <span className="block text-base font-serif text-[#1f1f1f] leading-snug">{name}</span>
-                      <span className="block text-[12px] text-[#8a8275] mt-0.5">{address}</span>
+                      <span className="block font-display text-[21px] sm:text-[24px] leading-tight text-[#1f1a17]">{name}</span>
+                      <span className="block mt-1.5 text-[13px] sm:text-[14px] tracking-[0.02em] text-[#6b6359]">{address}</span>
                     </span>
-                    <ChevronRight className="w-4 h-4 text-[#b39256] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
-                  </button>
+                    <ChevronRight
+                      className="w-6 h-6 text-[#B4884A] shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+                      strokeWidth={1.75}
+                    />
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -217,15 +237,29 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
         )}
 
         {/* Bottom row: no-location checkbox + external-venue note */}
-        <div className="grid sm:grid-cols-2 gap-6 sm:gap-10 border-t border-[#e7ddcb] pt-7">
-          <label className="flex items-start gap-3 cursor-pointer select-none">
-            <span
-              className={`mt-0.5 flex items-center justify-center w-5 h-5 border transition-colors duration-200 ${
-                unknown ? 'bg-[#C19A5B] border-[#C19A5B] text-white' : 'border-[#c9b78f] bg-white text-transparent'
+        <div className="grid sm:grid-cols-2 gap-6 sm:gap-0 border-t border-[#e7ddcb] pt-8">
+          <label className="flex items-start gap-4 cursor-pointer select-none sm:pr-10">
+            <motion.span
+              animate={{ scale: unknown ? [1, 0.85, 1] : 1 }}
+              transition={{ duration: 0.28 }}
+              className={`mt-0.5 flex items-center justify-center w-[22px] h-[22px] rounded-[3px] border-[1.5px] transition-colors duration-200 ${
+                unknown ? 'bg-[#9E7F57] border-[#9E7F57] text-white' : 'border-[#C9A46A] bg-[#fbf8f3] text-transparent'
               }`}
             >
-              <Check className="w-3.5 h-3.5" strokeWidth={3} />
-            </span>
+              <AnimatePresence initial={false}>
+                {unknown && (
+                  <motion.span
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0, transition: { duration: 0.12 } }}
+                    transition={{ type: 'spring', stiffness: 600, damping: 24 }}
+                    className="flex"
+                  >
+                    <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.span>
             <input
               type="checkbox"
               checked={unknown}
@@ -236,18 +270,16 @@ function LocationSelector({ selectedLocation, onLocationChange, unknown, onUnkno
               className="sr-only"
             />
             <span>
-              <span className="block text-base font-serif text-[#1f1f1f] leading-snug">{t('menuBuilder.location.unknownCheckbox')}</span>
-              <span className="block mt-1 text-[12px] text-[#9a8a6a] font-light leading-relaxed">{t('menuBuilder.location.unknownHelp')}</span>
+              <span className="block font-display text-[19px] sm:text-[21px] text-[#1f1a17] leading-snug">{t('menuBuilder.location.unknownCheckbox')}</span>
+              <span className="block mt-1.5 text-[13px] sm:text-[14px] tracking-[0.02em] text-[#6b6359] leading-relaxed">{t('menuBuilder.location.unknownHelp')}</span>
             </span>
           </label>
 
-          <div className="flex items-start gap-3 sm:border-l sm:border-[#e7ddcb] sm:pl-10">
-            <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[#f0e7d4] text-[#C19A5B] shrink-0">
-              <Info className="w-[18px] h-[18px]" strokeWidth={1.75} />
-            </span>
+          <div className="flex items-start gap-4 sm:border-l sm:border-[#C19A5B]/60 sm:pl-10">
+            <Info className="w-7 h-7 shrink-0 text-[#B4884A]" strokeWidth={1.4} />
             <span>
-              <span className="block text-[11px] uppercase tracking-[0.24em] text-[#a8824a]">{t('menuBuilder.location.noteLabel')}</span>
-              <span className="block mt-1 text-[12px] text-[#9a8a6a] font-light leading-relaxed">{t('menuBuilder.location.noteText')}</span>
+              <span className="block text-[12px] uppercase tracking-[0.3em] text-[#B4884A]">{t('menuBuilder.location.noteLabel')}</span>
+              <span className="block mt-1.5 text-[13px] sm:text-[14px] text-[#6b6359] leading-relaxed">{t('menuBuilder.location.noteText')}</span>
             </span>
           </div>
         </div>

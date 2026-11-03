@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Inter, Cormorant_Garamond, Playfair_Display } from "next/font/google";
+import { Playfair } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -13,27 +13,16 @@ import { isLang, DEFAULT_LANG } from "@/lib/i18n";
 import { getTranslation, type Lang } from "@/utils/translations";
 import { getSiteUrl } from "@/lib/site";
 
-// Optimize font loading with next/font
-const inter = Inter({
+// One typeface for the whole site: Playfair (2.0). Its optical-size axis cuts
+// the high-contrast display forms for headlines and sturdier text forms for
+// body copy and small caps labels automatically, so a single family covers
+// every role.
+const playfair = Playfair({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
   display: "swap",
-  variable: "--font-inter",
-});
-
-const cormorantGaramond = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-cormorant",
-});
-
-// Editorial display serif used by the Craft section headline & feature titles.
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  variable: "--font-playfair",
+  variable: "--font-site",
 });
 
 async function getRequestLang(): Promise<Lang> {
@@ -81,7 +70,7 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang={lang} className={`${inter.variable} ${cormorantGaramond.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
+    <html lang={lang} className={playfair.variable} suppressHydrationWarning>
       <body suppressHydrationWarning>
         {/* Wallet/crypto extensions inject their own <script> as body's first
             child before hydration, so React attribute-diffs it against this one.

@@ -1,33 +1,36 @@
 'use client';
 
+import { useRef } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLanguage } from './LanguageProvider';
 
 type Pillar = { title: string; text: string };
 
-/* Sampled from the approved composition (van_marokko_naar_uw_tafel). */
+/*
+ * "Van Marokko naar uw tafel" — a window onto Morocco.
+ *
+ * Editorial copy on the left; on the right two Moorish arch windows (the
+ * Koutoubia, and a tajine on a terrace) with a spice bowl set in front of them
+ * for depth. The arches drift at slightly different speeds as the page
+ * scrolls. The section opens on the same cream the hero video dissolves into,
+ * an olive branch hangs across that seam, and the bottom settles into the
+ * Services beige — so neither edge reads as a cut.
+ */
 const CANVAS = '#F6F0E8';
+const BELOW = '#EBE6DC'; // Services background
 const GOLD = '#AD865D';
 const GOLD_SOFT = '#C6A97E';
-const GOLD_DEEP = '#9E7645';
 const RULE = '#DCCFB8';
 const INK = '#111111';
 const BODY = '#6B655D';
 
-/*
- * The composition is one 2067 x 760 artwork: a cream field on the left and a
- * terrace scene on the right, meeting in a soft vertical fade. The scene is
- * used as a single image so that fade — and the tajine sitting in front of the
- * arch — survive exactly. Every measurement below is a share of the container
- * width (cqw), taken straight from the artwork, so the whole thing scales as
- * one piece. The clamp minimums keep the copy readable on smaller screens; the
- * section simply grows a little taller there and the scene crops from the top.
- */
-const SCENE_SPLIT = '44.51fr 55.49fr';   // where the artwork's fade sits
-const SCENE_ASPECT = 1147 / 760;
+const ARCH_MASK = "url('/images/craft/arch-mask.svg')";
+const ICONS = ['/images/craft/icon-leaf.webp', '/images/craft/icon-mandala.webp', '/images/craft/icon-arch.webp'];
 
-/* Eight-pointed khatam with an inner rosette — the mark above the kicker. */
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+/* Eight-pointed khatam with an inner rosette — the mark beside the kicker. */
 const starPoints = (outer: number, inner: number) =>
   Array.from({ length: 16 }, (_, i) => {
     const angle = (Math.PI / 8) * i - Math.PI / 2;
@@ -51,72 +54,80 @@ const Khatam = ({ className = '' }: { className?: string }) => (
   </svg>
 );
 
-const SCENE = '/images/origin/origin-scene.d237a182.jpg';          // the desktop artwork
-const HERO_MOBILE = '/images/origin/origin-hero-mobile.49679954.jpg'; // stacked: the same terrace, no baked rail
-const ORNAMENT = '/images/origin/origin-ornament.c6f0745e.png';
-const CALLIGRAPHY = '/images/origin/origin-calligraphy.7b3db671.png';
+/* A photo cut to the Moorish arch silhouette. */
+function ArchWindow({ src, alt, sizes, className = '' }: { src: string; alt: string; sizes: string; className?: string }) {
+  return (
+    <div
+      className={`relative aspect-[500/620] overflow-hidden ${className}`}
+      style={{ maskImage: ARCH_MASK, WebkitMaskImage: ARCH_MASK, maskSize: '100% 100%', WebkitMaskSize: '100% 100%' }}
+    >
+      <Image src={src} alt={alt} fill sizes={sizes} quality={82} className="object-cover" />
+    </div>
+  );
+}
 
-const ICONS = [
-  '/images/origin/icon-spices.e332de77.png',
-  '/images/origin/icon-heritage.5bf70733.png',
-  '/images/origin/icon-patience.e3ec69d9.png',
-];
+/* The same arch as a thin gold line — drawn offset behind a window. */
+const ArchOutline = ({ className = '' }: { className?: string }) => (
+  <svg viewBox="0 0 500 620" preserveAspectRatio="none" className={className} fill="none" aria-hidden="true">
+    <path
+      d="M1 620V250A330 330 0 0 1 250 1A330 330 0 0 1 499 250V620"
+      stroke={GOLD_SOFT}
+      strokeWidth="1.4"
+      vectorEffect="non-scaling-stroke"
+    />
+  </svg>
+);
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+function reveal(delay: number, y = 16) {
+  return {
+    initial: { opacity: 0, y },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: '-60px' },
+    transition: { duration: 0.9, delay, ease: EASE },
+  };
+}
 
 export default function Craft() {
   const { t } = useLanguage();
-
   const pillars = (t('craft.pillars') as Pillar[]) ?? [];
   const side = t('craft.side') as string;
   const footnote = t('craft.footnote') as string;
 
+  // Gentle depth: the large window rises a little faster than the small one,
+  // the bowl in front faster still.
+  const visualRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: visualRef, offset: ['start end', 'end start'] });
+  const yMain = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const ySmall = useTransform(scrollYProgress, [0, 1], [70, -20]);
+  const yBowl = useTransform(scrollYProgress, [0, 1], [90, -70]);
+  const yBranch = useTransform(scrollYProgress, [0, 1], [-10, 30]);
+
   return (
     <section
       id="about"
-      className="relative isolate overflow-hidden"
-      style={{ backgroundColor: CANVAS, color: INK }}
+      className="relative isolate overflow-x-clip"
+      style={{ color: INK, background: `linear-gradient(to bottom, ${CANVAS} 0%, ${CANVAS} 78%, ${BELOW} 100%)` }}
     >
-      <div
-        className="mx-auto flex w-full flex-col lg:grid lg:items-stretch"
-        style={{ containerType: 'inline-size', gridTemplateColumns: SCENE_SPLIT }}
+      {/* Olive branch hanging across the seam with the hero video */}
+      <motion.div
+        aria-hidden="true"
+        style={{ y: yBranch }}
+        className="pointer-events-none absolute -top-16 right-[-60px] z-20 w-[230px] rotate-[-14deg] sm:-top-24 sm:w-[320px] lg:right-[4%] lg:w-[380px]"
       >
-        {/* ── Editorial column ───────────────────────────────────────── */}
-        <div className="relative order-2 px-8 pb-14 pt-6 sm:px-10 sm:pb-20 sm:pt-10 lg:order-none lg:py-0 lg:pl-[51.8%] lg:pr-[2%] lg:pt-[2.42cqw]">
-          {/* Stacked, a soft lattice sits behind the top-right of the copy. */}
-          <div aria-hidden="true" className="pointer-events-none absolute -right-4 top-0 w-[54%] max-w-[260px] lg:hidden">
-            <Image
-              src={ORNAMENT}
-              alt=""
-              width={280}
-              height={332}
-              sizes="(max-width: 1023px) 260px, 1px"
-              quality={70}
-              className="h-auto w-full"
-            />
-          </div>
+        <Image src="/images/craft/olive-branch.webp" alt="" width={828} height={560} sizes="380px" className="h-auto w-full drop-shadow-[0_18px_22px_rgba(70,55,30,0.18)]" />
+      </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="relative flex items-center gap-2.5 lg:gap-[clamp(0.75rem,1.26cqw,2rem)]"
-            style={{ color: GOLD }}
-          >
-            <Khatam className="h-[22px] w-[22px] shrink-0 lg:h-[clamp(1.6rem,1.6cqw,2.6rem)] lg:w-[clamp(1.6rem,1.6cqw,2.6rem)]" />
-            <span className="whitespace-nowrap text-[clamp(11px,0.53cqw,15px)] uppercase leading-none tracking-[0.3em]">
-              {t('craft.kicker')}
-            </span>
+      <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 gap-14 px-6 pb-24 pt-20 sm:px-10 sm:pb-24 sm:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.12fr)] lg:items-center lg:gap-20 lg:px-12 lg:pb-24 lg:pt-32">
+        {/* ── Copy ───────────────────────────────────────────────────── */}
+        <div className="relative order-2 lg:order-1">
+          <motion.div {...reveal(0, 8)} className="flex items-center gap-3" style={{ color: GOLD }}>
+            <Khatam className="h-6 w-6 shrink-0" />
+            <span className="whitespace-nowrap text-[11px] uppercase leading-none tracking-[0.32em]">{t('craft.kicker')}</span>
           </motion.div>
 
           <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.05, ease: EASE }}
-            className="relative mt-4 max-w-[7.4em] font-display text-[42px] font-normal leading-[1.05] tracking-[-0.02em] sm:text-[3.2rem] lg:mt-[clamp(1.1rem,2.23cqw,3.4rem)] lg:text-[clamp(2.1rem,3.41cqw,5.2rem)] lg:leading-[0.92]"
-            style={{ color: INK }}
+            {...reveal(0.05)}
+            className="mt-6 max-w-[9em] font-display text-[42px] font-normal leading-[1.04] tracking-[-0.02em] sm:text-[54px] lg:text-[clamp(3.2rem,4.6vw,4.5rem)]"
           >
             {t('craft.title')}
           </motion.h2>
@@ -125,150 +136,119 @@ export default function Craft() {
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative mt-5 h-px w-10 origin-left lg:mt-[clamp(0.7rem,0.9cqw,1.6rem)] lg:w-[clamp(46px,4.6cqw,120px)]"
+            transition={{ duration: 0.9, delay: 0.2, ease: EASE }}
+            className="mt-7 h-px w-14 origin-left"
             style={{ backgroundColor: GOLD_SOFT }}
           />
 
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.25 }}
-            className="relative mt-5 max-w-[24em] text-[14px] font-light leading-[1.6] lg:mt-[clamp(1rem,1.8cqw,2.6rem)] lg:text-[clamp(13px,0.70cqw,19px)] lg:leading-[1.62]"
-            style={{ color: BODY }}
-          >
+          <motion.p {...reveal(0.2)} className="mt-7 max-w-[30em] text-[16px] leading-[1.7] sm:text-[17px]" style={{ color: BODY }}>
             {t('craft.description')}
           </motion.p>
 
-          {/* Three pillars */}
-          <div className="relative mt-7 flex flex-col lg:mt-[clamp(1.5rem,1.7cqw,3.2rem)] lg:gap-[clamp(1.2rem,1.3cqw,2.6rem)]">
+          <ul className="mt-10 max-w-[32rem]">
             {pillars.map((pillar, i) => (
-              <motion.div
+              <motion.li
                 key={pillar.title}
-                initial={{ opacity: 0, x: -18 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.3 + i * 0.12, ease: EASE }}
-                className={`group flex items-stretch gap-4 py-5 lg:gap-[clamp(0.9rem,1.25cqw,2rem)] lg:border-0 lg:py-0 ${i > 0 ? 'border-t' : ''}`}
+                {...reveal(0.3 + i * 0.1, 12)}
+                className="group flex items-start gap-5 border-t py-5 last:border-b"
                 style={{ borderColor: RULE }}
               >
-                <Image
-                  src={ICONS[i % ICONS.length]}
-                  alt=""
-                  width={320}
-                  height={320}
-                  sizes="56px"
-                  aria-hidden="true"
-                  className="h-8 w-8 shrink-0 self-start object-contain transition-transform duration-500 group-hover:scale-110 lg:h-[clamp(1.9rem,2.13cqw,3.4rem)] lg:w-[clamp(1.9rem,2.13cqw,3.4rem)]"
-                />
-                <span className="w-px shrink-0" style={{ backgroundColor: RULE }} />
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center">
+                  <Image
+                    src={ICONS[i % ICONS.length]}
+                    alt=""
+                    width={200}
+                    height={214}
+                    sizes="48px"
+                    className="h-10 w-10 object-contain transition-transform duration-500 ease-out group-hover:-translate-y-0.5 group-hover:scale-105"
+                  />
+                </span>
                 <div>
-                  <h3
-                    className="font-display text-[17px] font-normal leading-tight lg:text-[clamp(1rem,0.92cqw,1.7rem)]"
-                    style={{ color: INK }}
-                  >
-                    {pillar.title}
-                  </h3>
-                  <p
-                    className="mt-[0.3em] max-w-[26em] text-[13px] font-light leading-[1.5] lg:text-[clamp(12px,0.63cqw,16.5px)]"
-                    style={{ color: BODY }}
-                  >
+                  <h3 className="font-display text-[19px] font-normal leading-tight">{pillar.title}</h3>
+                  <p className="mt-1.5 text-[14px] leading-[1.6]" style={{ color: BODY }}>
                     {pillar.text}
                   </p>
                 </div>
-              </motion.div>
+              </motion.li>
             ))}
-          </div>
+          </ul>
 
-          {/* Closing mark */}
           {footnote && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="relative mt-8 flex items-center gap-4 lg:mt-[clamp(1.6rem,1.9cqw,3.4rem)] lg:gap-[clamp(1rem,1.3cqw,2.2rem)] lg:pb-[1.68cqw]"
-              style={{ color: GOLD }}
-            >
-              <span className="whitespace-nowrap text-[clamp(11px,0.53cqw,15px)] uppercase leading-none tracking-[0.3em]">
-                {footnote}
-              </span>
-              <span className="h-px flex-1 lg:w-[clamp(4rem,9cqw,16rem)] lg:max-w-full lg:flex-none" style={{ backgroundColor: RULE }} />
-              {/* أهلاً وسهلاً — closes the stacked layout, as in the artwork */}
-              <Image
-                src={CALLIGRAPHY}
-                alt=""
-                aria-hidden="true"
-                width={163}
-                height={77}
-                sizes="(max-width: 1023px) 70px, 1px"
-                className="h-8 w-auto shrink-0 lg:hidden"
-              />
+            <motion.div {...reveal(0.65, 0)} className="mt-9 flex items-center gap-5" style={{ color: GOLD }}>
+              <span className="whitespace-nowrap text-[11px] uppercase leading-none tracking-[0.32em]">{footnote}</span>
+              <span className="h-px w-24" style={{ backgroundColor: RULE }} />
             </motion.div>
           )}
         </div>
 
-        {/* ── The terrace scene ───────────────────────────────────────
-            One image: its own soft left fade meets the canvas, and the
-            tajine, dish and linen already sit in front of the arch. */}
-        <motion.div
-          initial={{ opacity: 0, scale: 1.02 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.1, ease: EASE }}
-          className="relative order-1 aspect-[880/645] w-full overflow-hidden sm:aspect-[16/9] lg:order-none lg:aspect-auto lg:h-full lg:min-h-[36.77cqw]"
-        >
-          {/* Stacked: the terrace as a plain photo. The pack's version carries
-              the rail baked in, so that corner is healed out and the rail is
-              drawn below as live text. */}
-          <Image
-            src={HERO_MOBILE}
-            alt={t('craft.images.1.alt')}
-            fill
-            sizes="(max-width: 1023px) 100vw, 1px"
-            quality={88}
-            className="object-cover object-center lg:hidden"
-          />
-          {/* From lg: the composed artwork, whose own left fade meets the canvas
-              and whose tajine, dish and linen already sit in front of the arch. */}
-          <Image
-            src={SCENE}
-            alt=""
-            aria-hidden="true"
-            fill
-            sizes="(min-width: 1024px) 56vw, 1px"
-            quality={90}
-            className="hidden object-cover object-bottom lg:block"
-          />
-
-          {/* the rail the artwork carries, kept as live text so it translates */}
-          {side && (
-            <div className="absolute left-[6%] top-[13%] flex flex-col items-start gap-4 lg:hidden">
-              <p
-                className="w-[96px] font-display text-[10px] uppercase leading-[2.1] tracking-[0.18em]"
-                style={{ color: '#5E462C' }}
-              >
-                {side}
-              </p>
-              <span className="h-12 w-px" style={{ backgroundColor: '#8A6A44' }} />
-            </div>
-          )}
-
-          {/* the rail the artwork carries, kept as live text so it translates */}
-          {side && (
-            <div
-              className="absolute left-[52.1%] top-[37.1%] hidden flex-col items-start gap-[1.4cqw] xl:flex"
-              style={{ color: GOLD_DEEP }}
+        {/* ── Windows onto Morocco ───────────────────────────────────── */}
+        <div ref={visualRef} className="relative order-1 aspect-[1/1.02] w-full lg:order-2 lg:aspect-[1/1.08]">
+          {/* large window: the Koutoubia */}
+          <motion.div style={{ y: yMain }} className="absolute right-0 top-0 w-[62%]">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 1.2, ease: EASE }}
+              className="relative"
             >
-              <span className="h-[2.2cqw] w-px" style={{ backgroundColor: GOLD_SOFT }} />
-              <p className="w-[6.4cqw] min-w-[7em] text-[clamp(10px,0.63cqw,16px)] uppercase leading-[2.3] tracking-[0.3em]">
-                {side}
-              </p>
-              <span className="h-[2.6cqw] w-px" style={{ backgroundColor: GOLD_SOFT }} />
-            </div>
+              <ArchOutline className="absolute -right-4 -top-4 h-full w-full sm:-right-5 sm:-top-5" />
+              <ArchWindow
+                src="/images/craft/koutoubia-arch.webp"
+                alt={t('craft.images.1.alt')}
+                sizes="(max-width: 1023px) 62vw, 34vw"
+              />
+            </motion.div>
+          </motion.div>
+
+          {/* small window: the tajine on the terrace, with a canvas margin so it
+              reads as a separate opening in the same wall */}
+          <motion.div style={{ y: ySmall }} className="absolute bottom-[4%] left-0 w-[40%]">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 1.2, delay: 0.15, ease: EASE }}
+              className="relative p-[7px]"
+              style={{ backgroundColor: CANVAS, maskImage: ARCH_MASK, WebkitMaskImage: ARCH_MASK, maskSize: '100% 100%', WebkitMaskSize: '100% 100%' }}
+            >
+              <ArchWindow src="/images/craft/tajine-terrace.webp" alt="" sizes="(max-width: 1023px) 40vw, 22vw" />
+            </motion.div>
+          </motion.div>
+
+          {/* rail above the small window */}
+          {side && (
+            <motion.div
+              {...reveal(0.4, 0)}
+              className="absolute left-[3%] top-[6%] hidden flex-col items-start gap-4 sm:flex"
+              style={{ color: GOLD }}
+            >
+              <span className="h-10 w-px" style={{ backgroundColor: GOLD_SOFT }} />
+              <p className="w-[11em] text-[11px] uppercase leading-[2.2] tracking-[0.3em]">{side}</p>
+              <span className="h-10 w-px" style={{ backgroundColor: GOLD_SOFT }} />
+            </motion.div>
           )}
-        </motion.div>
+
+          {/* spice bowl set in front of both windows (its contact shadow is in the asset) */}
+          <motion.div style={{ y: yBowl }} className="absolute bottom-[-6%] left-[30%] w-[40%]">
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: '-80px' }}
+              transition={{ duration: 1.1, delay: 0.35, ease: EASE }}
+              className="relative"
+            >
+              <Image
+                src="/images/craft/spice-bowl.webp"
+                alt=""
+                width={900}
+                height={862}
+                sizes="(max-width: 1023px) 40vw, 22vw"
+                className="relative h-auto w-full"
+              />
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

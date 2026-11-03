@@ -1,8 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { memo } from 'react';
-import { Clock, UtensilsCrossed, Moon } from 'lucide-react';
+import { Clock, UtensilsCrossed, Moon, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { StepHeader, StarSeal } from './MenuDecor';
 
@@ -58,6 +58,20 @@ function EventTimeSelector({
                     onChange={(e) => onChange(e.target.value)}
                     className="time-field flex-1 min-w-0 bg-transparent text-base sm:text-lg font-serif text-[#1f1f1f] outline-none cursor-pointer"
                   />
+                  {/* a filled-in time is confirmed with a small check */}
+                  <AnimatePresence initial={false}>
+                    {value && (
+                      <motion.span
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 520, damping: 24 }}
+                        className="ml-3 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#9E7F57] text-white"
+                      >
+                        <Check className="h-3 w-3" strokeWidth={3} />
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </div>
               </label>
             ))}

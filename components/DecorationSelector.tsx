@@ -110,16 +110,32 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
               key={cat.id}
               type="button"
               onClick={() => setActiveCategory(cat.id)}
-              className={`relative px-5 sm:px-7 py-2.5 text-[11px] sm:text-xs uppercase tracking-[0.2em] transition-colors duration-300 border ${
+              className={`relative px-5 sm:px-7 py-2.5 text-[11px] sm:text-xs uppercase tracking-[0.2em] transition-[color,border-color,transform] duration-300 border active:scale-[0.97] ${
                 isActive
-                  ? 'bg-[#C19A5B] border-[#C19A5B] text-white'
+                  ? 'border-[#9E7F57] text-white'
                   : 'bg-transparent border-[#d8c9a6] text-[#6c655b] hover:border-[#C19A5B] hover:text-[#a8824a]'
               }`}
             >
-              {t(`menuBuilder.decoration.categories.${cat.id}`)}
-              {hasSelection && (
-                <span className={`ml-2 inline-block w-1.5 h-1.5 rounded-full align-middle ${isActive ? 'bg-white' : 'bg-[#C19A5B]'}`} />
+              {/* the gold fill slides between categories */}
+              {isActive && (
+                <motion.span
+                  layoutId="decor-category-fill"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  className="absolute -inset-px bg-[#9E7F57]"
+                />
               )}
+              <span className="relative">{t(`menuBuilder.decoration.categories.${cat.id}`)}</span>
+              <AnimatePresence initial={false}>
+                {hasSelection && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 600, damping: 22 }}
+                    className={`relative ml-2 inline-block w-1.5 h-1.5 rounded-full align-middle ${isActive ? 'bg-white' : 'bg-[#C19A5B]'}`}
+                  />
+                )}
+              </AnimatePresence>
             </button>
           );
         })}
@@ -145,9 +161,10 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
                   onClick={() => onSelect(id)}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: index * 0.05 }}
-                  className={`group block w-full text-left transition-[padding] duration-300 ${
-                    isActive ? 'p-1.5 bg-[#C19A5B]' : 'p-0'
+                  transition={{ duration: 0.45, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                  whileTap={{ scale: 0.99 }}
+                  className={`group block w-full text-left transition-[padding,background-color] duration-300 ${
+                    isActive ? 'p-1.5 bg-[#9E7F57]' : 'p-0'
                   }`}
                 >
                   <div
@@ -168,9 +185,10 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
                       />
                       {isActive && (
                         <motion.span
-                          initial={{ opacity: 0, y: -6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute top-4 left-4 inline-flex items-center gap-2 bg-[#C19A5B] text-white text-[11px] font-medium uppercase tracking-[0.22em] px-4 py-2"
+                          initial={{ opacity: 0, y: -8, scale: 0.9 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 460, damping: 26 }}
+                          className="absolute top-4 left-4 inline-flex items-center gap-2 bg-[#9E7F57] text-white text-[11px] font-medium uppercase tracking-[0.22em] px-4 py-2"
                         >
                           <Check className="w-3.5 h-3.5" strokeWidth={3} />
                           {t('menuBuilder.decoration.chosen')}
@@ -206,7 +224,7 @@ function DecorationSelector({ selection, onSelect }: DecorationSelectorProps) {
                         }`}
                       >
                         {t('menuBuilder.decoration.viewCollection')}
-                        <ArrowRight className="w-3.5 h-3.5" />
+                        <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                       </span>
                     </div>
                   </div>

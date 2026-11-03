@@ -17,9 +17,11 @@ const config: Config = {
         'accent-gold-light': '#D0A15A',
       },
       fontFamily: {
-        serif: ['Cormorant Garamond', 'serif'],
-        sans: ['Inter', 'sans-serif'],
-        display: ['var(--font-playfair)', 'Playfair Display', 'serif'],
+        // Single typeface site-wide (see app/layout.tsx); the three names stay
+        // so existing classes keep working.
+        serif: ['var(--font-site)', 'Georgia', 'serif'],
+        sans: ['var(--font-site)', 'Georgia', 'serif'],
+        display: ['var(--font-site)', 'Georgia', 'serif'],
       },
       letterSpacing: {
         'wide': '0.05em',

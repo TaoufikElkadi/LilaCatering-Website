@@ -207,7 +207,12 @@ export default function Testimonials() {
 
 
   return (
-    <section className="py-12 sm:py-20 md:py-28 bg-[#ebe6dc]">
+    // Background runs from the Iftar section's ivory into the menu builder's
+    // warm cream, so neither seam shows as a hard edge.
+    <section
+      className="relative isolate overflow-hidden py-12 sm:py-20 md:py-28"
+      style={{ background: 'linear-gradient(to bottom, #f3ede2 0%, #f1eae0 50%, #f6ece2 100%)' }}
+    >
       <div className="max-w-[90rem] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16">
         {/* Header */}
         <motion.div
@@ -244,7 +249,7 @@ export default function Testimonials() {
               <div className="flex items-end justify-center gap-1">
                 <span className="text-2xl sm:text-3xl text-[#1f1f1f] font-serif font-light">{yearsCounter.count}</span>
               </div>
-              <span className="text-[#6c655b] text-[10px] uppercase tracking-[0.1em]">{t('testimonials.stats.years')}</span>
+              <span className="text-[#6c655b] text-[9px] uppercase tracking-[0.04em]">{t('testimonials.stats.years')}</span>
             </div>
           </div>
           <div className="text-center border-x border-[#dcd3c5]">
@@ -253,7 +258,7 @@ export default function Testimonials() {
                 <span className="text-2xl sm:text-3xl text-[#1f1f1f] font-serif font-light">{eventsCounter.count}</span>
                 <span className="text-[#6c655b] text-xs mb-0.5">+</span>
               </div>
-              <span className="text-[#6c655b] text-[10px] uppercase tracking-[0.1em]">{t('testimonials.stats.events')}</span>
+              <span className="text-[#6c655b] text-[9px] uppercase tracking-[0.04em]">{t('testimonials.stats.events')}</span>
             </div>
           </div>
           <div className="text-center">
@@ -262,7 +267,7 @@ export default function Testimonials() {
                 <span className="text-2xl sm:text-3xl text-[#1f1f1f] font-serif font-light">{satisfactionCounter.count}</span>
                 <span className="text-[#6c655b] text-xs mb-0.5">%</span>
               </div>
-              <span className="text-[#6c655b] text-[10px] uppercase tracking-[0.1em]">{t('testimonials.stats.satisfaction')}</span>
+              <span className="text-[#6c655b] text-[9px] uppercase tracking-[0.04em]">{t('testimonials.stats.satisfaction')}</span>
             </div>
           </div>
         </motion.div>
@@ -338,7 +343,7 @@ export default function Testimonials() {
             <motion.a
               href="#menu-builder"
               whileTap={{ scale: 0.98 }}
-              className="flex items-center justify-center h-12 w-full bg-[#1f1f1f] text-white text-xs uppercase tracking-[0.2em] active:bg-[#2f2a25] transition-colors"
+              className="flex items-center justify-center h-12 w-full bg-[#9E7F57] text-white text-xs uppercase tracking-[0.2em] active:bg-[#8B6E49] transition-colors"
             >
               {t('testimonials.stats.bookEvent')}
             </motion.a>
@@ -397,7 +402,7 @@ export default function Testimonials() {
                 href="#menu-builder"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="mt-6 min-h-[44px] w-full flex items-center justify-center text-center bg-[#1f1f1f] text-white text-xs font-light uppercase tracking-[0.14em] px-3 leading-tight hover:bg-[#2f2a25] transition-colors"
+                className="mt-6 min-h-[44px] w-full flex items-center justify-center text-center bg-[#9E7F57] text-white text-xs font-light uppercase tracking-[0.14em] px-3 leading-tight hover:bg-[#8B6E49] transition-colors"
               >
                 {t('testimonials.stats.bookEvent')}
               </motion.a>
@@ -437,7 +442,7 @@ export default function Testimonials() {
                     ))}
                   </div>
                 </div>
-                <p className="text-3xl text-right leading-snug text-[#1f1f1f] font-serif font-light tracking-tight">
+                <p className="text-[22px] text-right leading-[1.5] text-[#1f1f1f] font-serif font-light">
                   {testimonials[0]?.text}
                 </p>
               </motion.article>
@@ -452,7 +457,7 @@ export default function Testimonials() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="flex flex-col min-h-[420px] bg-white/60 backdrop-blur-sm border border-[#dcd3c5] p-6 justify-between"
               >
-                <p className="text-3xl text-center leading-snug text-[#1f1f1f] font-serif font-light tracking-tight">
+                <p className="text-[22px] text-center leading-[1.5] text-[#1f1f1f] font-serif font-light">
                   {testimonials[1]?.text}
                 </p>
                 <div className="mt-6 flex items-center justify-between">
@@ -515,7 +520,7 @@ export default function Testimonials() {
                     ))}
                   </div>
                 </div>
-                <p className="text-3xl text-right leading-snug text-[#1f1f1f] font-serif font-light tracking-tight">
+                <p className="text-[22px] text-right leading-[1.5] text-[#1f1f1f] font-serif font-light">
                   {testimonials[2]?.text}
                 </p>
               </motion.article>
@@ -555,7 +560,7 @@ export default function Testimonials() {
         </div>
 
         {/* Google rating badge + share your experience */}
-        <div className="mt-10 sm:mt-14 pt-8 border-t border-[#dcd3c5] text-center">
+        <div className="mt-10 sm:mt-14 text-center">
           {reviewMeta.rating && (
             <a
               href={reviewMeta.url || '#'}
@@ -581,7 +586,7 @@ export default function Testimonials() {
             <div>
               <button
                 onClick={() => setShareOpen(true)}
-                className="inline-flex items-center justify-center min-h-[44px] px-8 border border-[#1f1f1f] text-[#1f1f1f] text-xs uppercase tracking-[0.2em] hover:bg-[#1f1f1f] hover:text-white transition-colors"
+                className="inline-flex items-center justify-center min-h-[44px] px-8 border border-[#9E7F57] text-[#7a5f3e] text-xs uppercase tracking-[0.2em] hover:bg-[#9E7F57] hover:text-white transition-colors"
               >
                 {t('testimonials.share.cta')}
               </button>
@@ -638,7 +643,7 @@ export default function Testimonials() {
                 <button
                   onClick={submitShare}
                   disabled={shareStatus === 'sending'}
-                  className="flex-1 min-h-[44px] bg-[#1f1f1f] text-white text-xs uppercase tracking-[0.16em] disabled:opacity-50"
+                  className="flex-1 min-h-[44px] bg-[#9E7F57] hover:bg-[#8B6E49] text-white text-xs uppercase tracking-[0.16em] transition-colors disabled:opacity-50"
                 >
                   {shareStatus === 'sending'
                     ? t('testimonials.share.sending')

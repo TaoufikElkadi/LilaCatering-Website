@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState, type ReactNode } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Eight-pointed Moroccan star (khatam) — the shared ornamental motif.
 export const StarSeal = ({ className = '' }: { className?: string }) => (
@@ -9,7 +10,7 @@ export const StarSeal = ({ className = '' }: { className?: string }) => (
   </svg>
 );
 
-// Gold hairline flanked by a star — divider under step titles.
+// Gold hairline flanked by a star — older ornamental divider.
 export const StarDivider = ({ className = '' }: { className?: string }) => (
   <div className={`flex items-center justify-center gap-4 ${className}`}>
     <span className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent to-[#C19A5B]/70" />
@@ -18,15 +19,33 @@ export const StarDivider = ({ className = '' }: { className?: string }) => (
   </div>
 );
 
-// Consistent ornamental header used on every builder step.
+// Two gold hairlines around a small diamond — sits under the builder kicker.
+export const DiamondDivider = ({ className = '' }: { className?: string }) => (
+  <div className={`flex items-center justify-center gap-3 ${className}`} aria-hidden="true">
+    <span className="h-px w-12 sm:w-[52px] bg-gradient-to-r from-transparent to-[#b98a4f]" />
+    <span className="w-2 h-2 rotate-45 bg-[#b98a4f]" />
+    <span className="h-px w-12 sm:w-[52px] bg-gradient-to-l from-transparent to-[#b98a4f]" />
+  </div>
+);
+
+// Step title in the display serif, flanked by long gold hairlines that sit on
+// the text baseline.
+export function StepTitle({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`flex items-end justify-center gap-6 sm:gap-[60px] ${className}`}>
+      <span className="hidden sm:block mb-[0.38em] h-px w-[106px] shrink-0 bg-[#c9a16a]" aria-hidden="true" />
+      <h3 className="font-display text-[30px] sm:text-[42px] leading-[1.15] font-normal tracking-[0] text-[#1f1a17]">{children}</h3>
+      <span className="hidden sm:block mb-[0.38em] h-px w-[106px] shrink-0 bg-[#c9a16a]" aria-hidden="true" />
+    </div>
+  );
+}
+
+// Consistent header used on every builder step.
 export function StepHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="text-center space-y-4">
-      <h3 className="text-2xl md:text-3xl font-serif font-light tracking-[0.08em] text-[#1f1f1f] uppercase">
-        {title}
-      </h3>
-      <StarDivider />
-      <p className="text-xs text-[#6c655b] tracking-[0.25em] font-light uppercase">{subtitle}</p>
+    <div className="text-center">
+      <StepTitle>{title}</StepTitle>
+      <p className="mt-4 font-display font-normal text-[11px] sm:text-[13px] uppercase tracking-[0.28em] text-[#3d3630]">{subtitle}</p>
     </div>
   );
 }
@@ -70,5 +89,36 @@ export function CheckSeal({ show, className = '' }: { show: boolean; className?:
         </svg>
       </span>
     </motion.span>
+  );
+}
+
+// A number that rolls to its new value: the old figure slides out and the new
+// one slides in from the direction of change (up when it grows).
+export function RollingNumber({ value, className = '' }: { value: number | string; className?: string }) {
+  // Direction derived during render from the previous value (StrictMode-safe).
+  const [last, setLast] = useState({ value, dir: 1 });
+  if (last.value !== value) setLast({ value, dir: Number(value) >= Number(last.value) ? 1 : -1 });
+  const dir = last.value !== value ? (Number(value) >= Number(last.value) ? 1 : -1) : last.dir;
+  return (
+    <span className={`relative inline-flex overflow-hidden tabular-nums ${className}`}>
+      <AnimatePresence initial={false} mode="popLayout" custom={dir}>
+        <motion.span
+          key={String(value)}
+          custom={dir}
+          variants={{
+            enter: (d: number) => ({ y: `${d * 70}%`, opacity: 0 }),
+            center: { y: '0%', opacity: 1 },
+            exit: (d: number) => ({ y: `${d * -70}%`, opacity: 0 }),
+          }}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          className="inline-block"
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }

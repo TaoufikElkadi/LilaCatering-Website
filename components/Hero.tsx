@@ -25,11 +25,11 @@ const L = {
   },
 } as const;
 
-const AMBIENCE_SRC = '/hero_sound_ambiance_andalus.mp3';
+const MUSIC_VOLUME = 0.45;
 
 /**
  * True when the visitor has asked for less data, or is on a radio too slow to
- * justify multi-megabyte decoration. Gates the hero video and the ambience.
+ * justify multi-megabyte decoration. Gates the hero video (and with it the music).
  */
 function prefersLightData(): boolean {
   if (typeof navigator === 'undefined') return false;
@@ -44,64 +44,58 @@ function prefersLightData(): boolean {
 export default function Hero() {
   const { lang } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [enableVideo, setEnableVideo] = useState(false);
-  // Hero ambience: looping background sound. Browsers block autoplay with
-  // sound, so it starts on the first user interaction; the toggle lets the
-  // visitor mute it. Default "on" (intent to play once a gesture allows it).
+  // The reel's own music rides in the video file so it stays in sync with the
+  // footage. Browsers only autoplay muted video, so it plays muted and is
+  // unmuted on the first genuine user gesture; the toggle lets the visitor mute
+  // it. Default "on" (intent to play once a gesture allows it).
   const [soundOn, setSoundOn] = useState(true);
+  const soundOnRef = useRef(soundOn);
+  soundOnRef.current = soundOn;
+  // Set once the visitor has interacted: unmuting before that would make the
+  // browser pause the video.
+  const activatedRef = useRef(false);
+
+  // Returns whether the video is now audibly playing. If the browser refuses
+  // to play unmuted (no activation it recognises), fall back to muted playback
+  // so the visuals never stall, and report false so the next gesture retries.
+  const applySound = async (): Promise<boolean> => {
+    const video = videoRef.current;
+    if (!video) return false;
+    video.volume = MUSIC_VOLUME;
+    const wantSound = soundOnRef.current && activatedRef.current;
+    video.muted = !wantSound;
+    try {
+      await video.play();
+      return wantSound;
+    } catch {
+      video.muted = true;
+      video.play().catch(() => { /* still awaiting a gesture */ });
+      return false;
+    }
+  };
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.volume = 0.45;
-    if (prefersLightData()) return;   // never spend a metered connection on ambience
-
-    // Only a genuine activation gesture attaches the source, so a visitor who
-    // just scrolls past never pays for the download. Scrolling is deliberately
-    // not in this list: it is not a user activation, so play() would reject and
-    // we would have fetched 4 MB for nothing.
-    const startAmbience = () => {
-      if (!soundOn) return;
-      if (!audio.src) audio.src = AMBIENCE_SRC;
-      audio.play().catch(() => { /* still awaiting a gesture */ });
+    // Only events browsers accept as activation for audio: Safari ignores
+    // pointerdown/touchstart, so click/touchend/keydown are the reliable ones.
+    // Scrolling is not activation at all. Listeners stay until sound starts.
+    const events = ['click', 'touchend', 'keydown'] as const;
+    const onInteract = async () => {
+      activatedRef.current = true;
+      if (!soundOnRef.current) return detach();
+      if (await applySound()) detach();
     };
-
-    const onInteract = () => startAmbience();
-    document.addEventListener('pointerdown', onInteract, { once: true });
-    document.addEventListener('touchstart', onInteract, { once: true });
-    document.addEventListener('keydown', onInteract, { once: true });
-
-    const onVisibility = () => {
-      if (!audio.src) return;                       // nothing loaded yet, leave it that way
-      if (document.visibilityState === 'visible') startAmbience();
-      else audio.pause();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-
-    return () => {
-      document.removeEventListener('pointerdown', onInteract);
-      document.removeEventListener('touchstart', onInteract);
-      document.removeEventListener('keydown', onInteract);
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, [soundOn]);
+    const detach = () => events.forEach((e) => document.removeEventListener(e, onInteract));
+    events.forEach((e) => document.addEventListener(e, onInteract));
+    return detach;
+  }, []);
 
   const toggleSound = () => {
-    const audio = audioRef.current;
-    setSoundOn((prev) => {
-      const next = !prev;
-      if (audio) {
-        if (next) {
-          if (!audio.src) audio.src = AMBIENCE_SRC;
-          audio.play().catch(() => {});
-        } else {
-          audio.pause();
-        }
-      }
-      return next;
-    });
+    activatedRef.current = true;
+    soundOnRef.current = !soundOnRef.current;
+    setSoundOn(soundOnRef.current);
+    applySound();
   };
 
   useEffect(() => {
@@ -109,7 +103,7 @@ export default function Hero() {
         window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
-    // The loop is ~2.5 MB. On Save-Data or a slow radio the poster alone is the
+    // The reel is ~6 MB. On Save-Data or a slow radio the poster alone is the
     // better hero, so the video simply never starts downloading.
     if (prefersLightData()) return;
     const start = () => setEnableVideo(true);
@@ -130,7 +124,9 @@ export default function Hero() {
     const video = videoRef.current;
     if (!video) return;
 
-    video.muted = true;
+    // Muted unless the visitor already interacted before the video mounted.
+    video.volume = MUSIC_VOLUME;
+    video.muted = !(soundOnRef.current && activatedRef.current);
     video.playsInline = true;
     video.setAttribute('playsinline', 'true');
     video.setAttribute('webkit-playsinline', 'true');
@@ -166,8 +162,13 @@ export default function Hero() {
       playVideo();
     }
 
+    // The video carries music now, so it must not keep playing in a hidden tab.
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && video.paused) playVideo();
+      if (document.visibilityState === 'visible') {
+        if (video.paused) playVideo();
+      } else {
+        video.pause();
+      }
     };
     const handleInteraction = () => {
       if (video.paused) playVideo();
@@ -195,17 +196,11 @@ export default function Hero() {
   const eventOptions = L.eventOptions[lang];
 
   return (
-    <section className="relative h-[108vh] min-h-[720px] w-full overflow-hidden bg-black text-white">
-      {/* Looping hero ambience. No src and preload="none" on purpose: the file is
-          ~4 MB and autoplay-with-sound is blocked everywhere, so it used to be
-          4 MB of mobile data nobody could hear. The source is attached on the
-          first real user gesture, in startAmbience(). */}
-      <audio ref={audioRef} loop preload="none" />
-
+    <section className="relative h-[118vh] min-h-[780px] w-full overflow-hidden bg-black text-white">
       {/* Background video */}
       <div className="absolute inset-0 bg-black">
         <Image
-          src="/herovideoAI-poster.jpg"
+          src="/hero-reel-poster.jpg"
           alt=""
           aria-hidden="true"
           fill
@@ -220,7 +215,7 @@ export default function Hero() {
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               isVideoLoaded ? 'opacity-100' : 'opacity-0'
             }`}
-            poster="/herovideoAI-poster.jpg"
+            poster="/hero-reel-poster.jpg"
             autoPlay
             muted
             loop
@@ -230,13 +225,23 @@ export default function Hero() {
             controls={false}
             style={{ pointerEvents: 'none' }}
           >
-            <source src="/herovideoAI.mp4" type="video/mp4" />
+            {/* Lila's own reel. AV1 first (smaller), H.264 for Safari/older devices. */}
+            <source src="/hero-reel-v2.webm" type='video/webm; codecs="av01.0.05M.08"' />
+            <source src="/hero-reel-v2.mp4" type="video/mp4" />
           </video>
         )}
         {/* No overall tint — only soft top/bottom gradients so the nav, tagline
             and reservation bar stay legible over the video. */}
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/55 to-transparent pointer-events-none" />
+        {/* Below the reservation bar the video dissolves into the cream the
+            next section opens on, so the page flows on instead of cutting. */}
+        <div
+          className="absolute inset-x-0 bottom-0 h-[30vh] pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to bottom, rgba(246,240,232,0) 0%, rgba(246,240,232,0.18) 22%, rgba(246,240,232,0.55) 48%, rgba(246,240,232,0.86) 72%, #F6F0E8 100%)',
+          }}
+        />
       </div>
 
       {/* Soft focal glow behind the logo so it stays legible over bright video
@@ -249,14 +254,14 @@ export default function Hero() {
         onClick={toggleSound}
         aria-label={soundOn ? 'Geluid uit' : 'Geluid aan'}
         aria-pressed={soundOn}
-        className="absolute z-20 bottom-24 right-4 sm:bottom-28 sm:right-6 flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-sm border border-white/30 text-white/90 hover:bg-black/60 hover:border-white/50 transition-colors"
+        className="absolute z-20 top-[calc(100svh-8.5rem)] right-4 sm:top-[calc(100vh-9rem)] sm:right-6 flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-sm border border-white/30 text-white/90 hover:bg-black/60 hover:border-white/50 transition-colors"
       >
         {soundOn ? <Volume2 className="w-[18px] h-[18px]" /> : <VolumeX className="w-[18px] h-[18px]" />}
       </button>
 
       {/* Foreground: the FIRST viewport holds the centered logo + reservation bar
-          (so the bar is always fully visible); the section itself is a touch
-          taller, so a sliver of video shows below the fold. */}
+          (so the bar is always fully visible); the section itself runs on below
+          the fold, where the video dissolves into the next section's cream. */}
       <div className="relative z-10 h-screen flex flex-col">
         {/* Centered logo lockup */}
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">

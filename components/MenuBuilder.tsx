@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef, Fragment } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import BookingActions from './BookingActions';
+import { motion, AnimatePresence, MotionConfig, animate, useMotionValue, useTransform, useAnimationControls } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { X, Soup, Snowflake, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { menuItems, MenuItem, MenuCategory, MenuSubCategory } from '@/data/menuData';
@@ -34,8 +34,12 @@ import DatePickerSelector from './DatePickerSelector';
 import EventTimeSelector from './EventTimeSelector';
 import { useLanguage } from './LanguageProvider';
 import { getTranslatedMenuItem } from '@/utils/translations';
-import { StarSeal as DecorStar } from './MenuDecor';
+import { StarSeal as DecorStar, DiamondDivider, StepTitle, RollingNumber } from './MenuDecor';
 import { smoothScrollTo, getLenis } from '@/lib/lenis';
+
+// Only the final review step needs the booking/payment UI — keep it out of the
+// initial bundle.
+const BookingActions = dynamic(() => import('./BookingActions'), { ssr: false });
 
 type FlowStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
 type StepKind = 'event' | 'date' | 'time' | 'location' | 'guests' | 'starterTemp' | 'menu' | 'service' | 'decor' | 'review';
@@ -49,19 +53,66 @@ const STARTER_TEMP_SUBS: Record<StarterTemp, MenuSubCategory[]> = {
   hot: ['pastilla'],
 };
 
-// Faint eight-pointed-star (khatam) zellige texture for the section atmosphere.
-const ZELLIGE_TEXTURE =
-  "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><g fill='none' stroke='%23C19A5B' stroke-width='1'><path d='M70 14 82 42 110 30 98 58 126 70 98 82 110 110 82 98 70 126 58 98 30 110 42 82 14 70 42 58 30 30 58 42z'/><circle cx='70' cy='70' r='10'/></g></svg>\")";
+// Same gold as the header's Offerte CTA.
+const GOLD = '#9E7F57';
+const GOLD_DEEP = '#8B6E49';
 
-// A small ornamental divider: gold hairline flanked by an eight-pointed star.
-function StarDivider({ className = '' }: { className?: string }) {
+const NEXT_LABEL = { nl: 'Volgende', en: 'Next', fr: 'Suivant' } as const;
+
+// One easing for the whole flow: a quick start that settles softly.
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+// Pause after an auto-advancing choice, long enough for the selection to
+// visibly confirm before the next step glides in.
+const AUTO_ADVANCE_MS = 420;
+
+// Euro total that counts smoothly to its new value instead of jumping.
+function AnimatedTotal({ value, format }: { value: number; format: (n: number) => string }) {
+  const mv = useMotionValue(value);
+  const text = useTransform(mv, (v) => format(v));
+  useEffect(() => {
+    const controls = animate(mv, value, { duration: 0.6, ease: EASE_OUT });
+    return () => controls.stop();
+  }, [mv, value]);
+  return <motion.span className="tabular-nums">{text}</motion.span>;
+}
+
+/*
+ * Carved Moorish arch for the section's edges: the arch head (424x696 source,
+ * drawn 280px wide) with its straight pillar continued below as a repeating
+ * slice. The strip narrows with the viewport and fades on its inner edge; the
+ * whole arch fades in at the top and out at the bottom, so it rises out of
+ * and settles back into the neighbouring sections.
+ */
+const ARCH_STRIP_WIDTH = 'w-[clamp(90px,calc((100vw-1248px)/2+30px),280px)]';
+const ARCH_FADE_Y = 'linear-gradient(to bottom, transparent, #000 140px, #000 calc(100% - 280px), transparent)';
+const ARCH_FADE_X = 'linear-gradient(to right, transparent, #000 48px)';
+
+function CarvedArch({ side }: { side: 'left' | 'right' }) {
   return (
-    <div className={`flex items-center justify-center gap-4 ${className}`}>
-      <span className="h-px w-12 sm:w-16 bg-gradient-to-r from-transparent to-[#C19A5B]/70" />
-      <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-[#C19A5B]" aria-hidden="true">
-        <path d="M12 1.6l2.47 4.2 4.73-1.27-1.27 4.73 4.2 2.47-4.2 2.47 1.27 4.73-4.73-1.27L12 22.4l-2.47-4.2-4.73 1.27 1.27-4.73L1.6 12l4.2-2.47L4.53 4.8l4.73 1.27L12 1.6z" />
-      </svg>
-      <span className="h-px w-12 sm:w-16 bg-gradient-to-l from-transparent to-[#C19A5B]/70" />
+    <div
+      className={`absolute top-0 bottom-0 hidden lg:block ${ARCH_STRIP_WIDTH} ${side === 'right' ? 'right-0' : 'left-0 -scale-x-100'}`}
+      style={{ maskImage: ARCH_FADE_X, WebkitMaskImage: ARCH_FADE_X }}
+    >
+      <div className="absolute inset-0" style={{ maskImage: ARCH_FADE_Y, WebkitMaskImage: ARCH_FADE_Y }}>
+        <div
+          className="absolute inset-x-0 top-[440px] bottom-0"
+          style={{
+            backgroundImage: "url('/images/menu-builder/arch-carved-pillar.webp')",
+            backgroundRepeat: 'repeat-y',
+            backgroundPosition: 'right top',
+            backgroundSize: '280px 33px',
+          }}
+        />
+        <div
+          className="absolute right-0 top-0 h-[460px] w-[280px]"
+          style={{
+            backgroundImage: "url('/images/menu-builder/arch-carved.webp')",
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '280px 460px',
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -173,6 +224,7 @@ export default function MenuBuilder() {
   const [isDesktop, setIsDesktop] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
   // Latest-value refs so stable callbacks/listeners avoid stale closures.
   const advanceStepRef = useRef<() => void>(() => {});
   const currentStepRef = useRef<FlowStep>(1);
@@ -249,6 +301,26 @@ export default function MenuBuilder() {
     { step: 12, kind: 'decor' },
     { step: 13, kind: 'review' },
   ];
+  useEffect(() => {
+    const rail = tabsRef.current;
+    const tab = rail?.querySelector<HTMLElement>('[data-active]');
+    if (!rail || !tab) return;
+    const target = tab.offsetLeft - (rail.clientWidth - tab.offsetWidth) / 2;
+    rail.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+  }, [currentStep]);
+
+  // Direction of the last step change (derived during render), so steps slide
+  // in from the right going forward and from the left going back.
+  const [stepNav, setStepNav] = useState({ step: currentStep, dir: 1 });
+  if (stepNav.step !== currentStep) {
+    setStepNav({ step: currentStep, dir: currentStep > stepNav.step ? 1 : -1 });
+  }
+  const stepMotion = {
+    initial: { opacity: 0, x: 28 * stepNav.dir },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.45, ease: EASE_OUT },
+  };
+
   const TOTAL_STEPS = STEP_DEFS.length;
   const REVIEW_STEP = (STEP_DEFS.find((d) => d.kind === 'review')?.step ?? TOTAL_STEPS) as FlowStep;
   const currentDef = STEP_DEFS[currentStep - 1];
@@ -381,7 +453,13 @@ export default function MenuBuilder() {
     dessert: 1,
   };
 
+  // Latest selection, read by the stable handleSelectItem below so the memoised
+  // MenuCards don't all re-render on every pick.
+  const selectedItemsRef = useRef(selectedItems);
+  selectedItemsRef.current = selectedItems;
+
   const handleSelectItem = useCallback((item: MenuItem) => {
+    const selectedItems = selectedItemsRef.current;
     const isRemoval = selectedItems.some((i) => i.id === item.id);
 
     setSelectedItems((prev) => {
@@ -402,10 +480,15 @@ export default function MenuBuilder() {
     if (item.category === 'appetizer' && currentCount >= APPETIZER_MAX) return; // add was ignored
     const newCount = currentCount + 1;
     if (newCount >= COURSE_THRESHOLDS[activeMenuCategory]) {
-      window.setTimeout(() => advanceStepRef.current(), 220);
+      const category = activeMenuCategory;
+      scheduleAdvance(
+        () => selectedItemsRef.current.filter((i) => i.category === category).length >= COURSE_THRESHOLDS[category]
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItems, currentDef.kind, activeMenuCategory]);
+  }, [currentDef.kind, activeMenuCategory]);
+
+  const selectedIds = useMemo(() => new Set(selectedItems.map((i) => i.id)), [selectedItems]);
 
   const appetizerCount = selectedItems.filter((i) => i.category === 'appetizer').length;
 
@@ -469,6 +552,18 @@ export default function MenuBuilder() {
     return true;
   };
 
+  // "Volgende" gives one soft pulse the moment it becomes available — a quiet
+  // cue that the step is complete. Not on mount, only on the change.
+  const canNextNow = canProceedToNextStep();
+  const nextPulse = useAnimationControls();
+  const prevCanNext = useRef(canNextNow);
+  useEffect(() => {
+    if (canNextNow && !prevCanNext.current) {
+      nextPulse.start({ scale: [1, 1.045, 1], transition: { duration: 0.5, ease: 'easeOut' } });
+    }
+    prevCanNext.current = canNextNow;
+  }, [canNextNow, nextPulse]);
+
   const getValidationMessage = () => {
     if (currentStep === LAST_COURSE_STEP && selectedItems.length === 0) {
       return t('menuBuilder.validation.atLeastOne');
@@ -477,18 +572,23 @@ export default function MenuBuilder() {
   };
 
   const scrollToBuilder = useCallback(() => {
-    // On mobile the flow scrolls its own container; on desktop scroll the section.
-    setTimeout(() => {
+    // Wait for the new step to commit, then re-anchor.
+    requestAnimationFrame(() => {
+      // On mobile the flow scrolls its own container.
       if (mobileScrollRef.current) {
         mobileScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      const section = document.getElementById('menu-builder');
-      if (section) {
-        const offset = window.innerWidth < 640 ? 70 : 90;
-        smoothScrollTo(section, { offset: -offset });
-      }
-    }, 50);
+      // On desktop, anchor on the step tabs just under the fixed header — but
+      // leave the page alone when they're already comfortably in view, so short
+      // steps don't cause a pointless scroll.
+      const rail = tabsRef.current ?? document.getElementById('menu-builder');
+      if (!rail) return;
+      const headerOffset = 140;
+      const top = rail.getBoundingClientRect().top;
+      if (top >= headerOffset - 8 && top <= window.innerHeight * 0.35) return;
+      smoothScrollTo(rail, { offset: -headerOffset, duration: 0.9 });
+    });
   }, []);
 
   const handleNextStep = useCallback(() => {
@@ -515,6 +615,17 @@ export default function MenuBuilder() {
     setCurrentStep((s) => (s < TOTAL_STEPS ? ((s + 1) as FlowStep) : s));
     scrollToBuilder();
   }, [scrollToBuilder]);
+
+  // Auto-advance after a short confirmation pause — but only if the visitor is
+  // still on the step the choice was made on (a quick manual "Volgende" in the
+  // meantime must not advance twice). `stillValid` is re-checked when the pause
+  // ends, so undoing the choice during it cancels the advance.
+  const scheduleAdvance = useCallback((stillValid: () => boolean = () => true) => {
+    const from = currentStepRef.current;
+    window.setTimeout(() => {
+      if (currentStepRef.current === from && stillValid()) advanceStepRef.current();
+    }, AUTO_ADVANCE_MS);
+  }, []);
 
   // Keep latest-value refs in sync for stable callbacks / event listeners.
   useEffect(() => {
@@ -561,13 +672,13 @@ export default function MenuBuilder() {
   // short delay lets the selection state register). Users can always step back.
   const handleEventTypeSelect = useCallback((eventType: EventType) => {
     setSelectedEventType(eventType);
-    window.setTimeout(advanceStep, 220);
-  }, [advanceStep]);
+    scheduleAdvance();
+  }, [scheduleAdvance]);
 
   const handleDateSelect = useCallback((date: string) => {
     setSelectedDate(date);
-    if (date) window.setTimeout(advanceStep, 220);
-  }, [advanceStep]);
+    if (date) scheduleAdvance();
+  }, [scheduleAdvance]);
 
   // Choosing hot/cold for the starter: drop any already-selected starters that
   // don't match the new temperature, then advance to the starter dishes.
@@ -581,21 +692,21 @@ export default function MenuBuilder() {
       }
       return temp;
     });
-    window.setTimeout(advanceStep, 220);
-  }, [advanceStep]);
+    scheduleAdvance();
+  }, [scheduleAdvance]);
 
   // Picking a venue moves the flow forward automatically, mirroring the event
   // type / date steps. Ticking "venue unknown" is an equally valid answer, so it
   // advances too — but only on check, never when the user unticks it.
   const handleLocationSelect = useCallback((loc: typeof selectedLocation) => {
     setSelectedLocation(loc);
-    if (loc) window.setTimeout(advanceStep, 220);
-  }, [advanceStep]);
+    if (loc) scheduleAdvance();
+  }, [scheduleAdvance]);
 
   const handleLocationUnknown = useCallback((unknown: boolean) => {
     setLocationUnknown(unknown);
-    if (unknown) window.setTimeout(advanceStep, 220);
-  }, [advanceStep]);
+    if (unknown) scheduleAdvance();
+  }, [scheduleAdvance]);
 
   // Step labels for progress indicator — courses use their category name.
   const stepKeyForKind: Record<Exclude<StepKind, 'menu'>, string> = {
@@ -682,7 +793,7 @@ export default function MenuBuilder() {
     <>
       {/* Step 1: Event Type Selection */}
       {currentStep === 1 && (
-        <motion.div key="step-1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-1" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <EventTypeSelector selectedEventType={selectedEventType} onEventTypeChange={handleEventTypeSelect} />
           </div>
@@ -691,14 +802,11 @@ export default function MenuBuilder() {
 
       {/* Step: Starter temperature — warm of koud */}
       {currentDef.kind === 'starterTemp' && (
-        <motion.div key="step-startertemp" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-startertemp" {...stepMotion}>
           <div className="space-y-8 sm:space-y-12 py-2 sm:py-6">
-            <div className="text-center space-y-4">
-              <h3 className="text-2xl md:text-3xl font-serif font-light tracking-[0.08em] text-[#1f1f1f] uppercase">
-                {t('menuBuilder.starterTemp.title')}
-              </h3>
-              <StarDivider />
-              <p className="text-xs text-[#6c655b] tracking-[0.25em] font-light uppercase">
+            <div className="text-center">
+              <StepTitle>{t('menuBuilder.starterTemp.title')}</StepTitle>
+              <p className="mt-4 font-display text-[11px] sm:text-[13px] uppercase tracking-[0.28em] text-[#3d3630]">
                 {t('menuBuilder.starterTemp.subtitle')}
               </p>
             </div>
@@ -764,14 +872,11 @@ export default function MenuBuilder() {
 
       {/* Course steps: Hapjes / Voorgerechten / Hoofdgerechten / Desserts */}
       {currentDef.kind === 'menu' && activeMenuCategory && (
-        <motion.div key={`menu-${activeMenuCategory}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key={`menu-${activeMenuCategory}`} {...stepMotion}>
           <div>
             {/* Course title */}
             <div className="text-center space-y-4 mb-8 sm:mb-10">
-              <h3 className="text-2xl sm:text-3xl font-serif uppercase tracking-[0.06em] text-[#1f1f1f]">
-                {t(`menuBuilder.categories.${activeMenuCategory}`)}
-              </h3>
-              <StarDivider />
+              <StepTitle>{t(`menuBuilder.categories.${activeMenuCategory}`)}</StepTitle>
               {activeMenuCategory === 'appetizer' && (
                 <div className="flex flex-col items-center gap-2.5 pt-1">
                   <p className="text-sm text-[#6c655b] font-light">
@@ -779,9 +884,30 @@ export default function MenuBuilder() {
                     {' — '}
                     <span className="text-[#a8824a]">{t('menuBuilder.hapjes.included')}</span>
                   </p>
-                  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-[3px] border border-[#C19A5B]/40 bg-[#C19A5B]/[0.07] text-[11px] uppercase tracking-[0.22em] text-[#a8824a]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C19A5B]" />
-                    {t('menuBuilder.hapjes.counter').replace('{count}', String(appetizerCount))}
+                  <span className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-[3px] border border-[#C19A5B]/40 bg-[#C19A5B]/[0.07] text-[11px] uppercase tracking-[0.22em] text-[#a8824a]">
+                    {/* one dot per included hapje, filling as they're picked */}
+                    <span className="flex gap-1">
+                      {Array.from({ length: APPETIZER_MAX }).map((_, i) => (
+                        <span key={i} className="relative w-1.5 h-1.5 rounded-full border border-[#C19A5B]/60">
+                          <motion.span
+                            initial={false}
+                            animate={{ scale: i < appetizerCount ? 1 : 0 }}
+                            transition={{ type: 'spring', stiffness: 600, damping: 22 }}
+                            className="absolute -inset-px rounded-full bg-[#9E7F57]"
+                          />
+                        </span>
+                      ))}
+                    </span>
+                    {(() => {
+                      const [before, after] = t('menuBuilder.hapjes.counter').split('{count}');
+                      return (
+                        <span className="inline-flex items-baseline">
+                          {before}
+                          <RollingNumber value={appetizerCount} />
+                          {after}
+                        </span>
+                      );
+                    })()}
                   </span>
                 </div>
               )}
@@ -796,13 +922,21 @@ export default function MenuBuilder() {
                       <button
                         key={sub}
                         onClick={() => setSelectedSubCategory(selectedSubCategory === sub ? null : sub)}
-                        className={`min-h-[40px] px-5 sm:px-5 py-2 text-[11px] uppercase tracking-[0.22em] whitespace-nowrap border transition-all duration-300 active:scale-[0.97] ${
+                        className={`relative min-h-[40px] px-5 sm:px-5 py-2 text-[11px] uppercase tracking-[0.22em] whitespace-nowrap border transition-[color,border-color,transform] duration-300 active:scale-[0.97] ${
                           selectedSubCategory === sub
-                            ? 'border-[#C19A5B] bg-[#C19A5B] text-[#1f1f1f] shadow-[0_8px_20px_-8px_rgba(193,154,91,0.7)] font-medium'
+                            ? 'border-[#9E7F57] text-white'
                             : 'border-[#dcc8a4] bg-white/40 text-[#6c655b] hover:border-[#C19A5B] hover:text-[#1f1f1f]'
                         }`}
                       >
-                        {t(`menuBuilder.subCategories.${sub}`)}
+                        {/* the gold fill slides between filters */}
+                        {selectedSubCategory === sub && (
+                          <motion.span
+                            layoutId="menu-subcategory-fill"
+                            transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                            className="absolute -inset-px bg-[#9E7F57] shadow-[0_8px_20px_-10px_rgba(110,80,40,0.8)]"
+                          />
+                        )}
+                        <span className="relative">{t(`menuBuilder.subCategories.${sub}`)}</span>
                       </button>
                     ))}
                   </div>
@@ -811,32 +945,27 @@ export default function MenuBuilder() {
             )}
 
             {/* Menu Items Grid */}
-            <motion.div
-              layout
-              initial="hidden"
-              animate="visible"
-              variants={{ visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8"
-            >
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((item) => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {filteredItems.map((item, index) => (
                   <motion.div
                     key={item.id}
-                    variants={{
-                      hidden: { opacity: 0, y: 20, scale: 0.95 },
-                      visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
-                    }}
+                    layout="position"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT, delay: Math.min(index, 6) * 0.04 } }}
+                    exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.18 } }}
+                    transition={{ layout: { duration: 0.4, ease: EASE_OUT } }}
                   >
                     <MenuCard
                       item={item}
-                      isSelected={!!selectedItems.find((i) => i.id === item.id)}
+                      isSelected={selectedIds.has(item.id)}
                       onSelect={handleSelectItem}
                       disabled={item.category === 'appetizer' && appetizerCount >= APPETIZER_MAX}
                     />
                   </motion.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </div>
 
             <p className="mt-8 text-center text-[10px] tracking-[0.12em] text-[#a89e8d] font-light italic">
               {t('menuBuilder.imageDisclaimer')}
@@ -847,7 +976,7 @@ export default function MenuBuilder() {
 
       {/* Step: Guest Count */}
       {currentDef.kind === 'guests' && (
-        <motion.div key="step-3" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-3" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <GuestCountSelector
               guestCount={guestCount}
@@ -863,7 +992,7 @@ export default function MenuBuilder() {
 
       {/* Step: Service (included + luxe upgrades) */}
       {currentDef.kind === 'service' && (
-        <motion.div key="step-4" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-4" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <ServiceSelector
               coffeeLuxe={coffeeLuxe}
@@ -885,7 +1014,7 @@ export default function MenuBuilder() {
 
       {/* Step: Decoration */}
       {currentDef.kind === 'decor' && (
-        <motion.div key="step-5" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-5" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <DecorationSelector selection={decoration} onSelect={selectDecoration} />
           </div>
@@ -894,7 +1023,7 @@ export default function MenuBuilder() {
 
       {/* Step: Date */}
       {currentDef.kind === 'date' && (
-        <motion.div key="step-date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-date" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <DatePickerSelector selectedDate={selectedDate} onDateChange={handleDateSelect} />
           </div>
@@ -903,7 +1032,7 @@ export default function MenuBuilder() {
 
       {/* Step: Event timing — start / food served / end */}
       {currentDef.kind === 'time' && (
-        <motion.div key="step-time" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-time" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <EventTimeSelector
               eventStart={eventStart}
@@ -919,7 +1048,7 @@ export default function MenuBuilder() {
 
       {/* Step: Location (venue → transport cost) */}
       {currentDef.kind === 'location' && (
-        <motion.div key="step-location" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-location" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <LocationSelector
               selectedLocation={selectedLocation}
@@ -933,15 +1062,12 @@ export default function MenuBuilder() {
 
       {/* Step: Review (summary + PDF + scheduling) */}
       {currentDef.kind === 'review' && (
-        <motion.div key="step-review" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <motion.div key="step-review" {...stepMotion}>
           <div className="py-2 sm:py-6">
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
                 <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
                   <div className="text-center space-y-4">
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif uppercase tracking-[0.05em] text-[#1f1f1f]">
-                      {t('menuBuilder.review.title')}
-                    </h3>
-                    <StarDivider />
+                    <StepTitle>{t('menuBuilder.review.title')}</StepTitle>
                   </div>
 
                   {/* Summary Card */}
@@ -1086,109 +1212,121 @@ export default function MenuBuilder() {
   );
 
   // ---- Navigation buttons (shared) ------------------------------------------
-  const renderNav = () => (
-    <div className="flex gap-3 sm:gap-4">
-      <motion.button
-        onClick={handlePrevStep}
-        disabled={currentStep === 1}
-        whileTap={{ scale: currentStep === 1 ? 1 : 0.97 }}
-        className={`flex-1 sm:flex-none min-h-[52px] sm:min-h-[48px] px-6 sm:px-8 text-xs uppercase tracking-[0.2em] sm:tracking-[0.28em] border rounded-sm transition-all duration-200 ${
-          currentStep === 1 ? 'text-[#c1b8ab] border-[#e6ddd0] cursor-not-allowed' : 'text-[#1f1f1f] border-[#1f1f1f] active:bg-[#1f1f1f] active:text-white'
-        }`}
-      >
-        {t('menuBuilder.buttons.previous')}
-      </motion.button>
-
-      {currentStep < TOTAL_STEPS && (
-        <motion.button
-          onClick={handleNextStep}
-          disabled={!canProceedToNextStep()}
-          whileTap={{ scale: canProceedToNextStep() ? 0.97 : 1 }}
-          className={`flex-[2] sm:flex-1 min-h-[52px] sm:min-h-[48px] px-6 sm:px-10 text-xs uppercase tracking-[0.15em] sm:tracking-[0.28em] border rounded-sm transition-all duration-200 font-medium ${
-            canProceedToNextStep() ? 'text-white bg-[#C19A5B] border-[#C19A5B] active:bg-[#b08a4e]' : 'text-[#c1b8ab] border-[#e6ddd0] bg-[#f0ebe3] cursor-not-allowed'
-          }`}
+  const renderNav = () => {
+    const canNext = canProceedToNextStep();
+    return (
+      <div className="flex items-center justify-between gap-4">
+        <button
+          type="button"
+          onClick={handlePrevStep}
+          disabled={currentStep === 1}
+          className="group flex items-center gap-3 py-3 font-display text-[13px] uppercase tracking-[0.3em] text-[#8a6a45] transition-[opacity,color,transform] duration-200 enabled:active:scale-[0.97] disabled:opacity-40 disabled:cursor-default enabled:hover:text-[#5e4529]"
         >
-          <span className="flex items-center justify-center gap-2">
-            {nextLabel}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </span>
-        </motion.button>
-      )}
-    </div>
-  );
+          <svg className="w-[18px] h-[10px] transition-transform duration-300 group-enabled:group-hover:-translate-x-1" viewBox="0 0 18 10" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M17 5H1M5 1 1 5l4 4" /></svg>
+          {t('menuBuilder.buttons.previous').replace(/^←\s*/, '')}
+        </button>
+
+        {currentStep < TOTAL_STEPS && (
+          <motion.button
+            type="button"
+            animate={nextPulse}
+            whileTap={canNext ? { scale: 0.97 } : undefined}
+            onClick={handleNextStep}
+            disabled={!canNext}
+            style={{ backgroundColor: GOLD }}
+            onMouseEnter={(e) => canNext && (e.currentTarget.style.backgroundColor = GOLD_DEEP)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = GOLD)}
+            className="group flex h-[50px] min-w-[213px] items-center justify-center gap-3 rounded-[2px] px-8 font-display text-[13px] uppercase tracking-[0.3em] text-white shadow-[0_14px_30px_-18px_rgba(90,65,35,0.7)] transition-[background-color,opacity,transform,box-shadow] duration-300 enabled:hover:shadow-[0_18px_34px_-18px_rgba(90,65,35,0.8)] disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            {NEXT_LABEL[lang]}
+            <svg className="w-[18px] h-[10px] transition-transform duration-300 group-enabled:group-hover:translate-x-1" viewBox="0 0 18 10" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M1 5h16M13 1l4 4-4 4" /></svg>
+          </motion.button>
+        )}
+      </div>
+    );
+  };
 
   // Live total is meaningful once we're into menu/service/decor (after guests),
   // not on the event, date, or final review screens.
   const showLiveTotal = ['location', 'guests', 'menu', 'service', 'decor'].includes(currentDef.kind);
 
   return (
-    <section id="menu-builder" className="relative isolate overflow-hidden py-16 sm:py-28 bg-gradient-to-b from-[#f8f4ed] via-[#f5efe5] to-[#f2ebdd] text-[#1f1f1f]">
-      {/* Atmosphere */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(193,154,91,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 opacity-[0.045]" style={{ backgroundImage: ZELLIGE_TEXTURE, backgroundSize: '140px 140px' }} />
-        <div className="absolute -left-40 top-1/3 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(193,154,91,0.10),transparent_70%)] blur-2xl" />
-        <div className="absolute -right-40 bottom-0 h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(193,154,91,0.08),transparent_70%)] blur-2xl" />
-        <div className="absolute inset-x-8 top-6 h-px bg-gradient-to-r from-transparent via-[#C19A5B]/25 to-transparent" />
+    // reducedMotion="user": visitors who ask the OS for less motion get instant
+    // state changes instead of slides and springs.
+    <MotionConfig reducedMotion="user">
+    <section id="menu-builder" className="relative isolate overflow-x-clip pt-16 pb-16 sm:pt-24 sm:pb-24 bg-gradient-to-b from-[#f6ece2] via-[#f5ede5] to-[#f2e9e0] text-[#1f1a17]">
+      {/* Atmosphere: a carved Moorish arch framing each edge, the left one
+          mirrored (its pillar continues down long steps). The arches start
+          at the top of the section and fade in, so they belong to the menu
+          builder rather than to Testimonials above. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 -z-10" aria-hidden="true">
+        <CarvedArch side="right" />
+        <CarvedArch side="left" />
+        {/* hand the colour over to the Galerij section below */}
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent to-[#ebe6dc]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-12">
+      {/* On desktop the content narrows to the space between the two arches
+          (each arch strip is clamp(90px, …, 280px) wide), with a gutter. */}
+      <div
+        className="relative max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-4"
+        style={isDesktop ? { maxWidth: 'min(1180px, calc(100vw - 2 * clamp(90px, calc((100vw - 1248px) / 2 + 30px), 280px) - 72px))' } : undefined}
+      >
         {/* Header */}
-        <div className="text-center space-y-4">
-          <p className="text-[10px] sm:text-xs uppercase tracking-[0.4em] text-[#a8824a]">{t('menuBuilder.kicker')}</p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif uppercase tracking-[0.05em] sm:tracking-[0.08em] text-[#1f1f1f]">{t('menuBuilder.title')}</h2>
-          <StarDivider className="pt-1" />
-          <p className="text-sm text-[#4a4742] max-w-2xl mx-auto px-2 leading-relaxed font-light">{t('menuBuilder.description')}</p>
+        <div className="text-center">
+          <p className="font-display font-normal text-[11px] sm:text-[14px] uppercase tracking-[0.36em] text-[#4a4038]">{t('menuBuilder.kicker')}</p>
+          <DiamondDivider className="mt-4" />
+          <h2 className="mt-3 font-display text-[36px] sm:text-[48px] lg:text-[52px] leading-[1.1] font-normal text-[#1f1a17] tracking-[0]">{t('menuBuilder.title')}</h2>
+          <p className="mt-4 font-display font-normal tracking-[0] text-[15px] sm:text-[17px] leading-relaxed text-[#2b2622] max-w-[860px] mx-auto px-2">{t('menuBuilder.description')}</p>
         </div>
 
         {isDesktop ? (
           /* ============ DESKTOP: inline layout ============ */
           <>
-            {/* Desktop stepper — compact rail; centers when it fits, scrolls if not */}
-            <div className="mt-14 mb-14">
-              <div className="relative px-4 py-4 overflow-x-auto scrollbar-hide">
-                <div className="flex items-center w-max mx-auto">
-                  {stepLabels.map((s, index) => {
+            {/* Step tabs — text tabs on a hairline, gold underline on the active
+                one. Scrolls sideways when the steps don't fit. */}
+            <div className="mt-10 border-b border-[#e3d8cb]">
+              <div ref={tabsRef} className="overflow-x-auto scrollbar-hide [mask-image:linear-gradient(to_right,#000_92%,transparent)]">
+                <div className="flex min-w-full w-max justify-between">
+                  {stepLabels.map((s) => {
                     const isActive = s.step === currentStep;
                     const isDone = s.step < currentStep;
                     return (
-                      <Fragment key={s.step}>
-                        <button
-                          onClick={() => s.step < currentStep && setCurrentStep(s.step as FlowStep)}
-                          disabled={s.step > currentStep}
-                          className={`relative shrink-0 px-3 lg:px-4 py-2.5 border text-[10px] uppercase tracking-[0.18em] transition-all duration-300 ${
-                            isActive
-                              ? 'bg-gradient-to-br from-[#cda769] to-[#b8905a] text-white border-[#C19A5B] shadow-[0_8px_20px_-8px_rgba(193,154,91,0.8)] font-medium'
-                              : isDone
-                              ? 'bg-[#f3e9d6] text-[#a8824a] border-[#C19A5B]/40 hover:bg-[#ecdfc4] cursor-pointer'
-                              : 'bg-[#fdfbf7] text-[#b3a892] border-[#e3d7c1] cursor-default'
-                          }`}
-                        >
-                          {s.label}
-                        </button>
-                        {index < stepLabels.length - 1 && (
-                          <span className="shrink-0 w-5 lg:w-8 h-px mx-1 lg:mx-1.5 overflow-hidden bg-[#e3d7c1]">
-                            <motion.span
-                              className="block h-full origin-left bg-gradient-to-r from-[#C19A5B] to-[#cda769]"
-                              initial={false}
-                              animate={{ scaleX: s.step < currentStep ? 1 : 0 }}
-                              transition={{ duration: 0.45, ease: 'easeOut' }}
-                            />
-                          </span>
+                      <button
+                        key={s.step}
+                        data-active={isActive || undefined}
+                        onClick={() => isDone && setCurrentStep(s.step as FlowStep)}
+                        disabled={!isDone && !isActive}
+                        className={`group/tab relative shrink-0 px-[30px] pt-2 pb-[18px] font-display text-[14px] uppercase tracking-[0.1em] whitespace-nowrap transition-colors duration-300 ${
+                          isActive
+                            ? 'font-semibold text-[#1f1a17]'
+                            : isDone
+                            ? 'text-[#4a4038] hover:text-[#1f1a17] cursor-pointer'
+                            : 'text-[#4a4038]/80 cursor-default'
+                        }`}
+                      >
+                        {s.label}
+                        {isDone && (
+                          <span className="absolute inset-x-[30px] -bottom-px h-px origin-left scale-x-0 bg-[#b98a4f]/60 transition-transform duration-300 ease-out group-hover/tab:scale-x-100" />
                         )}
-                      </Fragment>
+                        {isActive && (
+                          <motion.span
+                            layoutId="menu-builder-tab"
+                            className="absolute inset-x-0 -bottom-px h-[2px] bg-[#b98a4f]"
+                            transition={{ type: 'spring', stiffness: 380, damping: 34 }}
+                          />
+                        )}
+                      </button>
                     );
                   })}
                 </div>
               </div>
             </div>
 
-            <div className="min-h-[520px] mt-12 space-y-12">{renderStepContent()}</div>
+            <div className="min-h-[400px] mt-[14px] space-y-12">{renderStepContent()}</div>
 
             {/* Desktop bottom nav */}
-            <div className="mt-14 pt-8 border-t border-[#dcd3c5]">
+            <div className="mt-10">
               {getValidationMessage() && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-5 text-center">
                   <p className="text-xs uppercase tracking-[0.25em] text-[#C19A5B] bg-[#C19A5B]/10 px-4 py-2 rounded-lg inline-block">{getValidationMessage()}</p>
@@ -1197,7 +1335,7 @@ export default function MenuBuilder() {
               {showLiveTotal && (
                 <div className="text-center mb-4">
                   <p className="text-[11px] uppercase tracking-[0.25em] text-[#8a8275]">
-                    {t('menuBuilder.review.startingFrom')} <span className="text-[#1f1f1f] font-medium">{formatTotalCompact(getTotalPrice())}</span>
+                    {t('menuBuilder.review.startingFrom')} <span className="text-[#1f1f1f] font-medium"><AnimatedTotal value={getTotalPrice()} format={formatTotalCompact} /></span>
                   </p>
                 </div>
               )}
@@ -1210,11 +1348,10 @@ export default function MenuBuilder() {
             <div className="mt-10">
               <div className="relative overflow-hidden rounded-[4px] border border-[#dfd2ba] bg-gradient-to-br from-[#fdfbf7] to-[#f3ecdf] p-6 shadow-[0_18px_44px_-26px_rgba(80,60,30,0.4)]">
                 <DecorStar className="pointer-events-none absolute -top-6 -right-6 w-28 h-28 text-[#C19A5B]/[0.06]" />
-                <p className="text-[11px] uppercase tracking-[0.28em] text-[#a8824a] mb-2">{stepLabels[0].label} → {stepLabels[stepLabels.length - 1].label}</p>
-                <p className="text-sm text-[#4a4742] font-light leading-relaxed mb-5">{t('menuBuilder.description')}</p>
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[#a8824a] mb-5">{stepLabels[0].label} → {stepLabels[stepLabels.length - 1].label}</p>
                 <button
                   onClick={() => setMobileOpen(true)}
-                  className="w-full min-h-[54px] flex items-center justify-center gap-2 text-xs uppercase tracking-[0.22em] font-medium text-white bg-gradient-to-r from-[#cda769] via-[#C19A5B] to-[#b8905a] rounded-[3px] shadow-[0_14px_34px_-14px_rgba(193,154,91,0.8)] active:scale-[0.98] transition-transform"
+                  className="w-full min-h-[54px] flex items-center justify-center gap-2 text-xs uppercase tracking-[0.22em] font-medium text-white bg-[#9E7F57] active:bg-[#8B6E49] rounded-[2px] shadow-[0_14px_30px_-18px_rgba(90,65,35,0.7)] active:scale-[0.98] transition-transform"
                 >
                   {t('menuBuilder.buttons.start')}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1298,7 +1435,7 @@ export default function MenuBuilder() {
                       {showLiveTotal && (
                         <div className="flex-1 min-w-0 text-center leading-tight">
                           <p className="text-[9px] uppercase tracking-[0.2em] text-[#8a8275]">{t('menuBuilder.review.startingFrom')}</p>
-                          <p className="text-base font-serif text-[#1f1f1f] truncate">{formatTotalCompact(getTotalPrice())}</p>
+                          <p className="text-base font-serif text-[#1f1f1f] truncate"><AnimatedTotal value={getTotalPrice()} format={formatTotalCompact} /></p>
                         </div>
                       )}
 
@@ -1307,7 +1444,7 @@ export default function MenuBuilder() {
                           onClick={handleNextStep}
                           disabled={!canProceedToNextStep()}
                           className={`shrink-0 min-h-[52px] px-7 rounded-sm border text-xs uppercase tracking-[0.18em] font-medium flex items-center gap-2 transition-colors ${
-                            canProceedToNextStep() ? 'text-white bg-[#C19A5B] border-[#C19A5B] active:bg-[#b08a4e]' : 'text-[#c1b8ab] border-[#e6ddd0] bg-[#f0ebe3]'
+                            canProceedToNextStep() ? 'text-white bg-[#9E7F57] border-[#9E7F57] active:bg-[#8B6E49]' : 'text-[#c1b8ab] border-[#e6ddd0] bg-[#f0ebe3]'
                           }`}
                         >
                           {nextLabel}
@@ -1334,5 +1471,6 @@ export default function MenuBuilder() {
         )}
       </div>
     </section>
+    </MotionConfig>
   );
 }

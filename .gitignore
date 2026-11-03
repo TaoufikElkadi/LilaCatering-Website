@@ -61,3 +61,7 @@ next-env.d.ts
 # Design source packs (reference artwork + mockups, ~30MB).
 # Kept on disk for future sections; not committed and not shipped to Vercel.
 /data/design-source/
+
+# Design asset packs dropped in public/ for reference — not used by the site.
+/public/*.zip
+/public/islamic-new-year-pattern-background.jpg

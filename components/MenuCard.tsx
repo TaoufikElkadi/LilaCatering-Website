@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
 import { MenuItem } from '@/data/menuData';
 import Image from 'next/image';
 import DietaryIcons from './DietaryIcons';
@@ -52,11 +52,19 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
   // Locked = cap reached and this card isn't one of the chosen ones.
   const locked = disabled && !isSelected;
 
+  // A locked card answers a tap with a short, polite shake instead of nothing.
+  const shake = useAnimationControls();
+
   return (
     <motion.div
       onClick={() => {
-        if (!locked) onSelect(item);
+        if (locked) {
+          shake.start({ x: [0, -7, 6, -4, 3, 0], transition: { duration: 0.42, ease: 'easeOut' } });
+          return;
+        }
+        onSelect(item);
       }}
+      animate={shake}
       whileHover={locked ? undefined : { y: -6 }}
       whileTap={locked ? undefined : { scale: 0.985 }}
       transition={{ type: 'spring', stiffness: 320, damping: 26 }}
@@ -65,6 +73,20 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
         locked ? 'cursor-not-allowed opacity-45' : 'cursor-pointer'
       }`}
     >
+      {/* Selection glow: a gold ring that blooms outward once when added
+          (not on mount, so revisiting a step doesn't replay it) */}
+      <AnimatePresence initial={false}>
+        {isSelected && (
+          <motion.span
+            key="bloom"
+            initial={{ opacity: 0.7, scale: 1 }}
+            animate={{ opacity: 0, scale: 1.04 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-none absolute inset-0 z-30 border-2 border-[#C19A5B]"
+          />
+        )}
+      </AnimatePresence>
       {/* Main Card Container — sharp corners, framed ivory */}
       <div
         className={`relative h-full flex flex-col overflow-hidden bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] transition-[box-shadow,border-color] duration-500 ${
@@ -170,16 +192,46 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
             {/* Actions row */}
             <div className="flex items-center justify-between gap-3">
                 {/* Add / Added pill */}
-                <span
-                  className={`inline-flex items-center gap-1.5 px-4 py-2 text-[10px] sm:text-[11px] uppercase tracking-[0.18em] border transition-all duration-300 ${
+                <motion.span
+                  layout
+                  transition={{ layout: { duration: 0.3, ease: [0.22, 1, 0.36, 1] } }}
+                  className={`relative inline-flex items-center gap-1.5 overflow-hidden px-4 py-2 text-[10px] sm:text-[11px] uppercase tracking-[0.18em] border transition-colors duration-300 ${
                     isSelected
                       ? 'bg-[#1f1f1f] text-white border-[#1f1f1f]'
                       : 'text-[#6c655b] border-[#d6c39d] group-hover:border-[#C19A5B] group-hover:text-[#1f1f1f]'
                   }`}
                 >
-                  {isSelected ? <Check className="w-3.5 h-3.5 text-[#C19A5B]" strokeWidth={3} /> : <Plus className="w-3.5 h-3.5" />}
-                  {selectLabel}
-                </span>
+                  {/* plus turns into a check */}
+                  <motion.span
+                    animate={{ rotate: isSelected ? 360 : 0 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                    className="relative flex h-3.5 w-3.5"
+                  >
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {isSelected ? (
+                        <motion.span key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex">
+                          <Check className="w-3.5 h-3.5 text-[#C19A5B]" strokeWidth={3} />
+                        </motion.span>
+                      ) : (
+                        <motion.span key="plus" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="flex">
+                          <Plus className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-90" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.span>
+                  <AnimatePresence initial={false} mode="popLayout">
+                    <motion.span
+                      key={selectLabel}
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -10, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                      className="inline-block"
+                    >
+                      {selectLabel}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.span>
 
                 {/* Details link */}
                 <button
@@ -187,12 +239,12 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
                     e.stopPropagation();
                     setIsExpanded(!isExpanded);
                   }}
-                  className={`flex items-center gap-1 whitespace-nowrap text-[10px] sm:text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                  className={`group/details flex items-center gap-1 whitespace-nowrap text-[10px] sm:text-[11px] uppercase tracking-[0.14em] transition-colors ${
                     isExpanded ? 'text-[#C19A5B]' : 'text-[#a39e94] hover:text-[#C19A5B]'
                   }`}
                 >
                   {t('menuCard.details')}
-                  <ArrowRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                  <ArrowRight className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-90' : 'group-hover/details:translate-x-0.5'}`} />
                 </button>
               </div>
             </div>
@@ -204,9 +256,8 @@ const MenuCard = memo(function MenuCard({ item, isSelected, onSelect, disabled =
           {isExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.35, ease: 'easeInOut' }}
+              animate={{ height: 'auto', opacity: 1, transition: { height: { duration: 0.45, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.3, delay: 0.08 } } }}
+              exit={{ height: 0, opacity: 0, transition: { height: { duration: 0.32, ease: [0.4, 0, 0.2, 1] }, opacity: { duration: 0.15 } } }}
               className="overflow-hidden border-t border-[#e7ddcb]"
               onClick={(e) => e.stopPropagation()}
             >

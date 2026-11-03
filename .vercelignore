@@ -19,3 +19,7 @@ data/saveweb2zip-com-savor-it
 
 # Design source packs (reference artwork + mockups) — not used by the build.
 data/design-source
+
+# Design asset packs dropped in public/ for reference — not used by the site.
+public/*.zip
+public/islamic-new-year-pattern-background.jpg

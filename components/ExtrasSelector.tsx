@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Coffee, Cookie, Check } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import {
@@ -16,7 +16,7 @@ import {
   type TableExtraId,
   type TeaShowId,
 } from '@/lib/pricing';
-import { StepHeader, StarSeal, InsetFrame } from './MenuDecor';
+import { StepHeader, StarSeal } from './MenuDecor';
 
 interface ServiceSelectorProps {
   coffeeLuxe: boolean;
@@ -119,13 +119,11 @@ function ServiceSelector({
                 {/* Standard option */}
                 <button
                   onClick={() => toggle(false)}
-                  className={`group relative w-full text-left rounded-[2px] border px-4 py-3.5 transition-all duration-300 ${
-                    !luxe
-                      ? 'border-[#C19A5B] bg-[#C19A5B]/[0.07]'
-                      : 'border-[#e3d7c1] bg-white/40 hover:border-[#d6c39d]'
+                  className={`group relative w-full text-left rounded-[2px] border px-4 py-3.5 transition-[border-color,transform] duration-300 active:scale-[0.99] ${
+                    !luxe ? 'border-transparent' : 'border-[#e3d7c1] bg-white/40 hover:border-[#d6c39d]'
                   }`}
                 >
-                  <InsetFrame isActive={!luxe} />
+                  {!luxe && <ServiceHighlight id={key} />}
                   <div className="relative flex items-center justify-between gap-3">
                     <div>
                       <p className={`text-sm tracking-[0.04em] ${!luxe ? 'text-[#1f1f1f] font-medium' : 'text-[#3a352c]'}`}>
@@ -142,13 +140,11 @@ function ServiceSelector({
                 {/* Luxe option */}
                 <button
                   onClick={() => toggle(true)}
-                  className={`group relative w-full text-left rounded-[2px] border px-4 py-3.5 transition-all duration-300 ${
-                    luxe
-                      ? 'border-[#C19A5B] bg-[#C19A5B]/[0.07]'
-                      : 'border-[#e3d7c1] bg-white/40 hover:border-[#d6c39d]'
+                  className={`group relative w-full text-left rounded-[2px] border px-4 py-3.5 transition-[border-color,transform] duration-300 active:scale-[0.99] ${
+                    luxe ? 'border-transparent' : 'border-[#e3d7c1] bg-white/40 hover:border-[#d6c39d]'
                   }`}
                 >
-                  <InsetFrame isActive={luxe} />
+                  {luxe && <ServiceHighlight id={key} />}
                   <div className="relative flex items-center justify-between gap-3">
                     <div>
                       <p className={`text-sm tracking-[0.04em] ${luxe ? 'text-[#1f1f1f] font-medium' : 'text-[#3a352c]'}`}>
@@ -234,6 +230,19 @@ function ServiceSelector({
   );
 }
 
+/** The chosen Standard/Luxe option's frame — it glides between the two. */
+function ServiceHighlight({ id }: { id: string }) {
+  return (
+    <motion.span
+      layoutId={`service-choice-${id}`}
+      transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+      className="pointer-events-none absolute -inset-px rounded-[2px] border border-[#C19A5B] bg-[#C19A5B]/[0.08]"
+    >
+      <span className="absolute inset-[5px] rounded-[1px] border border-[#C19A5B]/45" />
+    </motion.span>
+  );
+}
+
 /** Centered section label with hairline rules on each side. */
 function SectionHeading({ label }: { label: string }) {
   return (
@@ -262,21 +271,35 @@ function ToggleRow({
   return (
     <button
       onClick={onClick}
-      className={`group flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 ${
+      className={`group flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 active:bg-[#efe3cc]/70 ${
         active ? 'bg-[#C19A5B]/[0.08]' : 'hover:bg-[#f3ead9]/60'
       }`}
     >
       <span className="flex min-w-0 items-center gap-3.5">
         <span
-          className={`grid place-items-center w-[18px] h-[18px] shrink-0 border-[1.5px] transition-colors ${
+          className={`grid place-items-center w-[18px] h-[18px] shrink-0 border-[1.5px] transition-[border-color,background-color,transform] duration-200 group-active:scale-90 ${
             radio ? 'rounded-full' : 'rounded-[2px]'
-          } ${active ? 'border-[#C19A5B] bg-[#C19A5B] text-white' : 'border-[#c9b487] text-transparent group-hover:border-[#C19A5B]'}`}
+          } ${
+            active
+              ? radio
+                ? 'border-[#9E7F57] bg-transparent'
+                : 'border-[#9E7F57] bg-[#9E7F57] text-white'
+              : 'border-[#c9b487] group-hover:border-[#C19A5B]'
+          }`}
         >
-          {radio ? (
-            active && <span className="w-1.5 h-1.5 rounded-full bg-white" />
-          ) : (
-            <Check className="w-3 h-3" strokeWidth={3} />
-          )}
+          <AnimatePresence initial={false}>
+            {active && (
+              <motion.span
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0, transition: { duration: 0.12 } }}
+                transition={{ type: 'spring', stiffness: 600, damping: 24 }}
+                className="col-start-1 row-start-1 flex"
+              >
+                {radio ? <span className="w-2 h-2 rounded-full bg-[#9E7F57]" /> : <Check className="w-3 h-3" strokeWidth={3} />}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </span>
         <span className={`truncate text-[13.5px] sm:text-sm tracking-[0.01em] ${active ? 'text-[#1f1f1f] font-medium' : 'text-[#4a443b]'}`}>
           {label}

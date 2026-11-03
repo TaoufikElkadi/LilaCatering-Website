@@ -2,11 +2,12 @@
 
 import { memo } from 'react';
 import type { ComponentType } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useSpring } from 'framer-motion';
+import { useEffect } from 'react';
 import { Minus, Plus, Users, Check, Info } from 'lucide-react';
 import { useLanguage } from './LanguageProvider';
 import { MIN_GUESTS } from '@/lib/pricing';
-import { StepHeader, StarSeal } from './MenuDecor';
+import { StepHeader, StarSeal, RollingNumber } from './MenuDecor';
 
 // Split step and per-gender slider range.
 const SPLIT_STEP = 5;
@@ -82,23 +83,31 @@ function GuestCountSelector({
               whileTap={{ scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 320, damping: 24 }}
               onClick={() => onGuestCountChange(count)}
-              className={`group relative aspect-square bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] flex flex-col items-center justify-center gap-2 transition-[box-shadow,border-color] duration-500 ${
+              className={`group relative aspect-square bg-gradient-to-br from-[#fdfbf7] to-[#f6f1e8] flex flex-col items-center justify-center gap-2 border transition-[box-shadow,border-color] duration-500 ${
                 isActive
-                  ? 'border-2 border-[#C19A5B] shadow-[0_16px_40px_-20px_rgba(120,90,40,0.5)]'
-                  : 'border border-[#e7ddcb] shadow-[0_8px_22px_-16px_rgba(60,45,25,0.25)] hover:border-[#d6c39d]'
+                  ? 'border-transparent shadow-[0_16px_40px_-20px_rgba(120,90,40,0.5)]'
+                  : 'border-[#e7ddcb] shadow-[0_8px_22px_-16px_rgba(60,45,25,0.25)] hover:border-[#d6c39d]'
               }`}
             >
+              {/* one gold frame that glides to whichever count is chosen */}
+              {isActive && (
+                <motion.span
+                  layoutId="guest-preset-frame"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  className="pointer-events-none absolute -inset-px border-2 border-[#9E7F57]"
+                />
+              )}
               {isActive && (
                 <motion.span
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 380, damping: 18 }}
-                  className="absolute -top-2.5 -right-2.5 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-[#C19A5B] shadow-[0_3px_8px_-2px_rgba(120,90,40,0.6)]"
+                  className="absolute -top-2.5 -right-2.5 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-[#9E7F57] shadow-[0_3px_8px_-2px_rgba(120,90,40,0.6)]"
                 >
                   <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
                 </motion.span>
               )}
-              <Users className={`w-5 h-5 md:w-6 md:h-6 ${isActive ? 'text-[#C19A5B]' : 'text-[#b39256]'}`} strokeWidth={1.6} />
+              <Users className={`w-5 h-5 md:w-6 md:h-6 transition-[color,transform] duration-300 group-hover:-translate-y-0.5 ${isActive ? 'text-[#9E7F57]' : 'text-[#b39256]'}`} strokeWidth={1.6} />
               <p className={`text-2xl md:text-[1.7rem] font-serif font-light leading-none ${isActive ? 'text-[#1f1f1f]' : 'text-[#3a352c]'}`}>
                 {count}
               </p>
@@ -135,12 +144,10 @@ function GuestCountSelector({
 
           {/* Total donut */}
           <div className="flex flex-col items-center justify-center px-2 lg:px-6">
-            <div
-              className="relative w-28 h-28 rounded-full"
-              style={{ background: `conic-gradient(${WOMEN_COLOR} 0 ${womenPct}%, ${MEN_COLOR} ${womenPct}% 100%)` }}
-            >
+            <div className="relative w-28 h-28">
+              <SplitRing womenPct={womenPct} />
               <div className="absolute inset-[10px] rounded-full bg-[#faf6ee] flex flex-col items-center justify-center">
-                <span className="text-2xl font-serif text-[#1f1f1f] leading-none">{total}</span>
+                <RollingNumber value={total} className="text-2xl font-serif text-[#1f1f1f] leading-none" />
                 <span className="text-[9px] tracking-[0.22em] text-[#a8824a] uppercase mt-1">{t('menuBuilder.guestCount.total')}</span>
               </div>
             </div>
@@ -167,7 +174,7 @@ function GuestCountSelector({
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#C19A5B]/40" />
           </div>
           <p className="text-center text-[13px] text-[#6c655b] font-light">
-            {womenPer10} {t('menuBuilder.guestCount.womenWord')} &amp; {menPer10} {t('menuBuilder.guestCount.menWord')}
+            <RollingNumber value={womenPer10} /> {t('menuBuilder.guestCount.womenWord')} &amp; <RollingNumber value={menPer10} /> {t('menuBuilder.guestCount.menWord')}
           </p>
 
           <div className="flex items-start gap-3 border border-[#e2d8c5] bg-white/50 px-5 py-4">
@@ -182,6 +189,28 @@ function GuestCountSelector({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Women/men ring whose share glides to its new value instead of jumping. */
+function SplitRing({ womenPct }: { womenPct: number }) {
+  const share = useSpring(womenPct / 100, { stiffness: 140, damping: 22 });
+  useEffect(() => {
+    share.set(womenPct / 100);
+  }, [share, womenPct]);
+  return (
+    <svg viewBox="0 0 36 36" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden="true">
+      <circle cx="18" cy="18" r="15.9155" fill="none" stroke={MEN_COLOR} strokeWidth="4.2" />
+      <motion.circle
+        cx="18"
+        cy="18"
+        r="15.9155"
+        fill="none"
+        stroke={WOMEN_COLOR}
+        strokeWidth="4.2"
+        style={{ pathLength: share }}
+      />
+    </svg>
   );
 }
 
@@ -214,7 +243,7 @@ function GenderControl({
           onClick={() => onChange(value - step)}
           disabled={value <= 0}
           aria-label={`-${step}`}
-          className="flex items-center justify-center w-10 h-10 border border-[#dcc8a4] text-[#a8824a] transition-colors enabled:hover:bg-[#C19A5B]/10 enabled:hover:text-[#1f1f1f] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-10 h-10 border border-[#dcc8a4] text-[#a8824a] transition-[background-color,color,transform] duration-150 enabled:hover:bg-[#C19A5B]/10 enabled:hover:text-[#1f1f1f] enabled:active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Minus className="w-4 h-4" strokeWidth={2} />
         </button>
@@ -222,13 +251,13 @@ function GenderControl({
           <span style={{ color }}>
             <Glyph className="w-5 h-5" />
           </span>
-          <span className="text-3xl font-serif text-[#1f1f1f] tabular-nums leading-none">{value}</span>
+          <RollingNumber value={value} className="text-3xl font-serif text-[#1f1f1f] leading-none" />
         </div>
         <button
           type="button"
           onClick={() => onChange(value + step)}
           aria-label={`+${step}`}
-          className="flex items-center justify-center w-10 h-10 border border-[#dcc8a4] text-[#a8824a] transition-colors hover:bg-[#C19A5B]/10 hover:text-[#1f1f1f]"
+          className="flex items-center justify-center w-10 h-10 border border-[#dcc8a4] text-[#a8824a] transition-[background-color,color,transform] duration-150 hover:bg-[#C19A5B]/10 hover:text-[#1f1f1f] active:scale-90"
         >
           <Plus className="w-4 h-4" strokeWidth={2} />
         </button>

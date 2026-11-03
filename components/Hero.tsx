@@ -196,9 +196,12 @@ export default function Hero() {
   const eventOptions = L.eventOptions[lang];
 
   return (
-    <section className="relative h-[118vh] min-h-[780px] w-full overflow-hidden bg-black text-white">
-      {/* Background video */}
-      <div className="absolute inset-0 bg-black">
+    <section className="relative h-[100svh] min-h-[680px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
+      {/* Background video. On phones the landscape reel would be cropped to a
+          thin vertical slice, so the video area stops short of the section
+          bottom (shorter box = less crop, i.e. zoomed out) and fades into the
+          cream below. */}
+      <div className="absolute inset-x-0 top-0 bottom-[17%] sm:bottom-0 bg-black [mask-image:linear-gradient(to_bottom,#000_80%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,#000_80%,transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]">
         <Image
           src="/hero-reel-poster.jpg"
           alt=""
@@ -236,7 +239,7 @@ export default function Hero() {
         {/* Below the reservation bar the video dissolves into the cream the
             next section opens on, so the page flows on instead of cutting. */}
         <div
-          className="absolute inset-x-0 bottom-0 h-[30vh] pointer-events-none"
+          className="absolute inset-x-0 bottom-0 hidden h-[30vh] pointer-events-none sm:block"
           style={{
             background:
               'linear-gradient(to bottom, rgba(246,240,232,0) 0%, rgba(246,240,232,0.18) 22%, rgba(246,240,232,0.55) 48%, rgba(246,240,232,0.86) 72%, #F6F0E8 100%)',
@@ -246,7 +249,7 @@ export default function Hero() {
 
       {/* Soft focal glow behind the logo so it stays legible over bright video
           frames, without tinting the whole video. */}
-      <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[760px] h-[620px] max-w-[92vw] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45),rgba(0,0,0,0.2)_45%,transparent_70%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[760px] h-[440px] sm:h-[620px] max-w-[92vw] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45),rgba(0,0,0,0.2)_45%,transparent_70%)]" />
 
       {/* Sound toggle */}
       <button

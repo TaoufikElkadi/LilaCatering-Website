@@ -112,7 +112,7 @@ export default function Craft() {
       <motion.div
         aria-hidden="true"
         style={{ y: yBranch }}
-        className="pointer-events-none absolute -top-16 right-[-60px] z-20 w-[230px] rotate-[-14deg] sm:-top-24 sm:w-[320px] lg:right-[4%] lg:w-[380px]"
+        className="pointer-events-none absolute -top-16 right-[-60px] z-20 hidden w-[230px] rotate-[-14deg] sm:block sm:-top-24 sm:w-[320px] lg:right-[4%] lg:w-[380px]"
       >
         <Image src="/images/craft/olive-branch.webp" alt="" width={828} height={560} sizes="380px" className="h-auto w-full drop-shadow-[0_18px_22px_rgba(70,55,30,0.18)]" />
       </motion.div>
@@ -182,7 +182,8 @@ export default function Craft() {
         </div>
 
         {/* ── Windows onto Morocco ───────────────────────────────────── */}
-        <div ref={visualRef} className="relative order-1 aspect-[1/1.02] w-full lg:order-2 lg:aspect-[1/1.08]">
+        {/* images are desktop/tablet only; on phones the copy stands alone */}
+        <div ref={visualRef} className="relative order-1 hidden aspect-[1/1.02] w-full sm:block lg:order-2 lg:aspect-[1/1.08]">
           {/* large window: the Koutoubia */}
           <motion.div style={{ y: yMain }} className="absolute right-0 top-0 w-[62%]">
             <motion.div

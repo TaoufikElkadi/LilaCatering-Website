@@ -249,7 +249,7 @@ export default function Hero() {
 
       {/* Soft focal glow behind the logo so it stays legible over bright video
           frames, without tinting the whole video. */}
-      <div className="pointer-events-none absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-[760px] h-[440px] sm:h-[620px] max-w-[92vw] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45),rgba(0,0,0,0.2)_45%,transparent_70%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-[42%] hidden sm:block -translate-x-1/2 -translate-y-1/2 w-[760px] h-[440px] sm:h-[620px] max-w-[92vw] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.45),rgba(0,0,0,0.2)_45%,transparent_70%)]" />
 
       {/* Sound toggle */}
       <button
@@ -266,14 +266,16 @@ export default function Hero() {
           (so the bar is always fully visible); the section itself runs on below
           the fold, where the video dissolves into the next section's cream. */}
       <div className="relative z-10 h-screen flex flex-col">
-        {/* Centered logo lockup */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+        {/* Centered logo lockup. Phones show only the tagline, low above the
+            reservation button — the header already carries the mark, so the
+            video stays clear. */}
+        <div className="flex-1 flex flex-col items-center justify-end pb-16 sm:justify-center sm:pb-0 text-center px-6">
         {/* Location / tagline */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="space-y-1 text-[10px] sm:text-[11px] uppercase tracking-[0.42em] text-white/85"
+          className="space-y-1.5 sm:space-y-1 text-[12px] sm:text-[11px] uppercase tracking-[0.38em] sm:tracking-[0.42em] text-white/90 sm:text-white/85 [text-shadow:0_1px_14px_rgba(0,0,0,0.55)] sm:[text-shadow:none]"
         >
           {tagline.map((line, i) => (
             <p key={i}>{line}</p>
@@ -285,7 +287,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="mt-6 sm:mt-8"
+          className="mt-8 hidden sm:block"
         >
           <Image
             src="/logo-full.png"

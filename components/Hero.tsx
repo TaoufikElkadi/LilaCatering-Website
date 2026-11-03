@@ -196,12 +196,12 @@ export default function Hero() {
   const eventOptions = L.eventOptions[lang];
 
   return (
-    <section className="relative h-[100svh] min-h-[680px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
-      {/* Background video. On phones the landscape reel would be cropped to a
-          thin vertical slice, so the video area stops short of the section
-          bottom (shorter box = less crop, i.e. zoomed out) and fades into the
-          cream below. */}
-      <div className="absolute inset-x-0 top-0 bottom-[17%] sm:bottom-0 bg-black [mask-image:linear-gradient(to_bottom,#000_80%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,#000_80%,transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]">
+    <section className="relative h-[calc(100svh+90px)] min-h-[760px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
+      {/* Background video. On phones the hero is one screen tall (less crop of
+          the landscape reel than the desktop 118vh) and the video only fades
+          into the cream below the fold, behind and under the reservation
+          button — the first screen stays full video. */}
+      <div className="absolute inset-0 bg-black [mask-image:linear-gradient(to_bottom,#000_calc(100%-170px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,#000_calc(100%-170px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]">
         <Image
           src="/hero-reel-poster.jpg"
           alt=""
@@ -294,7 +294,7 @@ export default function Hero() {
             height={1016}
             priority
             sizes="(max-width: 640px) 240px, 300px"
-            className="w-[230px] sm:w-[260px] md:w-[300px] h-auto drop-shadow-[0_10px_34px_rgba(0,0,0,0.5)]"
+            className="w-[170px] sm:w-[260px] md:w-[300px] h-auto drop-shadow-[0_10px_34px_rgba(0,0,0,0.5)]"
           />
         </motion.div>
       </div>

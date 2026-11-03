@@ -44,7 +44,6 @@ function prefersLightData(): boolean {
 export default function Hero() {
   const { lang } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const ambientRef = useRef<HTMLCanvasElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [enableVideo, setEnableVideo] = useState(false);
   // The reel's own music rides in the video file so it stays in sync with the
@@ -91,29 +90,6 @@ export default function Hero() {
     events.forEach((e) => document.addEventListener(e, onInteract));
     return detach;
   }, []);
-
-  // Phones: the landscape reel plays as a wide band so more of each scene is
-  // visible, over an ambient backdrop of its own frames — a 48x27 canvas
-  // repainted ~10x a second and blurred up to full size. No second video
-  // download, and the colours always match the footage.
-  useEffect(() => {
-    if (!enableVideo) return;
-    const video = videoRef.current;
-    const canvas = ambientRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!video || !canvas || !ctx) return;
-    const mq = window.matchMedia('(max-width: 639px)');
-    let raf = 0;
-    let last = 0;
-    const tick = (t: number) => {
-      raf = requestAnimationFrame(tick);
-      if (!mq.matches || video.paused || video.readyState < 2 || t - last < 100) return;
-      last = t;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [enableVideo]);
 
   const toggleSound = () => {
     activatedRef.current = true;
@@ -218,12 +194,11 @@ export default function Hero() {
   const eventOptions = L.eventOptions[lang];
 
   return (
-    <section data-hero className="relative h-[calc(100svh+90px)] min-h-[760px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
-      {/* Background video. On phones the hero is one screen tall (less crop of
-          the landscape reel than the desktop 118vh) and the video only fades
-          into the cream below the fold, behind and under the reservation
-          button — the first screen stays full video. */}
-      <div className="absolute inset-0 bg-black [mask-image:linear-gradient(to_bottom,#000_calc(100%-170px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,#000_calc(100%-170px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]">
+    <section data-hero className="relative h-[80svh] min-h-[600px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
+      {/* Background video. On phones the hero is 80% of the screen: a shorter
+          box crops less of the landscape reel (more of each scene visible),
+          and only its last few px melt into the cream of the next section. */}
+      <div className="absolute inset-0 bg-black [mask-image:linear-gradient(to_bottom,#000_calc(100%-56px),transparent)] [-webkit-mask-image:linear-gradient(to_bottom,#000_calc(100%-56px),transparent)] sm:[mask-image:none] sm:[-webkit-mask-image:none]">
         <Image
           src="/hero-reel-poster.jpg"
           alt=""
@@ -232,23 +207,12 @@ export default function Hero() {
           priority
           sizes="100vw"
           quality={70}
-          className="object-cover max-sm:scale-110 max-sm:blur-2xl"
+          className="object-cover"
         />
-        {/* phones: ambient blurred backdrop painted from the video's frames */}
-        <canvas
-          ref={ambientRef}
-          width={48}
-          height={27}
-          aria-hidden="true"
-          className={`absolute inset-0 h-full w-full scale-110 blur-2xl transition-opacity duration-700 sm:hidden ${
-            isVideoLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-        <div className="absolute inset-0 bg-black/25 sm:hidden" />
         {enableVideo && (
           <video
             ref={videoRef}
-            className={`absolute object-cover transition-opacity duration-700 inset-x-0 top-[44%] h-[58vh] w-full -translate-y-1/2 [mask-image:linear-gradient(to_bottom,transparent,#000_16%,#000_84%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_16%,#000_84%,transparent)] sm:inset-0 sm:top-0 sm:h-full sm:translate-y-0 sm:[mask-image:none] sm:[-webkit-mask-image:none] ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               isVideoLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             poster="/hero-reel-poster.jpg"
@@ -290,7 +254,7 @@ export default function Hero() {
         onClick={toggleSound}
         aria-label={soundOn ? 'Geluid uit' : 'Geluid aan'}
         aria-pressed={soundOn}
-        className="absolute z-20 top-[calc(100svh-8.5rem)] right-4 sm:top-[calc(100vh-9rem)] sm:right-6 flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-sm border border-white/30 text-white/90 hover:bg-black/60 hover:border-white/50 transition-colors"
+        className="absolute z-20 top-[calc(80svh-9.5rem)] right-4 sm:top-[calc(100vh-9rem)] sm:right-6 flex items-center justify-center w-11 h-11 rounded-full bg-black/40 backdrop-blur-sm border border-white/30 text-white/90 hover:bg-black/60 hover:border-white/50 transition-colors"
       >
         {soundOn ? <Volume2 className="w-[18px] h-[18px]" /> : <VolumeX className="w-[18px] h-[18px]" />}
       </button>
@@ -298,11 +262,11 @@ export default function Hero() {
       {/* Foreground: the FIRST viewport holds the centered logo + reservation bar
           (so the bar is always fully visible); the section itself runs on below
           the fold, where the video dissolves into the next section's cream. */}
-      <div className="relative z-10 h-screen flex flex-col">
+      <div className="relative z-10 h-full sm:h-screen flex flex-col">
         {/* Centered logo lockup. Phones show only the tagline, low above the
             reservation button — the header already carries the mark, so the
             video stays clear. */}
-        <div className="flex-1 flex flex-col items-center justify-end pb-16 sm:justify-center sm:pb-0 text-center px-6">
+        <div className="flex-1 flex flex-col items-center justify-end pb-20 sm:justify-center sm:pb-0 text-center px-6">
         {/* Location / tagline */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}

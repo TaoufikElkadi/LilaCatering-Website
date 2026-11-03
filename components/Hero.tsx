@@ -44,6 +44,7 @@ function prefersLightData(): boolean {
 export default function Hero() {
   const { lang } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const ambientRef = useRef<HTMLCanvasElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [enableVideo, setEnableVideo] = useState(false);
   // The reel's own music rides in the video file so it stays in sync with the
@@ -90,6 +91,29 @@ export default function Hero() {
     events.forEach((e) => document.addEventListener(e, onInteract));
     return detach;
   }, []);
+
+  // Phones: the landscape reel plays as a wide band so more of each scene is
+  // visible, over an ambient backdrop of its own frames — a 48x27 canvas
+  // repainted ~10x a second and blurred up to full size. No second video
+  // download, and the colours always match the footage.
+  useEffect(() => {
+    if (!enableVideo) return;
+    const video = videoRef.current;
+    const canvas = ambientRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!video || !canvas || !ctx) return;
+    const mq = window.matchMedia('(max-width: 639px)');
+    let raf = 0;
+    let last = 0;
+    const tick = (t: number) => {
+      raf = requestAnimationFrame(tick);
+      if (!mq.matches || video.paused || video.readyState < 2 || t - last < 100) return;
+      last = t;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [enableVideo]);
 
   const toggleSound = () => {
     activatedRef.current = true;
@@ -194,7 +218,7 @@ export default function Hero() {
   const eventOptions = L.eventOptions[lang];
 
   return (
-    <section className="relative h-[calc(100svh+90px)] min-h-[760px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
+    <section data-hero className="relative h-[calc(100svh+90px)] min-h-[760px] sm:h-[118vh] sm:min-h-[780px] w-full overflow-hidden bg-[#F6F0E8] sm:bg-black text-white">
       {/* Background video. On phones the hero is one screen tall (less crop of
           the landscape reel than the desktop 118vh) and the video only fades
           into the cream below the fold, behind and under the reservation
@@ -208,12 +232,23 @@ export default function Hero() {
           priority
           sizes="100vw"
           quality={70}
-          className="object-cover"
+          className="object-cover max-sm:scale-110 max-sm:blur-2xl"
         />
+        {/* phones: ambient blurred backdrop painted from the video's frames */}
+        <canvas
+          ref={ambientRef}
+          width={48}
+          height={27}
+          aria-hidden="true"
+          className={`absolute inset-0 h-full w-full scale-110 blur-2xl transition-opacity duration-700 sm:hidden ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+        <div className="absolute inset-0 bg-black/25 sm:hidden" />
         {enableVideo && (
           <video
             ref={videoRef}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            className={`absolute object-cover transition-opacity duration-700 inset-x-0 top-[44%] h-[58vh] w-full -translate-y-1/2 [mask-image:linear-gradient(to_bottom,transparent,#000_16%,#000_84%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,transparent,#000_16%,#000_84%,transparent)] sm:inset-0 sm:top-0 sm:h-full sm:translate-y-0 sm:[mask-image:none] sm:[-webkit-mask-image:none] ${
               isVideoLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             poster="/hero-reel-poster.jpg"

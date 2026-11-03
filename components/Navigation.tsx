@@ -56,6 +56,8 @@ function InstagramGlyph({ className = '' }: { className?: string }) {
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
+  // still over the hero video (homepage): the bar stays transparent until then
+  const [overVideo, setOverVideo] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { lang, setLang, t } = useLanguage();
@@ -69,6 +71,10 @@ export default function Navigation() {
     const update = () => {
       const y = window.scrollY;
       setScrolled(y > 50);
+      // the hero's last stretch dissolves into cream, so count the video as
+      // passed ~25% of a screen before the section actually ends
+      const hero = document.querySelector('[data-hero]');
+      setOverVideo(!!hero && hero.getBoundingClientRect().bottom - window.innerHeight * 0.25 > 72);
       const delta = y - lastY;
       if (y < 140) {
         setHidden(false);
@@ -87,7 +93,7 @@ export default function Navigation() {
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [pathname]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -141,9 +147,9 @@ export default function Navigation() {
     router.push(`${nextPath}${hash}`);
   };
 
-  // On the homepage the bar starts transparent over the hero video (white ink,
-  // gold mark) and turns into the cream bar once the page scrolls.
-  const overHero = stripLocale(pathname) === '/' && !scrolled && !mobileMenuOpen;
+  // On the homepage the bar is transparent over the hero video (white ink,
+  // gold mark) and turns into the cream bar once the video is scrolled past.
+  const overHero = stripLocale(pathname) === '/' && overVideo && !mobileMenuOpen;
   const ink = overHero ? '#FFFFFF' : INK;
 
   return (

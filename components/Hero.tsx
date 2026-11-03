@@ -140,14 +140,12 @@ export default function Hero() {
       }
     };
 
-    const handleLoadedData = () => {
-      setIsVideoLoaded(true);
-      playVideo();
-    };
-    const handleCanPlay = () => {
-      setIsVideoLoaded(true);
-      playVideo();
-    };
+    // Only reveal the video once it is actually playing. If autoplay is
+    // blocked (iOS Low Power Mode, data saver) it stays hidden over the
+    // poster, so the native play-button overlay never shows.
+    const handleLoadedData = () => playVideo();
+    const handleCanPlay = () => playVideo();
+    const handlePlaying = () => setIsVideoLoaded(true);
 
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((entry) => {
@@ -157,10 +155,8 @@ export default function Hero() {
     );
     observer.observe(video);
 
-    if (video.readyState >= 3) {
-      setIsVideoLoaded(true);
-      playVideo();
-    }
+    if (!video.paused) setIsVideoLoaded(true);
+    else if (video.readyState >= 3) playVideo();
 
     // The video carries music now, so it must not keep playing in a hidden tab.
     const handleVisibilityChange = () => {
@@ -176,6 +172,7 @@ export default function Hero() {
 
     video.addEventListener('canplay', handleCanPlay);
     video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('playing', handlePlaying);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('touchstart', handleInteraction, { once: true });
     document.addEventListener('touchmove', handleInteraction, { once: true });
@@ -185,6 +182,7 @@ export default function Hero() {
       observer.disconnect();
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('playing', handlePlaying);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('touchstart', handleInteraction);
       document.removeEventListener('touchmove', handleInteraction);
@@ -235,7 +233,7 @@ export default function Hero() {
         )}
         {/* No overall tint — only soft top/bottom gradients so the nav, tagline
             and reservation bar stay legible over the video. */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/35 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-40 sm:h-52 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
         {/* Below the reservation bar the video dissolves into the cream the
             next section opens on, so the page flows on instead of cutting. */}
         <div

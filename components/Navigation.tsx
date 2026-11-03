@@ -84,6 +84,7 @@ export default function Navigation() {
         ticking = true;
       }
     };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -140,15 +141,20 @@ export default function Navigation() {
     router.push(`${nextPath}${hash}`);
   };
 
+  // On the homepage the bar starts transparent over the hero video (white ink,
+  // gold mark) and turns into the cream bar once the page scrolls.
+  const overHero = stripLocale(pathname) === '/' && !scrolled && !mobileMenuOpen;
+  const ink = overHero ? '#FFFFFF' : INK;
+
   return (
     <>
       <nav
-        className={`fixed w-full z-50 transition-[transform,opacity,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`fixed w-full z-50 transition-[transform,opacity,box-shadow,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           hidden && !mobileMenuOpen
             ? '-translate-y-full opacity-0 pointer-events-none'
             : 'translate-y-0 opacity-100'
         } ${scrolled ? 'shadow-[0_1px_24px_-12px_rgba(63,58,51,0.45)]' : ''}`}
-        style={{ backgroundColor: BAR }}
+        style={{ backgroundColor: overHero ? 'rgba(232,226,214,0)' : BAR }}
       >
         <div className="relative mx-auto w-full max-w-[1920px] px-4 sm:px-8 lg:px-[8.3%]">
           <div className="relative flex h-16 items-center justify-between sm:h-[72px] lg:h-[124px]">
@@ -157,7 +163,7 @@ export default function Navigation() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="-ml-1 flex h-11 w-11 items-center justify-center rounded-full transition-colors active:bg-black/5 lg:hidden"
               aria-label="Toggle menu"
-              style={{ color: INK }}
+              style={{ color: ink }}
             >
               <div className="flex h-4 w-5 flex-col justify-between">
                 <motion.span
@@ -181,13 +187,13 @@ export default function Navigation() {
             {/* Desktop: left — navigation links */}
             <div
               className="hidden items-center gap-10 text-[15px] uppercase tracking-[0.27em] lg:flex xl:gap-[3.7vw]"
-              style={{ color: INK }}
+              style={{ color: ink }}
             >
               {desktopLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative py-2 transition-colors duration-300 hover:text-[#1f1c19] after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#9E7F57] after:transition-all after:duration-300 hover:after:w-full"
+                  className={`relative py-2 transition-colors duration-300 ${overHero ? 'hover:text-white/80' : 'hover:text-[#1f1c19]'} after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-[#9E7F57] after:transition-all after:duration-300 hover:after:w-full`}
                 >
                   {item.name}
                 </Link>
@@ -223,21 +229,23 @@ export default function Navigation() {
                     className="flex h-12 w-12 items-center justify-center rounded-full text-[15px] uppercase tracking-[0.16em] transition-colors duration-300"
                     style={
                       lang === item.code
-                        ? { color: INK_STRONG, backgroundColor: 'rgba(63,58,51,0.07)' }
-                        : { color: INK_MUTED }
+                        ? overHero
+                          ? { color: '#FFFFFF', backgroundColor: 'rgba(255,255,255,0.16)' }
+                          : { color: INK_STRONG, backgroundColor: 'rgba(63,58,51,0.07)' }
+                        : { color: overHero ? 'rgba(255,255,255,0.8)' : INK_MUTED }
                     }
                   >
                     {item.label}
                   </button>
                 ))}
               </div>
-              <span className="mx-[1.6vw] h-8 w-px" style={{ backgroundColor: RULE }} />
+              <span className="mx-[1.6vw] h-8 w-px transition-colors duration-500" style={{ backgroundColor: overHero ? 'rgba(255,255,255,0.45)' : RULE }} />
               <a
                 href="https://www.instagram.com/lilacatering/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-12 w-12 items-center justify-center transition-opacity duration-300 hover:opacity-70"
-                style={{ color: '#241E19' }}
+                style={{ color: overHero ? '#FFFFFF' : '#241E19' }}
                 aria-label="Instagram"
               >
                 <InstagramGlyph className="h-[32px] w-[32px]" />
